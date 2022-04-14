@@ -11,6 +11,12 @@
     "watch": "rollup -c -w",
     "lint": "eslint ./src --ext .ts --ignore-path .gitignore"
   },
+  "engines": {
+    "node": ">=12.2.0",
+    "npm": ">=7.0.0"
+  },
+  "keywords": ["graph", "webgl", "force", "simulation", "visualization"],
+  "homepage": "https://cosmograph.app",
   "author": "cosmograph-org",
   "devDependencies": {
     "@rollup/plugin-alias": "^3.1.2",
