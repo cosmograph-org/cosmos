@@ -1,0 +1,51 @@
+{
+  "name": "@cosmograph/cosmos",
+  "version": "1.0.0-beta.0",
+  "description": "GPU-based force graph layout algorithm and rendering engine",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "CC-BY-NC-4.0",
+  "repository": "git://github.com/cosmograph-org/cosmos.git",
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
+    "lint": "eslint ./src --ext .ts --ignore-path .gitignore"
+  },
+  "author": "cosmograph-org",
+  "devDependencies": {
+    "@rollup/plugin-alias": "^3.1.2",
+    "@rollup/plugin-commonjs": "^19.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.0",
+    "@types/d3-color": "^3.0.2",
+    "@types/d3-selection": "^3.0.1",
+    "@types/d3-transition": "^3.0.1",
+    "@types/d3-zoom": "^3.0.1",
+    "@typescript-eslint/eslint-plugin": "^4.25.0",
+    "@typescript-eslint/parser": "^4.25.0",
+    "@zerollup/ts-transform-paths": "^1.7.18",
+    "eslint": "^7.27.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "eslint-plugin-unicorn": "^32.0.1",
+    "rollup": "^2.50.1",
+    "rollup-plugin-glslify": "^1.2.0",
+    "rollup-plugin-typescript2": "^0.30.0",
+    "ttypescript": "^1.5.12",
+    "typescript": "^4.3.2"
+  },
+  "dependencies": {
+    "d3-color": "^3.0.1",
+    "d3-selection": "^3.0.0",
+    "d3-transition": "^3.0.1",
+    "d3-zoom": "^3.0.0",
+    "gl-bench": "^1.0.35",
+    "gl-matrix": "^3.3.0",
+    "regl": "^2.1.0"
+  },
+  "pre-commit": "lint:staged",
+  "lint-staged": {
+    "./src/**/*.(ts)": "eslint --fix"
+  }
+}
