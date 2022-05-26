@@ -8,6 +8,7 @@ import { ForceCenter } from '@/graph/modules/ForceCenter'
 import { ForceGravity } from '@/graph/modules/ForceGravity'
 import { ForceLink, LinkDirection } from '@/graph/modules/ForceLink'
 import { ForceManyBody } from '@/graph/modules/ForceManyBody'
+import { ForceManyBodyQuadtree } from '@/graph/modules/ForceManyBodyQuadtree'
 import { ForceMouse } from '@/graph/modules/ForceMouse'
 import { FPSMonitor } from '@/graph/modules/FPSMonitor'
 import { GraphData } from '@/graph/modules/GraphData'
@@ -16,6 +17,7 @@ import { Points } from '@/graph/modules/Points'
 import { Store, ALPHA_MIN } from '@/graph/modules/Store'
 import { Zoom } from '@/graph/modules/Zoom'
 import { Node, Link, InputNode, InputLink } from '@/graph/types'
+import { defaultConfigValues } from '@/graph/variables'
 
 export class Graph<N extends InputNode, L extends InputLink> {
   public config = new GraphConfig<Node<N>, Link<N, L>>()
@@ -30,7 +32,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   private lines: Lines<N, L>
   private forceGravity: ForceGravity<N, L>
   private forceCenter: ForceCenter<N, L>
-  private forceManyBody: ForceManyBody<N, L>
+  private forceManyBody: ForceManyBody<N, L> | ForceManyBodyQuadtree<N, L> | undefined
   private forceLinkIncoming: ForceLink<N, L>
   private forceLinkOutcoming: ForceLink<N, L>
   private forceMouse: ForceMouse<N, L>
@@ -77,7 +79,9 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.lines = new Lines(this.reglInstance, this.config, this.store, this.graph, this.points)
     this.forceGravity = new ForceGravity(this.reglInstance, this.config, this.store, this.graph, this.points)
     this.forceCenter = new ForceCenter(this.reglInstance, this.config, this.store, this.graph, this.points)
-    this.forceManyBody = new ForceManyBody(this.reglInstance, this.config, this.store, this.graph, this.points)
+    this.forceManyBody = this.config.useQuadtree
+      ? new ForceManyBodyQuadtree(this.reglInstance, this.config, this.store, this.graph, this.points)
+      : new ForceManyBody(this.reglInstance, this.config, this.store, this.graph, this.points)
     this.forceLinkIncoming = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
     this.forceLinkOutcoming = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
     this.forceMouse = new ForceMouse(this.reglInstance, this.config, this.store, this.graph, this.points)
@@ -242,7 +246,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.forceCenter.destroy()
     this.forceLinkIncoming.destroy()
     this.forceLinkOutcoming.destroy()
-    this.forceManyBody.destroy()
+    this.forceManyBody?.destroy()
     this.reglInstance.destroy()
     this.hasBeenRecentlyDestroyed = true
   }
@@ -250,7 +254,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   public create (): void {
     this.points.create()
     this.lines.create()
-    this.forceManyBody.create()
+    this.forceManyBody?.create()
     this.forceLinkIncoming.create(LinkDirection.INCOMING)
     this.forceLinkOutcoming.create(LinkDirection.OUTCOMING)
     this.forceCenter.create()
@@ -278,7 +282,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.forceLinkIncoming.initPrograms()
     this.forceLinkOutcoming.initPrograms()
     this.forceMouse.initPrograms()
-    this.forceManyBody.initPrograms()
+    this.forceManyBody?.initPrograms()
     this.forceCenter.initPrograms()
   }
 
@@ -307,7 +311,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
           this.points.updatePosition()
         }
 
-        this.forceManyBody.run()
+        this.forceManyBody?.run()
         this.points.updatePosition()
 
         this.forceLinkIncoming.run()
@@ -315,7 +319,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
         this.forceLinkOutcoming.run()
         this.points.updatePosition()
 
-        this.store.alpha += this.store.addAlpha(this.config.simulation.decay)
+        this.store.alpha += this.store.addAlpha(this.config.simulation.decay ?? defaultConfigValues.simulation.decay)
         if (this.isRightClickMouse) this.store.alpha = Math.max(this.store.alpha, 0.1)
         this.store.simulationProgress = Math.sqrt(Math.min(1, ALPHA_MIN / this.store.alpha))
         this.config.simulation.onTick?.(this.store.alpha)

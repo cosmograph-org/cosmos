@@ -2,8 +2,7 @@ import regl from 'regl'
 import { CoreModule } from '@/graph/modules/core-module'
 import calculateLevelFrag from '@/graph/modules/ForceManyBody/calculate-level.frag'
 import calculateLevelVert from '@/graph/modules/ForceManyBody/calculate-level.vert'
-import forceFrag from '@/graph/modules/ForceManyBody/force-level.frag'
-import forceCenterFrag from '@/graph/modules/ForceManyBody/force-centermass.frag'
+import { forceFrag } from '@/graph/modules/ForceManyBody/quadtree-frag-shader'
 import { createIndexesBuffer, createQuadBuffer } from '@/graph/modules/Shared/buffer'
 import clearFrag from '@/graph/modules/Shared/clear.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
@@ -11,14 +10,12 @@ import { defaultConfigValues } from '@/graph/variables'
 import { InputNode, InputLink } from '@/graph/types'
 import { getRandomValue } from '@/graph/helper'
 
-export class ForceManyBody<N extends InputNode, L extends InputLink> extends CoreModule<N, L> {
+export class ForceManyBodyQuadtree<N extends InputNode, L extends InputLink> extends CoreModule<N, L> {
   private randomValuesFbo: regl.Framebuffer2D | undefined
   private levelsFbos = new Map<string, regl.Framebuffer2D>()
   private clearLevelsCommand: regl.DrawCommand | undefined
-  private clearVelocityCommand: regl.DrawCommand | undefined
   private calculateLevelsCommand: regl.DrawCommand | undefined
-  private forceCommand: regl.DrawCommand | undefined
-  private forceFromItsOwnCentermassCommand: regl.DrawCommand | undefined
+  private quadtreeCommand: regl.DrawCommand | undefined
   private quadtreeLevels = 0
 
   public create (): void {
@@ -27,8 +24,11 @@ export class ForceManyBody<N extends InputNode, L extends InputLink> extends Cor
     for (let i = 0; i < this.quadtreeLevels; i += 1) {
       const levelTextureSize = Math.pow(2, i + 1)
       this.levelsFbos.set(`level[${i}]`, reglInstance.framebuffer({
-        shape: [levelTextureSize, levelTextureSize],
-        colorType: 'float',
+        color: reglInstance.texture({
+          data: new Float32Array(levelTextureSize * levelTextureSize * 4),
+          shape: [levelTextureSize, levelTextureSize, 4],
+          type: 'float',
+        }),
         depth: false,
         stencil: false,
       })
@@ -90,40 +90,8 @@ export class ForceManyBody<N extends InputNode, L extends InputLink> extends Cor
       stencil: { enable: false },
     })
 
-    this.forceCommand = reglInstance({
-      frag: forceFrag,
-      vert: updateVert,
-      framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
-      primitive: 'triangle strip',
-      count: 4,
-      attributes: { quad: createQuadBuffer(reglInstance) },
-      uniforms: {
-        position: () => points?.previousPositionFbo,
-        level: (_, props: { levelFbo: regl.Framebuffer2D; levelTextureSize: number; level: number }) => props.level,
-        levels: this.quadtreeLevels,
-        levelFbo: (_, props) => props.levelFbo,
-        levelTextureSize: (_, props) => props.levelTextureSize,
-        alpha: () => store.alpha,
-        repulsion: () => config.simulation?.repulsion,
-        spaceSize: () => config.spaceSize,
-        theta: () => config.simulation?.repulsionTheta,
-      },
-      blend: {
-        enable: true,
-        func: {
-          src: 'one',
-          dst: 'one',
-        },
-        equation: {
-          rgb: 'add',
-          alpha: 'add',
-        },
-      },
-      depth: { enable: false, mask: false },
-      stencil: { enable: false },
-    })
-    this.forceFromItsOwnCentermassCommand = reglInstance({
-      frag: forceCenterFrag,
+    this.quadtreeCommand = reglInstance({
+      frag: forceFrag(config.simulation?.repulsionQuadtreeLevels ?? this.quadtreeLevels, this.quadtreeLevels),
       vert: updateVert,
       framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
       primitive: 'triangle strip',
@@ -132,33 +100,12 @@ export class ForceManyBody<N extends InputNode, L extends InputLink> extends Cor
       uniforms: {
         position: () => points?.previousPositionFbo,
         randomValues: () => this.randomValuesFbo,
-        levelFbo: (_, props: { levelFbo: regl.Framebuffer2D; levelTextureSize: number }) => props.levelFbo,
-        levelTextureSize: (_, props) => props.levelTextureSize,
-        alpha: () => store.alpha,
-        repulsion: () => config.simulation?.repulsion,
         spaceSize: () => config.spaceSize,
+        repulsion: () => config.simulation?.repulsion,
+        theta: () => config.simulation?.repulsionTheta,
+        alpha: () => store.alpha,
+        ...Object.fromEntries(this.levelsFbos),
       },
-      blend: {
-        enable: true,
-        func: {
-          src: 'one',
-          dst: 'one',
-        },
-        equation: {
-          rgb: 'add',
-          alpha: 'add',
-        },
-      },
-      depth: { enable: false, mask: false },
-      stencil: { enable: false },
-    })
-    this.clearVelocityCommand = reglInstance({
-      frag: clearFrag,
-      vert: updateVert,
-      framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
-      primitive: 'triangle strip',
-      count: 4,
-      attributes: { quad: createQuadBuffer(reglInstance) },
     })
   }
 
@@ -174,23 +121,7 @@ export class ForceManyBody<N extends InputNode, L extends InputLink> extends Cor
         cellSize: cellSize,
       })
     }
-    this.clearVelocityCommand?.()
-    for (let i = 0; i < this.quadtreeLevels; i += 1) {
-      const levelTextureSize = Math.pow(2, i + 1)
-      this.forceCommand?.({
-        levelFbo: this.levelsFbos.get(`level[${i}]`),
-        levelTextureSize,
-        level: i,
-      })
-
-      if (i === this.quadtreeLevels - 1) {
-        this.forceFromItsOwnCentermassCommand?.({
-          levelFbo: this.levelsFbos.get(`level[${i}]`),
-          levelTextureSize,
-          level: i,
-        })
-      }
-    }
+    this.quadtreeCommand?.()
   }
 
   public destroy (): void {

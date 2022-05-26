@@ -13,6 +13,102 @@ export type StringAccessor<Datum> = ((d: Datum, i?: number, ...rest: unknown[]) 
 export type ColorAccessor<Datum> = ((d: Datum, i?: number, ...rest: unknown[]) => string | [number, number, number, number] | null)
   | string | [number, number, number, number] | null | undefined
 
+export interface Events <N extends InputNode> {
+  /**
+   * Callback function that will be called on every canvas click.
+   * If clicked on a node, its data will be passed as an argument: `(node: Node<N> &vert; undefined) => void`.
+   * Default value: `undefined`
+   */
+  onClick?: (clickedNode: Node<N> | undefined) => void;
+}
+
+export interface GraphSimulationSetting {
+  /**
+   * Decay coefficient. Use smaller values if you want the simulation to "cool down" slower.
+   * Default value: `1000`
+   */
+  decay?: number;
+  /**
+   * Gravity force coefficient.
+   * Default value: `0`
+   */
+  gravity?: number;
+  /**
+   * Centering to center mass force coefficient.
+   * Default value: `0`
+   */
+  center?: number;
+  /**
+   * Repulsion force coefficient.
+   * Default value: `0.1`
+   */
+  repulsion?: number;
+  /**
+   * Decreases / increases the detalization of the Many-Body force calculations.
+   * When `useQuadtree` is set to `true`, this property corresponds to the Barnes–Hut approximation criterion.
+   * Default value: `1.7`
+   */
+  repulsionTheta?: number;
+  /**
+   * Barnes–Hut approximation depth.
+   * Can only be used when `useQuadtree` is set `true`.
+   * Default value: 12
+   */
+  repulsionQuadtreeLevels?: number;
+  /**
+   * Link spring force coefficient.
+   * Default value: `1`
+   */
+  linkSpring?: number;
+  /**
+   * Minimum link distance.
+   * Default value: `2`
+   */
+  linkDistance?: number;
+  /**
+   * Range of random link distance values.
+   * Default value: `[1, 1.2]`
+   */
+  linkDistRandomVariationRange?: number[];
+  /**
+   * Repulsion coefficient from mouse position.
+   * Default value: `2`
+   */
+  repulsionFromMouse?: number;
+  /**
+   * Friction coefficient.
+   * Default value: `0.85`
+   */
+  friction?: number;
+  /**
+   * Callback function that will be called when the simulation starts.
+   * Default value: `undefined`
+   */
+  onStart?: () => void;
+  /**
+   * Callback function that will be called on every simulation tick.
+   * The value of the argument `alpha` will decrease over time as the simulation "cools down":
+   * `(alpha: number) => void`.
+   * Default value: `undefined`
+   */
+  onTick?: (alpha?: number) => void;
+  /**
+   * Callback function that will be called when the simulation stops.
+   * Default value: `undefined`
+   */
+  onEnd?: () => void;
+  /**
+   * Callback function that will be called when the simulation gets paused.
+   * Default value: `undefined`
+   */
+  onPause?: () => void;
+  /**
+   * Callback function that will be called when the simulation is restarted.
+   * Default value: `undefined`
+   */
+  onRestart?: () => void;
+}
+
 export interface GraphConfigInterface<N extends InputNode, L extends InputLink> {
   /**
    * Canvas background color.
@@ -20,174 +116,94 @@ export interface GraphConfigInterface<N extends InputNode, L extends InputLink> 
    */
   backgroundColor?: string;
   /**
-   * Simulation space side length.
-   * Default value: 4096
+   * Simulation space size (max 8192).
+   * Default value: `4096`
    */
   spaceSize?: number;
   /**
-   * Node color accessor function or value.
+   * Node color accessor function or hex value.
    * Default value: '#b3b3b3'
   */
   nodeColor?: ColorAccessor<N>;
   /**
    * Node size accessor function or value in pixels.
-   * Default value: 4
+   * Default value: `4`
   */
   nodeSize?: NumericAccessor<N>;
   /**
-   * The number by which nodeSize is multiplied.
-   * Default value: 1
+   * Scale factor for the node size.
+   * Default value: `1`
    */
-  nodeSizeMultiplier?: number;
+  nodeSizeScale?: number;
 
   /**
-   * Link color accessor function or value.
+   * Turns link rendering on / off.
+   * Default value: `true`
+   */
+  renderLinks?: boolean;
+  /**
+   * Link color accessor function or hex value.
    * Default value: '#666666'
    */
   linkColor?: ColorAccessor<L>;
   /**
    * Link width accessor function or value in pixels.
-   * Default value: 1
+   * Default value: `1`
   */
   linkWidth?: NumericAccessor<L>;
   /**
-   * The number by which linkWidth is multiplied.
-   * Default value: 1
+   * Scale factor for the link width.
+   * Default value: `1`
    */
-  linkWidthMultiplier?: number;
+  linkWidthScale?: number;
   /**
-   * Whether to render links or not.
-   * Default value: true
+   * Turns link arrow rendering on / off.
+   * Default value: `true`
    */
-  renderLinks?: boolean;
+  linkArrows?: boolean;
   /**
-   * Whether to render link's arrows or not.
-   * Default value: true
+   * Scale factor for the link arrows size.
+   * Default value: `1`
    */
-  arrowLinks?: boolean;
+  linkArrowsSizeScale?: number;
   /**
-   * The number by which arrow size is multiplied.
-   * Default value: 1
+   * The range defines the minimum and maximum link visibility distance in pixels.
+   * The link will be fully opaque when its length is less than the first number in the array,
+   * and will have `linkVisibilityMinTransparency` transparency when its length is greater than
+   * the second number in the array.
+   * This distance is defined in screen space coordinates and will change as you zoom in and out
+   * (e.g. links become longer when you zoom in, and shorter when you zoom out).
+   * Default value: `[50, 150]`
    */
-  arrowSizeMultiplier?: number;
+  linkVisibilityDistanceRange?: number[];
   /**
-   * The minimum link distance in which link color do not loose transparency.
-   * Default value: 50
+   * The transparency value that the link will have when its length reaches
+   * the maximum link distance value from `linkVisibilityDistanceRange`.
+   * Default value: `0.25`
    */
-  minOpaqueLinkDist?: number;
+  linkVisibilityMinTransparency?: number;
   /**
-   * The maximum link distance in which link color will reach clampLinkMinOpacity value.
-   * Default value: 150
+   * Use the classic quadtree algorithm for the Many-Body force.
+   * This property will be applied only on component initialization and it
+   * can't be changed using the `setConfig` method.
+   * Default value: `false`
    */
-  maxTransparentLinkDist?: number;
-  /**
-   * The transparency value for maxTransparentLinkDist.
-   * Default value: 0.25
-   */
-  clampLinkMinOpacity?: number;
-
-  /** Simulation parameters */
-  simulation?: {
-    /**
-     * Decay coefficient. Small values for quick simulation.
-     * Default value: 1000
-     */
-    decay?: number;
-    /**
-     * Gravity force coefficient.
-     * Default value: 0
-     */
-    gravity?: number;
-    /**
-     * Centering to center mass force coefficient.
-     * Default value: 0
-     */
-    center?: number;
-    /**
-     * Repulsion force coefficient.
-     * Default value: 0.1
-     */
-    repulsion?: number;
-    /**
-     * Barnes–Hut approximation criterion.
-     * Default value: 1.7
-     */
-    repulsionTheta?: number;
-    /**
-     * Barnes–Hut approximation depth.
-     * Default value: 12
-     */
-    repulsionQuadtreeLevels?: number;
-    /**
-     * Link spring force coefficient.
-     * Default value: 1
-     */
-     linkSpring?: number;
-    /**
-     * Minimum link distance.
-     * Default value: 2
-     */
-    linkDistance?: number;
-    /**
-     * Range of random link distance values.
-     * Default value: [1, 1.2]
-     */
-    linkDistRandomVariationRange?: number[];
-    /**
-     * Repulsion coefficient from mouse position.
-     * Default value: 2
-     */
-    repulsionFromMouse?: number;
-    /**
-     * Friction value from 0 to 1.
-     * Default value: 0.85
-     */
-    friction?: number;
-    /**
-     * On start simulation callback function.
-     * Default value: () => undefined
-     */
-    onStart?: () => void;
-    /**
-     * On tick simulation callback function.
-     * Default value: (alpha) => undefined
-     */
-    onTick?: (alpha?: number) => void;
-    /**
-     * On end simulation callback function.
-     * Default value: () => undefined
-     */
-    onEnd?: () => void;
-    /**
-     * On pause simulation callback function.
-     * Default value: () => undefined
-     */
-    onPause?: () => void;
-    /**
-     * On restart simulation callback function.
-     * Default value: () => undefined
-     */
-    onRestart?: () => void;
-  };
+  useQuadtree?: boolean;
+  /** Simulation parameters and event listeners */
+  simulation?: GraphSimulationSetting;
   /**
    * Events
    */
-  events?: {
-    /**
-     * On click callback function.
-     * Default value: (clickedNode) => undefined
-     */
-    onClick?: (clickedNode?: Node<N> | undefined) => void;
-  };
+  events?: Events<N>;
 
   /**
-   * Whether to show WebGL performance monitor or not.
-   * Default value: false
+   * Show WebGL performance monitor.
+   * Default value: `false`
    */
-   showFPSMonitor?: boolean;
+  showFPSMonitor?: boolean;
   /**
    * Canvas pixel ratio.
-   * Default value: 2
+   * Default value: `2`
    */
   pixelRatio?: number;
 }
@@ -197,18 +213,18 @@ export class GraphConfig<N extends InputNode, L extends InputLink> implements Gr
   public spaceSize = defaultConfigValues.spaceSize
   public nodeColor = defaultNodeColor
   public nodeSize = defaultNodeSize
-  public nodeSizeMultiplier = defaultConfigValues.nodeSizeMultiplier
+  public nodeSizeScale = defaultConfigValues.nodeSizeScale
   public linkColor = defaultLinkColor
   public linkWidth = defaultLinkWidth
-  public linkWidthMultiplier = defaultConfigValues.linkWidthMultiplier
+  public linkWidthScale = defaultConfigValues.linkWidthScale
   public renderLinks = defaultConfigValues.renderLinks
-  public arrowLinks = defaultConfigValues.arrowLinks
-  public arrowSizeMultiplier = defaultConfigValues.arrowSizeMultiplier
-  public minOpaqueLinkDist = defaultConfigValues.minOpaqueLinkDist
-  public maxTransparentLinkDist = defaultConfigValues.maxTransparentLinkDist
-  public clampLinkMinOpacity = defaultConfigValues.clampLinkMinOpacity
+  public linkArrows = defaultConfigValues.arrowLinks
+  public linkArrowsSizeScale = defaultConfigValues.arrowSizeScale
+  public linkVisibilityDistanceRange = defaultConfigValues.linkVisibilityDistanceRange
+  public linkVisibilityMinTransparency = defaultConfigValues.linkVisibilityMinTransparency
+  public useQuadtree = defaultConfigValues.useQuadtree
 
-  public simulation = {
+  public simulation: GraphSimulationSetting = {
     decay: defaultConfigValues.simulation.decay,
     gravity: defaultConfigValues.simulation.gravity,
     center: defaultConfigValues.simulation.center,
@@ -220,17 +236,15 @@ export class GraphConfig<N extends InputNode, L extends InputLink> implements Gr
     linkDistRandomVariationRange: defaultConfigValues.simulation.linkDistRandomVariationRange,
     repulsionFromMouse: defaultConfigValues.simulation.repulsionFromMouse,
     friction: defaultConfigValues.simulation.friction,
-    onStart: (): void => undefined,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onTick: (alpha?: number): void => undefined,
-    onEnd: (): void => undefined,
-    onPause: (): void => undefined,
-    onRestart: (): void => undefined,
+    onStart: undefined,
+    onTick: undefined,
+    onEnd: undefined,
+    onPause: undefined,
+    onRestart: undefined,
   }
 
-  public events = {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onClick: (clickedNode?: Node<N>): void => undefined,
+  public events: Events<N> = {
+    onClick: undefined,
   }
 
   public showFPSMonitor = defaultConfigValues.showFPSMonitor

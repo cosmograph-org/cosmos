@@ -10,7 +10,7 @@ uniform sampler2D particleSize;
 uniform float ratio;
 uniform mat3 transform;
 uniform float pointsTextureSize;
-uniform float sizeMultiplier;
+uniform float sizeScale;
 uniform float spaceSize;
 uniform vec2 screenSize;
 
@@ -34,7 +34,7 @@ void main() {
 
   // Size
   vec4 pSize = texture2D(particleSize, (index + 0.5) / pointsTextureSize);
-  float size = pSize.r * sizeMultiplier;
+  float size = pSize.r * sizeScale;
 
   // Color
   vec4 pColor = texture2D(particleColor, (index + 0.5) / pointsTextureSize);

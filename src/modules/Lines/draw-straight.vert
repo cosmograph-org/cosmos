@@ -6,16 +6,15 @@ uniform sampler2D positions;
 uniform sampler2D particleSize;
 uniform mat3 transform;
 uniform float pointsTextureSize;
-uniform float widthMultiplier;
-uniform float nodeSizeMultiplier;
+uniform float widthScale;
+uniform float nodeSizeScale;
 uniform bool useArrow;
-uniform float arrowSizeMultiplier;
+uniform float arrowSizeScale;
 uniform float spaceSize;
 uniform vec2 screenSize;
 uniform float ratio;
-uniform float maxTransparentLinkDist;
-uniform float minOpaqueLinkDist;
-uniform float clampLinkMinOpacity;
+uniform vec2 linkVisibilityDistanceRange;
+uniform float linkVisibilityMinTransparency;
 
 varying vec4 rgbaColor;
 varying vec2 pos;
@@ -35,7 +34,7 @@ float pointSize(float size) {
 void main() {
   pos = position;
   // Target particle size
-  targetPointSize = pointSize(texture2D(particleSize, (pointB + 0.5) / pointsTextureSize).r * nodeSizeMultiplier);
+  targetPointSize = pointSize(texture2D(particleSize, (pointB + 0.5) / pointsTextureSize).r * nodeSizeScale);
   // Position
   vec4 pointPositionA = texture2D(positions, (pointA + 0.5) / pointsTextureSize);
   vec4 pointPositionB = texture2D(positions, (pointB + 0.5) / pointsTextureSize);
@@ -51,10 +50,10 @@ void main() {
 
   targetPointSize = (targetPointSize / (2.0 * ratio)) / linkDistPx;
   
-  float linkWidth = width * widthMultiplier;
+  float linkWidth = width * widthScale;
   float k = 2.0;
   float arrowWidth = max(5.0, linkWidth * k);
-  arrowWidth *= arrowSizeMultiplier;
+  arrowWidth *= arrowSizeScale;
 
   float arrowWidthPx = arrowWidth / transform[0][0];
   arrowLength = min(0.3, (0.866 * arrowWidthPx * 2.0) / linkDist);
@@ -72,7 +71,7 @@ void main() {
 
   // Color
   vec3 rgbColor = color.rgb;
-  float opacity = color.a * max(clampLinkMinOpacity, map(linkDistPx, maxTransparentLinkDist, minOpaqueLinkDist, 0.0, 1.0));
+  float opacity = color.a * max(linkVisibilityMinTransparency, map(linkDistPx, linkVisibilityDistanceRange.g, linkVisibilityDistanceRange.r, 0.0, 1.0));
 
   rgbaColor = vec4(rgbColor, opacity);
 

@@ -4,7 +4,7 @@ precision highp float;
 
 uniform sampler2D position;
 uniform sampler2D particleSize;
-uniform float sizeMultiplier;
+uniform float sizeScale;
 uniform float spaceSize;
 uniform vec2 screenSize;
 uniform float ratio;
@@ -25,7 +25,7 @@ void main() {
   vec3 final = transform * vec3(p, 1);
 
   vec4 pSize = texture2D(particleSize, index);
-  float size = pSize.r * sizeMultiplier;
+  float size = pSize.r * sizeScale;
 
   float left = 2.0 * (selection[0].x - 0.5 * pointSize(size)) / screenSize.x - 1.0;
   float right = 2.0 * (selection[1].x + 0.5 * pointSize(size)) / screenSize.x - 1.0;

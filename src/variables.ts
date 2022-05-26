@@ -6,14 +6,14 @@ export const defaultBackgroundColor = '#222222'
 
 export const defaultConfigValues = {
   spaceSize: 4096,
-  nodeSizeMultiplier: 1,
-  linkWidthMultiplier: 1,
-  arrowSizeMultiplier: 1,
+  nodeSizeScale: 1,
+  linkWidthScale: 1,
+  arrowSizeScale: 1,
   renderLinks: true,
   arrowLinks: true,
-  minOpaqueLinkDist: 50,
-  maxTransparentLinkDist: 150,
-  clampLinkMinOpacity: 0.25,
+  linkVisibilityDistanceRange: [50, 150],
+  linkVisibilityMinTransparency: 0.25,
+  useQuadtree: false,
   simulation: {
     decay: 1000,
     gravity: 0,
