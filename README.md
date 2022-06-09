@@ -105,6 +105,9 @@ It provides several simulation settings to adjust the layout. Each of them can b
 | simulation.onPause | Callback function that will be called when the simulation gets paused | | `undefined`
 | simulation.onRestart | Callback function that will be called when the simulation is restarted | | `undefined`
 
+### Known Issues
+Starting from version 15.4, iOS has stopped supporting the key WebGL extension powering our Many-Body force implementation (EXT_float_blend). We're trying to figure out why that happened and hope to find a way to solve the problem in the future.
+
 ### License
 CC-BY-NC-4.0
 
