@@ -5,9 +5,11 @@
 
 Cosmos is a WebGL Force Graph layout algorithm and rendering engine. All the computations and drawing are happening on the GPU in fragment and vertex shaders avoiding expensive memory operations. 
 
-It enables real time simulation of network graphs consisting of hundreds thousands of nodes and edges on modern hardware.
+It enables real-time simulation of network graphs consisting of hundreds of thousands of nodes and edges on modern hardware.
 
-https://user-images.githubusercontent.com/755708/165214913-40701c64-afc5-498f-a92e-db10e6caa19d.mp4
+https://user-images.githubusercontent.com/755708/173392407-9b05cbb6-d39e-4c2c-ab41-50900cfda823.mp4
+
+[📺 Comparison with other libraries](https://www.youtube.com/watch?v=HWk78hP8aEE)
 
 [🎮 Try Cosmos on CodeSandbox](https://codesandbox.io/s/cosmos-example-fmuf1x?file=/src/index.ts)
 
