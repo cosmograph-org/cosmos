@@ -8,7 +8,7 @@ function isFunction (value: unknown): boolean {
   return typeof value === 'function'
 }
 
-export async function getTigerGraphData(vertex_type: string, edge_type: string, host:string, graphname: string, username: string, password: string) : Promise<[InputNode[], InputLink[]] | readonly [InputNode[], InputLink[]]> {
+export async function getTigerGraphData(vertex_type: string, edge_type: string, host:string, graphname: string, username: string, password: string) : Promise<{ nodes: InputNode[]; links: InputLink[]; }> {
   return fetch(`${host}:14240/gsqlserver/interpreted_query?vertex_type=${vertex_type}&edge_type=${edge_type}`, {
       method: 'POST',
       body: `INTERPRET QUERY (STRING vertex_type, STRING edge_type) FOR GRAPH ${graphname} {
@@ -41,7 +41,7 @@ export async function getTigerGraphData(vertex_type: string, edge_type: string, 
       for (let vertex in vertices) nodes.push({id: `${vertices[vertex].v_id}`});
       for (let edge in edges) links.push({ source: `${edges[edge].from_id}`, target: `${edges[edge].to_id}`});
 
-      return [nodes, links] as const;
+      return {"nodes": nodes, "links": links};
     });
 }
 
