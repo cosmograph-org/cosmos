@@ -1,9 +1,48 @@
 import { color as d3Color } from 'd3-color'
 import regl from 'regl'
 import { ColorAccessor, NumericAccessor, StringAccessor } from './config'
+import { InputNode, InputLink } from './types'
+import 'btoa';
 
 function isFunction (value: unknown): boolean {
   return typeof value === 'function'
+}
+
+export async function getTigerGraphData(vertex_type: string, edge_type: string, host:string, graphname: string, username: string, password: string) : Promise<[InputNode[], InputLink[]] | readonly [InputNode[], InputLink[]]> {
+  return fetch(`${host}:14240/gsqlserver/interpreted_query?vertex_type=${vertex_type}&edge_type=${edge_type}`, {
+      method: 'POST',
+      body: `INTERPRET QUERY (STRING vertex_type, STRING edge_type) FOR GRAPH ${graphname} {
+        ListAccum<EDGE> @@edges;
+        docs = {vertex_type.*};
+        Res = SELECT d FROM docs:d - (edge_type:e) -> vertex_type:d2
+                ACCUM @@edges += e;
+        PRINT docs;
+        PRINT @@edges AS edges;
+      }`,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic '+btoa(`${username}:${password}`),
+      }
+    }).then(response => {
+      if (!response.ok) {
+        throw new Error(`Error! status: ${response.status}`);
+      }
+  
+      return response.json();
+    }).then(data => {
+
+      const links: InputLink[] = [];
+      const nodes: InputNode[] = [];
+
+      console.log(data);
+
+      let vertices = data.results[0]["docs"];
+      let edges = data.results[1]["edges"];
+      for (let vertex in vertices) nodes.push({id: `${vertices[vertex].v_id}`});
+      for (let edge in edges) links.push({ source: `${edges[edge].from_id}`, target: `${edges[edge].to_id}`});
+
+      return [nodes, links] as const;
+    });
 }
 
 export function getValue<T, ReturnType> (
