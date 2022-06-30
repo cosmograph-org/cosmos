@@ -1,7 +1,7 @@
 import { InputNode, InputLink } from './types'
 import 'btoa'
 
-export class TigerGraphConnection {
+export class TigerGraphConnection<N extends InputNode, L extends InputLink> {
   host: string;
   graphname: string;
   username: string;
@@ -13,7 +13,7 @@ export class TigerGraphConnection {
     this.graphname = graphname;
     this.username = username;
     this.password = password;
-    this.token = "";
+    this.token = token ? token : "";
   }
 
   async generateToken() {
@@ -36,7 +36,7 @@ export class TigerGraphConnection {
     });
   }
 
-  async getTigerGraphData(vertex_type: Array<string>, edge_type: Array<string>) : Promise<{ nodes: InputNode[]; links: InputLink[]; }> {
+  async getTigerGraphData(vertex_type: Array<string>, edge_type: Array<string>) : Promise<{ nodes: N[]; links: L[]; }> {
     return fetch(`${this.host}:14240/gsqlserver/interpreted_query`, {
         method: 'POST',
         body: `INTERPRET QUERY () FOR GRAPH ${this.graphname} {
@@ -59,8 +59,8 @@ export class TigerGraphConnection {
         return response.json();
     }).then(data => {
   
-        const links: InputLink[] = [];
-        const nodes: InputNode[] = [];
+        const links: L[] = [];
+        const nodes: N[] = [];
   
         if (data.error) {
           throw new Error(`Error! status: ${data.message}`);
@@ -75,7 +75,7 @@ export class TigerGraphConnection {
     });
   }
 
-    async runInterpretedQuery(interpreted_query: string) : Promise<{ nodes: InputNode[]; links: InputLink[]; }> {
+    async runInterpretedQuery(interpreted_query: string) : Promise<{ nodes: N[]; links: L[]; }> {
         return fetch(`${this.host}:14240/gsqlserver/interpreted_query`, {
             method: 'POST',
             body: interpreted_query,
@@ -90,8 +90,8 @@ export class TigerGraphConnection {
         
             return response.json();
         }).then(data => {
-            const links: InputLink[] = [];
-            const nodes: InputNode[] = [];
+            const links: L[] = [];
+            const nodes: N[] = [];
 
             if (data.error) {
                 throw new Error(`Error! status: ${data.message}`);
@@ -122,7 +122,7 @@ export class TigerGraphConnection {
         });
     }
 
-    async runQuery(query_name: string, params?: JSON) : Promise<{ nodes: InputNode[]; links: InputLink[]; }> {
+    async runQuery(query_name: string, params?: JSON) : Promise<{ nodes: N[]; links: L[]; }> {
         return fetch(`${this.host}:9000/query/${this.graphname}/${query_name}`, {
             method: 'POST',
             body: params ? JSON.stringify(params) : "{}",
@@ -139,8 +139,8 @@ export class TigerGraphConnection {
         }).then(data => {
             data = data.results;
 
-            const links: InputLink[] = [];
-            const nodes: InputNode[] = [];
+            const links: L[] = [];
+            const nodes: N[] = [];
         
             for (let res in data) {
                 for (let key in data[res]) {
@@ -165,7 +165,7 @@ export class TigerGraphConnection {
         });
     }
 
-    async runInstalledQuery(query_name: string, params?: JSON) : Promise<{ nodes: InputNode[]; links: InputLink[]; }> {
+    async runInstalledQuery(query_name: string, params?: JSON) : Promise<{ nodes: N[]; links: L[]; }> {
         if (this.token === "") {
             return this.generateToken().then(() => this.runQuery(query_name, params));
         } else return this.runQuery(query_name, params);
