@@ -117,8 +117,8 @@ export class ForceManyBodyQuadtree<N extends InputNode, L extends InputLink> ext
       const cellSize = (config.spaceSize ?? defaultConfigValues.spaceSize) / levelTextureSize
       this.calculateLevelsCommand?.({
         levelFbo: this.levelsFbos.get(`level[${i}]`),
-        levelTextureSize: levelTextureSize,
-        cellSize: cellSize,
+        levelTextureSize,
+        cellSize,
       })
     }
     this.quadtreeCommand?.()
