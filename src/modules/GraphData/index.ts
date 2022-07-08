@@ -4,6 +4,14 @@ export class GraphData <N extends InputNode, L extends InputLink> {
   private _nodes: Node<N>[] = []
   private _links: Link<N, L>[] = []
 
+  public get nodes (): Node<N>[] {
+    return this._nodes
+  }
+
+  public get links (): Link<N, L>[] {
+    return this._links
+  }
+
   public setData (inputNodes: InputNode[], inputLinks: InputLink[]): void {
     const nodes = inputNodes.map((n, i) => {
       return {
@@ -62,14 +70,6 @@ export class GraphData <N extends InputNode, L extends InputLink> {
       .filter(l => l !== undefined) as Link<N, L>[]
     this._nodes = nodes
     this._links = links
-  }
-
-  public get nodes (): Node<N>[] {
-    return this._nodes
-  }
-
-  public get links (): Link<N, L>[] {
-    return this._links
   }
 
   public findNodeById (id: string): Node<N> | undefined {

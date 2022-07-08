@@ -170,8 +170,8 @@ export class ForceManyBody<N extends InputNode, L extends InputLink> extends Cor
       const cellSize = (config.spaceSize ?? defaultConfigValues.spaceSize) / levelTextureSize
       this.calculateLevelsCommand?.({
         levelFbo: this.levelsFbos.get(`level[${i}]`),
-        levelTextureSize: levelTextureSize,
-        cellSize: cellSize,
+        levelTextureSize,
+        cellSize,
       })
     }
     this.clearVelocityCommand?.()

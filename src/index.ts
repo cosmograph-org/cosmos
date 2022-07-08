@@ -49,7 +49,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
 
     canvas.width = w * this.config.pixelRatio
     canvas.height = h * this.config.pixelRatio
-    // If the canvas element has no CSS width and height style, the clientWidth and the clientHeight will always be equal to the width and height canvas attribute.
+    // If the canvas element has no CSS width and height style, the clientWidth and the clientHeight will always
+    // be equal to the width and height canvas attribute.
     // In order to prevent resize problem assume that canvas CSS style width and height has a value of 100%.
     if (canvas.style.width === '' && canvas.style.height === '') {
       select(canvas)
@@ -105,6 +106,10 @@ export class Graph<N extends InputNode, L extends InputLink> {
 
   public get links (): Link<N, L>[] {
     return this.graph.links
+  }
+
+  public get selectedPoints (): N[] {
+    return this.graph.nodes.filter((n, i) => this.store.selectedIndices.includes(i))
   }
 
   public setConfig (config: Partial<GraphConfigInterface<Node<N>, Link<N, L>>>): void {
@@ -206,10 +211,6 @@ export class Graph<N extends InputNode, L extends InputLink> {
     } else {
       this.store.selectedIndices = new Float32Array()
     }
-  }
-
-  public get selectedPoints (): N[] {
-    return this.graph.nodes.filter((n, i) => this.store.selectedIndices.includes(i))
   }
 
   public start (alpha = 1): void {
