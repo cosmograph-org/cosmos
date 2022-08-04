@@ -150,7 +150,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     return this.graph.findNodeById(id)
   }
 
-  public selectNodeById (id: string): void {
+  public zoomToPointById (id: string): void {
     const node = this.graph.findNodeById(id)
     if (!node) return
     const positionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
