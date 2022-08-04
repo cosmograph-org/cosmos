@@ -109,7 +109,11 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   public get selectedPoints (): N[] {
-    return this.graph.nodes.filter((n, i) => this.store.selectedIndices.includes(i))
+    const points = new Array(this.store.selectedIndices.length)
+    for (let i = 0; i < this.store.selectedIndices.length; i += 1) {
+      points[i] = this.graph.nodes[this.store.selectedIndices[i] as number]
+    }
+    return points
   }
 
   public setConfig (config: Partial<GraphConfigInterface<Node<N>, Link<N, L>>>): void {
