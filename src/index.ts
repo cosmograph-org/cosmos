@@ -363,16 +363,16 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.store.selectedArea = [[event.offsetX, (h - event.offsetY)], [event.offsetX, (h - event.offsetY)]]
     this.points.findPoint(true)
     const pixels = readPixels(this.reglInstance, this.points.selectedFbo as regl.Framebuffer2D)
-    const selectedIndices = pixels
+    const pixelsInSelectedArea = pixels
       .map((pixel, i) => {
         if (i % 4 === 0 && pixel !== 0) return i / 4
-        else return 404
+        else return -1
       })
-      .filter(d => d !== 404)
-    this.store.selectedIndices = selectedIndices
-    const clickedId = selectedIndices[selectedIndices.length - 1] ?? -1
-    const clickedParticle = selectedIndices.length ? this.graph.nodes[clickedId] : undefined
-    this.config.events.onClick?.(clickedParticle)
+      .filter(d => d !== -1)
+    this.store.selectedIndices = new Float32Array()
+    const clickedIndex = pixelsInSelectedArea[pixelsInSelectedArea.length - 1]
+    const clickedParticle = (pixelsInSelectedArea.length && clickedIndex !== undefined) ? this.graph.nodes[clickedIndex] : undefined
+    this.config.events.onClick?.(clickedParticle, clickedIndex)
   }
 
   private onMouseMove (event: MouseEvent): void {

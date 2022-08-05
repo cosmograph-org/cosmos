@@ -43,9 +43,6 @@ export class GraphData <N extends InputNode, L extends InputLink> {
       if (!n.degree) n.degree = (n.outdegree ?? 0) + (n.indegree ?? 0)
     })
 
-    // Sort nodes by degree value
-    nodes.sort((a, b) => (a.degree) - (b.degree ?? 0))
-
     // Put index to node by ascending from 0
     nodes.forEach((n, i) => {
       n.index = i

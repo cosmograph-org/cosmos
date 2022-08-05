@@ -19,7 +19,7 @@ export interface Events <N extends InputNode> {
    * If clicked on a node, its data will be passed as an argument: `(node: Node<N> &vert; undefined) => void`.
    * Default value: `undefined`
    */
-  onClick?: (clickedNode: Node<N> | undefined) => void;
+  onClick?: (clickedNode: Node<N> | undefined, index: number | undefined) => void;
 }
 
 export interface GraphSimulationSetting {
