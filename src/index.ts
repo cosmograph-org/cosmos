@@ -151,30 +151,19 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   public findNodeById (id: string): Node<N> | undefined {
-    return this.graph.findNodeById(id)
+    return this.graph.getNodeById(id)
   }
 
   public zoomToPointById (id: string): void {
-    const node = this.graph.findNodeById(id)
+    const node = this.graph.getNodeById(id)
     if (!node) return
-    const positionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
-    const posX = positionPixels[node.index * 4 + 0]
-    const posY = positionPixels[node.index * 4 + 1]
-    if (posX === undefined || posY === undefined) return
-    const scale = 8
-    const translateX = posX - this.config.spaceSize / 2
-    const translateY = posY - this.config.spaceSize / 2
-    select(this.canvas)
-      .transition()
-      .duration(250)
-      .call(this.zoomInstance.behavior.transform, zoomIdentity
-        .translate(0, 0)
-        .scale(1)
-        .translate(-translateX, translateY)
-      )
-      .transition()
-      .duration(500)
-      .call(this.zoomInstance.behavior.scaleTo, scale)
+    this.zoomToPoint(node)
+  }
+
+  public zoomToPointByIndex (index: number): void {
+    const node = this.graph.getNodeByIndex(index)
+    if (!node) return
+    this.zoomToPoint(node)
   }
 
   public zoom (value: number, duration = 0): void {
@@ -408,6 +397,27 @@ export class Graph<N extends InputNode, L extends InputLink> {
       select(this.canvas)
         .call(this.zoomInstance.behavior.transform, this.zoomInstance.eventTransform)
     }
+  }
+
+  private zoomToPoint (node: Node<N>): void {
+    const positionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
+    const posX = positionPixels[node.index * 4 + 0]
+    const posY = positionPixels[node.index * 4 + 1]
+    if (posX === undefined || posY === undefined) return
+    const scale = 8
+    const translateX = posX - this.config.spaceSize / 2
+    const translateY = posY - this.config.spaceSize / 2
+    select(this.canvas)
+      .transition()
+      .duration(250)
+      .call(this.zoomInstance.behavior.transform, zoomIdentity
+        .translate(0, 0)
+        .scale(1)
+        .translate(-translateX, translateY)
+      )
+      .transition()
+      .duration(500)
+      .call(this.zoomInstance.behavior.scaleTo, scale)
   }
 }
 

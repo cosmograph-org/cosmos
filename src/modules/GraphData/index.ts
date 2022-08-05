@@ -3,6 +3,7 @@ import { Node, Link, InputNode, InputLink } from '@/graph/types'
 export class GraphData <N extends InputNode, L extends InputLink> {
   private _nodes: Node<N>[] = []
   private _links: Link<N, L>[] = []
+  private nodeIdToNodeMap: Map<string, Node<N>> = new Map()
 
   public get nodes (): Node<N>[] {
     return this._nodes
@@ -23,15 +24,15 @@ export class GraphData <N extends InputNode, L extends InputLink> {
       } as Node<N>
     })
 
-    const nodesObj: { [key: string]: Node<N> } = {}
+    this.nodeIdToNodeMap.clear()
     nodes.forEach(n => {
-      nodesObj[n.id] = n
+      this.nodeIdToNodeMap.set(n.id, n)
     })
 
     // Calculate node outdegree/indegree value
     inputLinks.forEach(l => {
-      const sourceNode = nodesObj[l.source]
-      const targetNode = nodesObj[l.target]
+      const sourceNode = this.nodeIdToNodeMap.get(l.source)
+      const targetNode = this.nodeIdToNodeMap.get(l.target)
       if (sourceNode !== undefined && targetNode !== undefined) {
         sourceNode.outdegree += 1
         targetNode.indegree += 1
@@ -50,8 +51,8 @@ export class GraphData <N extends InputNode, L extends InputLink> {
 
     const links = inputLinks
       .map(l => {
-        const sourceNode = nodesObj[l.source]
-        const targetNode = nodesObj[l.target]
+        const sourceNode = this.nodeIdToNodeMap.get(l.source)
+        const targetNode = this.nodeIdToNodeMap.get(l.target)
         if (sourceNode !== undefined && targetNode !== undefined) {
           return {
             ...l,
@@ -69,7 +70,11 @@ export class GraphData <N extends InputNode, L extends InputLink> {
     this._links = links
   }
 
-  public findNodeById (id: string): Node<N> | undefined {
-    return this.nodes.find(node => node.id.toLowerCase() === id.toLowerCase())
+  public getNodeById (id: string): Node<N> | undefined {
+    return this.nodeIdToNodeMap.get(id)
+  }
+
+  public getNodeByIndex (index: number): Node<N> | undefined {
+    return this._nodes[index]
   }
 }
