@@ -200,7 +200,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     }, {})
   }
 
-  public onSelect (selection: [[number, number], [number, number]] | null): void {
+  public selectPointsInRange (selection: [[number, number], [number, number]] | null): void {
     if (selection) {
       const h = this.store.screenSize[1]
       this.store.selectedArea = [[selection[0][0], (h - selection[1][1])], [selection[1][0], (h - selection[0][1])]]
@@ -215,6 +215,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     } else {
       this.store.selectedIndices = new Float32Array()
     }
+    this.points.updateGreyoutStatus()
   }
 
   public start (alpha = 1): void {
@@ -370,6 +371,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
       })
       .filter(d => d !== -1)
     this.store.selectedIndices = new Float32Array()
+    this.points.updateGreyoutStatus()
     const clickedIndex = pixelsInSelectedArea[pixelsInSelectedArea.length - 1]
     const clickedParticle = (pixelsInSelectedArea.length && clickedIndex !== undefined) ? this.graph.nodes[clickedIndex] : undefined
     this.config.events.onClick?.(clickedParticle, clickedIndex)

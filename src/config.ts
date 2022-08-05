@@ -1,6 +1,7 @@
 import { Node, Link, InputNode, InputLink } from '@/graph/types'
 import {
   defaultNodeColor,
+  defaultGreyoutNodeOpacity,
   defaultNodeSize,
   defaultLinkColor,
   defaultLinkWidth,
@@ -126,6 +127,11 @@ export interface GraphConfigInterface<N extends InputNode, L extends InputLink> 
   */
   nodeColor?: ColorAccessor<N>;
   /**
+   * Opacity value of nodes outside the rectangular selection.
+   * Default value: 0.1
+  */
+  nodeGreyoutOpacity?: number;
+  /**
    * Node size accessor function or value in pixels.
    * Default value: `4`
   */
@@ -212,6 +218,7 @@ export class GraphConfig<N extends InputNode, L extends InputLink> implements Gr
   public backgroundColor = defaultBackgroundColor
   public spaceSize = defaultConfigValues.spaceSize
   public nodeColor = defaultNodeColor
+  public nodeGreyoutOpacity = defaultGreyoutNodeOpacity
   public nodeSize = defaultNodeSize
   public nodeSizeScale = defaultConfigValues.nodeSizeScale
   public linkColor = defaultLinkColor

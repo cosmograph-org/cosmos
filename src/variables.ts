@@ -1,4 +1,5 @@
 export const defaultNodeColor = '#b3b3b3'
+export const defaultGreyoutNodeOpacity = 0.1
 export const defaultNodeSize = 4
 export const defaultLinkColor = '#666666'
 export const defaultLinkWidth = 1

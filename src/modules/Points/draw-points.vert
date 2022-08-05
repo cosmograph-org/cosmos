@@ -6,6 +6,7 @@ attribute vec2 indexes;
 
 uniform sampler2D positions;
 uniform sampler2D particleColor;
+uniform sampler2D particleGreyoutStatus;
 uniform sampler2D particleSize;
 uniform float ratio;
 uniform mat3 transform;
@@ -13,6 +14,7 @@ uniform float pointsTextureSize;
 uniform float sizeScale;
 uniform float spaceSize;
 uniform vec2 screenSize;
+uniform float greyoutOpacity;
 
 varying vec2 index;
 varying vec3 rgbColor;
@@ -40,5 +42,11 @@ void main() {
   vec4 pColor = texture2D(particleColor, (index + 0.5) / pointsTextureSize);
   rgbColor = pColor.rgb;
   gl_PointSize = pointSize(size);
+
   alpha = pColor.a;
+  // Alpha of selected points
+  vec4 greyoutStatus = texture2D(particleGreyoutStatus, (index + 0.5) / pointsTextureSize);
+  if (greyoutStatus.r > 0.0) {
+    alpha *= greyoutOpacity;
+  }
 }

@@ -1,6 +1,6 @@
 import regl from 'regl'
 import { CoreModule } from '@/graph/modules/core-module'
-import { createColorBuffer } from '@/graph/modules/Points/color-buffer'
+import { createColorBuffer, createGreyoutStatusBuffer } from '@/graph/modules/Points/color-buffer'
 import drawPointsFrag from '@/graph/modules/Points/draw-points.frag'
 import drawPointsVert from '@/graph/modules/Points/draw-points.vert'
 import findPointFrag from '@/graph/modules/Points/find-point.frag'
@@ -17,6 +17,7 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
   public velocityFbo: regl.Framebuffer2D | undefined
   public selectedFbo: regl.Framebuffer2D | undefined
   public colorFbo: regl.Framebuffer2D | undefined
+  public greyoutStatusFbo: regl.Framebuffer2D | undefined
   public sizeFbo: regl.Framebuffer2D | undefined
   private drawCommand: regl.DrawCommand | undefined
   private updatePositionCommand: regl.DrawCommand | undefined
@@ -79,6 +80,7 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
 
     this.updateSize()
     this.updateColor()
+    this.updateGreyoutStatus()
   }
 
   public initPrograms (): void {
@@ -106,6 +108,7 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
       uniforms: {
         positions: () => this.currentPositionFbo,
         particleColor: () => this.colorFbo,
+        particleGreyoutStatus: () => this.greyoutStatusFbo,
         particleSize: () => this.sizeFbo,
         ratio: () => config.pixelRatio,
         sizeScale: () => config.nodeSizeScale,
@@ -113,6 +116,7 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
         transform: () => store.transform,
         spaceSize: () => config.spaceSize,
         screenSize: () => store.screenSize,
+        greyoutOpacity: () => config.nodeGreyoutOpacity,
       },
       blend: {
         enable: true,
@@ -159,6 +163,11 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
     this.colorFbo = createColorBuffer(nodes, reglInstance, store.pointsTextureSize, config.nodeColor)
   }
 
+  public updateGreyoutStatus (): void {
+    const { reglInstance, store } = this
+    this.greyoutStatusFbo = createGreyoutStatusBuffer(store.selectedIndices, reglInstance, store.pointsTextureSize)
+  }
+
   public updateSize (): void {
     const { reglInstance, config, store, data: { nodes } } = this
     this.sizeFbo = createSizeBuffer(nodes, reglInstance, store.pointsTextureSize, config.nodeSize)
@@ -184,6 +193,7 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
     this.selectedFbo?.destroy()
     this.colorFbo?.destroy()
     this.sizeFbo?.destroy()
+    this.greyoutStatusFbo?.destroy()
   }
 
   private swapFbo (): void {
