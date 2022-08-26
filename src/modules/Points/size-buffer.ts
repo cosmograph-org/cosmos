@@ -1,23 +1,25 @@
 import regl from 'regl'
 import { NumericAccessor } from '@/graph/config'
 import { getValue } from '@/graph/helper'
-import { InputNode, Node } from '@/graph/types'
+import { GraphData } from '@/graph/modules/GraphData'
+import { InputNode, Node, InputLink } from '@/graph/types'
 import { defaultNodeSize } from '@/graph/variables'
 
-export function createSizeBuffer <N extends InputNode> (
-  nodes: Node<N>[],
+export function createSizeBuffer <N extends InputNode, L extends InputLink> (
+  data: GraphData<N, L>,
   reglInstance: regl.Regl,
   pointTextureSize: number,
   sizeAccessor: NumericAccessor<Node<N>>
 ): regl.Framebuffer2D {
-  const numParticles = nodes.length
+  const numParticles = data.nodes.length
   const initialState = new Float32Array(pointTextureSize * pointTextureSize * 4)
 
   for (let i = 0; i < numParticles; ++i) {
-    const node = nodes[i]
-    if (node) {
+    const sortedIndex = data.getSortedIndexByInputIndex(i)
+    const node = data.nodes[i]
+    if (node && sortedIndex !== undefined) {
       const size = getValue<Node<N>, number>(node, sizeAccessor)
-      initialState[i * 4] = size ?? defaultNodeSize
+      initialState[sortedIndex * 4] = size ?? defaultNodeSize
     }
   }
 

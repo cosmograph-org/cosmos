@@ -111,7 +111,11 @@ export class Graph<N extends InputNode, L extends InputLink> {
   public get selectedPoints (): N[] {
     const points = new Array(this.store.selectedIndices.length)
     for (let i = 0; i < this.store.selectedIndices.length; i += 1) {
-      points[i] = this.graph.nodes[this.store.selectedIndices[i] as number]
+      const selectedIndex = this.store.selectedIndices[i]
+      if (selectedIndex !== undefined) {
+        const index = this.graph.getInputIndexBySortedIndex(selectedIndex)
+        if (index !== undefined) points[i] = this.graph.nodes[index]
+      }
     }
     return points
   }
@@ -259,7 +263,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   private update (runSimulation: boolean): void {
     const { graph } = this
     this.store.pointsTextureSize = Math.ceil(Math.sqrt(graph.nodes.length))
-    this.store.linksTextureSize = Math.ceil(Math.sqrt(graph.links.length * 2))
+    this.store.linksTextureSize = Math.ceil(Math.sqrt(graph.linksNumber * 2))
     this.destroy()
     this.create()
     this.initPrograms()
@@ -361,7 +365,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
       .filter(d => d !== -1)
     this.store.selectedIndices = new Float32Array()
     this.points.updateGreyoutStatus()
-    const clickedIndex = pixelsInSelectedArea[pixelsInSelectedArea.length - 1]
+    const clickedIndex = this.graph.getInputIndexBySortedIndex(pixelsInSelectedArea[pixelsInSelectedArea.length - 1] as number)
     const clickedParticle = (pixelsInSelectedArea.length && clickedIndex !== undefined) ? this.graph.nodes[clickedIndex] : undefined
     this.config.events.onClick?.(clickedParticle, clickedIndex)
   }
@@ -400,9 +404,12 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   private zoomToPoint (node: Node<N>): void {
+    const { graph } = this
     const positionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
-    const posX = positionPixels[node.index * 4 + 0]
-    const posY = positionPixels[node.index * 4 + 1]
+    const nodeIndex = graph.getSortedIndexById(node.id)
+    if (nodeIndex === undefined) return
+    const posX = positionPixels[nodeIndex * 4 + 0]
+    const posY = positionPixels[nodeIndex * 4 + 1]
     if (posX === undefined || posY === undefined) return
     const scale = 8
     const translateX = posX - this.config.spaceSize / 2

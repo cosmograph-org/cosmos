@@ -24,15 +24,18 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
   private findPointCommand: regl.DrawCommand | undefined
 
   public create (): void {
-    const { reglInstance, config, store, data: { nodes } } = this
+    const { reglInstance, config, store, data } = this
     const { spaceSize } = config
     const { pointsTextureSize } = store
-    const numParticles = nodes.length
+    const numParticles = data.nodes.length
     const initialState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
     for (let i = 0; i < numParticles; ++i) {
-      const node = nodes[i]
-      initialState[i * 4 + 0] = node?.x ?? (spaceSize ?? defaultConfigValues.spaceSize) * (Math.random() * (0.505 - 0.495) + 0.495)
-      initialState[i * 4 + 1] = node?.y ?? (spaceSize ?? defaultConfigValues.spaceSize) * (Math.random() * (0.505 - 0.495) + 0.495)
+      const sortedIndex = this.data.getSortedIndexByInputIndex(i)
+      const node = data.nodes[i]
+      if (node && sortedIndex !== undefined) {
+        initialState[sortedIndex * 4 + 0] = node.x ?? (spaceSize ?? defaultConfigValues.spaceSize) * (Math.random() * (0.505 - 0.495) + 0.495)
+        initialState[sortedIndex * 4 + 1] = node.y ?? (spaceSize ?? defaultConfigValues.spaceSize) * (Math.random() * (0.505 - 0.495) + 0.495)
+      }
     }
 
     // Create position buffer
@@ -159,8 +162,8 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
   }
 
   public updateColor (): void {
-    const { reglInstance, config, store, data: { nodes } } = this
-    this.colorFbo = createColorBuffer(nodes, reglInstance, store.pointsTextureSize, config.nodeColor)
+    const { reglInstance, config, store, data } = this
+    this.colorFbo = createColorBuffer(data, reglInstance, store.pointsTextureSize, config.nodeColor)
   }
 
   public updateGreyoutStatus (): void {
@@ -169,8 +172,8 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
   }
 
   public updateSize (): void {
-    const { reglInstance, config, store, data: { nodes } } = this
-    this.sizeFbo = createSizeBuffer(nodes, reglInstance, store.pointsTextureSize, config.nodeSize)
+    const { reglInstance, config, store, data } = this
+    this.sizeFbo = createSizeBuffer(data, reglInstance, store.pointsTextureSize, config.nodeSize)
   }
 
   public draw (): void {
