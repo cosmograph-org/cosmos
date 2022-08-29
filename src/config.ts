@@ -127,7 +127,7 @@ export interface GraphConfigInterface<N extends InputNode, L extends InputLink> 
   */
   nodeColor?: ColorAccessor<N>;
   /**
-   * Opacity value of nodes outside the rectangular selection.
+   * Grey out node opacity value when the selection is active.
    * Default value: 0.1
   */
   nodeGreyoutOpacity?: number;

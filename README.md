@@ -64,6 +64,7 @@ graph.setData(nodes, links)
 | backgroundColor | Canvas background color | `#222222`
 | spaceSize | Simulation space size (max 8192) | `4096`
 | nodeColor | Node color accessor function or hex value | `#b3b3b3`
+| nodeGreyoutOpacity | Grey out node opacity value when the selection is active | `0.1`
 | nodeSize | Node size accessor function or value in pixels | `4`
 | nodeSizeScale | Scale factor for the node size | `1`
 | renderLinks | Turns link rendering on / off | `true`
@@ -76,7 +77,7 @@ graph.setData(nodes, links)
 | linkVisibilityMinTransparency | The transparency value that the link will have when its length reaches the maximum link distance value from `linkVisibilityDistanceRange`. | `0.25`
 | useQuadtree | Use the classic [quadtree algorithm](https://en.wikipedia.org/wiki/Barnes%E2%80%93Hut_simulation) for the Many-Body force. This property will be applied only on component initialization and it can't be changed using the `setConfig` method. <br /><br /> ⚠ The algorithm might not work on some GPUs (e.g. Nvidia) and on Windows (unless you disable ANGLE in the browser settings). | `false`
 | simulation | Simulation parameters and event listeners | See [Simulation configuration](#simulation_configuration) table for more details
-| events.onClick | Callback function that will be called on every canvas click. If clicked on a node, its data will be passed as an argument: <code>(node: Node<N> &vert; undefined) => void</code> | `undefined`
+| events.onClick | Callback function that will be called on every canvas click. If clicked on a node, its data will be passed as a first argument and index as a second: <code>(node: Node<N> &vert; undefined, index: number &vert; undefined) => void</code> | `undefined`
 | showFPSMonitor | Show WebGL performance monitor | `false`
 | pixelRatio | Canvas pixel ratio | `2`
 
