@@ -1,7 +1,7 @@
 import regl from 'regl'
 import { ColorAccessor } from '@/graph/config'
 import { getValue, getRgbaColor } from '@/graph/helper'
-import { InputNode, Node, InputLink } from '@/graph/types'
+import { InputNode, InputLink } from '@/graph/types'
 import { GraphData } from '@/graph/modules/GraphData'
 import { defaultNodeColor } from '@/graph/variables'
 
@@ -9,7 +9,7 @@ export function createColorBuffer <N extends InputNode, L extends InputLink> (
   data: GraphData<N, L>,
   reglInstance: regl.Regl,
   textureSize: number,
-  colorAccessor: ColorAccessor<Node<N>>
+  colorAccessor: ColorAccessor<N>
 ): regl.Framebuffer2D {
   const initialState = new Float32Array(textureSize * textureSize * 4)
 
@@ -17,7 +17,7 @@ export function createColorBuffer <N extends InputNode, L extends InputLink> (
     const sortedIndex = data.getSortedIndexByInputIndex(i)
     const node = data.nodes[i]
     if (node && sortedIndex !== undefined) {
-      const c = getValue<Node<N>, string | [number, number, number, number]>(node, colorAccessor) ?? defaultNodeColor
+      const c = getValue<N, string | [number, number, number, number]>(node, colorAccessor) ?? defaultNodeColor
       const rgba = getRgbaColor(c)
       initialState[sortedIndex * 4 + 0] = rgba[0]
       initialState[sortedIndex * 4 + 1] = rgba[1]

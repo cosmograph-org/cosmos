@@ -16,11 +16,11 @@ import { Lines } from '@/graph/modules/Lines'
 import { Points } from '@/graph/modules/Points'
 import { Store, ALPHA_MIN } from '@/graph/modules/Store'
 import { Zoom } from '@/graph/modules/Zoom'
-import { Node, Link, InputNode, InputLink } from '@/graph/types'
+import { InputNode, InputLink } from '@/graph/types'
 import { defaultConfigValues } from '@/graph/variables'
 
 export class Graph<N extends InputNode, L extends InputLink> {
-  public config = new GraphConfig<Node<N>, Link<N, L>>()
+  public config = new GraphConfig<N, L>()
   private canvas: HTMLCanvasElement
   private reglInstance: regl.Regl
   private requestAnimationFrameId = 0
@@ -100,11 +100,11 @@ export class Graph<N extends InputNode, L extends InputLink> {
     return this.store.simulationIsRunning
   }
 
-  public get nodes (): Node<N>[] {
+  public get nodes (): N[] {
     return this.graph.nodes
   }
 
-  public get links (): Link<N, L>[] {
+  public get links (): L[] {
     return this.graph.links
   }
 
@@ -120,7 +120,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     return points
   }
 
-  public setConfig (config: Partial<GraphConfigInterface<Node<N>, Link<N, L>>>): void {
+  public setConfig (config: Partial<GraphConfigInterface<N, L>>): void {
     const prevConfig = { ...this.config }
     this.config.init(config)
     if (prevConfig.linkColor !== this.config.linkColor) this.lines.updateColor()
@@ -140,7 +140,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     }
   }
 
-  public setData (nodes: InputNode[], links: InputLink[], runSimulation = true): void {
+  public setData (nodes: N[], links: L[], runSimulation = true): void {
     if (!nodes.length && !links.length) {
       this.destroy()
       this.reglInstance.clear({
@@ -154,7 +154,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.update(runSimulation)
   }
 
-  public findNodeById (id: string): Node<N> | undefined {
+  public findNodeById (id: string): N | undefined {
     return this.graph.getNodeById(id)
   }
 
@@ -403,7 +403,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     }
   }
 
-  private zoomToPoint (node: Node<N>): void {
+  private zoomToPoint (node: N): void {
     const { graph } = this
     const positionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
     const nodeIndex = graph.getSortedIndexById(node.id)
@@ -428,5 +428,5 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 }
 
-export type { InputLink, InputNode, Node, Link } from './types'
+export type { InputLink, InputNode } from './types'
 export type { GraphConfigInterface } from './config'

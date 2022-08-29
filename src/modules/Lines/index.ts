@@ -4,7 +4,7 @@ import { CoreModule } from '@/graph/modules/core-module'
 import drawStraightFrag from '@/graph/modules/Lines/draw-straight.frag'
 import drawStraightVert from '@/graph/modules/Lines/draw-straight.vert'
 import { defaultLinkColor, defaultLinkWidth } from '@/graph/variables'
-import { Link, InputNode, InputLink } from '@/graph/types'
+import { InputNode, InputLink } from '@/graph/types'
 
 export class Lines<N extends InputNode, L extends InputLink> extends CoreModule<N, L> {
   private drawStraightCommand: regl.DrawCommand | undefined
@@ -127,7 +127,7 @@ export class Lines<N extends InputNode, L extends InputLink> extends CoreModule<
     const { reglInstance, config, data } = this
     const instancePoints: number[][] = []
     data.completeLinks.forEach(l => {
-      const c = getValue<Link<N, L>, string | [number, number, number, number]>(l, config.linkColor) ?? defaultLinkColor
+      const c = getValue<L, string | [number, number, number, number]>(l, config.linkColor) ?? defaultLinkColor
       const rgba = getRgbaColor(c)
       instancePoints.push(rgba)
     })
@@ -138,7 +138,7 @@ export class Lines<N extends InputNode, L extends InputLink> extends CoreModule<
     const { reglInstance, config, data } = this
     const instancePoints: number[][] = []
     data.completeLinks.forEach(l => {
-      const linkWidth = getValue<Link<N, L>, number>(l, config.linkWidth)
+      const linkWidth = getValue<L, number>(l, config.linkWidth)
       instancePoints.push([linkWidth ?? defaultLinkWidth])
     })
     this.widthBuffer = reglInstance.buffer(instancePoints)

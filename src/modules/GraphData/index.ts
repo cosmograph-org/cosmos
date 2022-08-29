@@ -1,13 +1,13 @@
-import { Node, Link, InputNode, InputLink } from '@/graph/types'
+import { InputNode, InputLink } from '@/graph/types'
 
 export class GraphData <N extends InputNode, L extends InputLink> {
-  public completeLinks: Set<Link<N, L>> = new Set()
+  public completeLinks: Set<L> = new Set()
   public degree: number[] = []
   public groupedSourceToTargetLinks: Map<number, Set<number>> = new Map()
   public groupedTargetToSourceLinks: Map<number, Set<number>> = new Map()
-  private _nodes: Node<N>[] = []
-  private _links: Link<N, L>[] = []
-  private idToNodeMap: Map<string, Node<N>> = new Map()
+  private _nodes: N[] = []
+  private _links: L[] = []
+  private idToNodeMap: Map<string, N> = new Map()
   private sortedIndexToInputIndexMap: Map<number, number> = new Map()
   private inputIndexToSortedIndexMap: Map<number, number> = new Map()
   private idToSortedIndexMap: Map<string, number> = new Map()
@@ -15,11 +15,11 @@ export class GraphData <N extends InputNode, L extends InputLink> {
   private idToIndegreeMap: Map<string, number> = new Map()
   private idToOutdegreeMap: Map<string, number> = new Map()
 
-  public get nodes (): Node<N>[] {
+  public get nodes (): N[] {
     return this._nodes
   }
 
-  public get links (): Link<N, L>[] {
+  public get links (): L[] {
     return this._links
   }
 
@@ -27,7 +27,7 @@ export class GraphData <N extends InputNode, L extends InputLink> {
     return this.completeLinks.size
   }
 
-  public setData (inputNodes: InputNode[], inputLinks: InputLink[]): void {
+  public setData (inputNodes: N[], inputLinks: L[]): void {
     this.idToNodeMap.clear()
     this.idToSortedIndexMap.clear()
     this.inputIndexToIdMap.clear()
@@ -35,7 +35,7 @@ export class GraphData <N extends InputNode, L extends InputLink> {
     this.idToOutdegreeMap.clear()
 
     inputNodes.forEach((n, i) => {
-      this.idToNodeMap.set(n.id, n as Node<N>)
+      this.idToNodeMap.set(n.id, n)
       this.inputIndexToIdMap.set(i, n.id)
       this.idToIndegreeMap.set(n.id, 0)
       this.idToOutdegreeMap.set(n.id, 0)
@@ -48,7 +48,7 @@ export class GraphData <N extends InputNode, L extends InputLink> {
       const sourceNode = this.idToNodeMap.get(l.source)
       const targetNode = this.idToNodeMap.get(l.target)
       if (sourceNode !== undefined && targetNode !== undefined) {
-        this.completeLinks.add(l as Link<N, L>)
+        this.completeLinks.add(l)
         const outdegree = this.idToOutdegreeMap.get(sourceNode.id)
         if (outdegree !== undefined) this.idToOutdegreeMap.set(sourceNode.id, outdegree + 1)
         const indegree = this.idToIndegreeMap.get(targetNode.id)
@@ -91,15 +91,15 @@ export class GraphData <N extends InputNode, L extends InputLink> {
       }
     })
 
-    this._nodes = inputNodes as Node<N>[]
-    this._links = inputLinks as Link<N, L>[]
+    this._nodes = inputNodes
+    this._links = inputLinks
   }
 
-  public getNodeById (id: string): Node<N> | undefined {
+  public getNodeById (id: string): N | undefined {
     return this.idToNodeMap.get(id)
   }
 
-  public getNodeByIndex (index: number): Node<N> | undefined {
+  public getNodeByIndex (index: number): N | undefined {
     return this._nodes[index]
   }
 

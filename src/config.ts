@@ -1,4 +1,4 @@
-import { Node, Link, InputNode, InputLink } from '@/graph/types'
+import { InputNode, InputLink } from '@/graph/types'
 import {
   defaultNodeColor,
   defaultGreyoutNodeOpacity,
@@ -20,7 +20,7 @@ export interface Events <N extends InputNode> {
    * If clicked on a node, its data will be passed as an argument: `(node: Node<N> &vert; undefined) => void`.
    * Default value: `undefined`
    */
-  onClick?: (clickedNode: Node<N> | undefined, index: number | undefined) => void;
+  onClick?: (clickedNode: N | undefined, index: number | undefined) => void;
 }
 
 export interface GraphSimulationSetting {
@@ -214,7 +214,7 @@ export interface GraphConfigInterface<N extends InputNode, L extends InputLink> 
   pixelRatio?: number;
 }
 
-export class GraphConfig<N extends InputNode, L extends InputLink> implements GraphConfigInterface<Node<N>, Link<N, L>> {
+export class GraphConfig<N extends InputNode, L extends InputLink> implements GraphConfigInterface<N, L> {
   public backgroundColor = defaultBackgroundColor
   public spaceSize = defaultConfigValues.spaceSize
   public nodeColor = defaultNodeColor
