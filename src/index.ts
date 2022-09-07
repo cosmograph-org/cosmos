@@ -96,8 +96,11 @@ export class Graph<N extends InputNode, L extends InputLink> {
     return this.store.simulationProgress
   }
 
-  public get simulationIsRunning (): boolean {
-    return this.store.simulationIsRunning
+  /**
+   * A value that gives information about the running simulation status.
+   */
+  public get isSimulationRunning (): boolean {
+    return this.store.isSimulationRunning
   }
 
   public get nodes (): N[] {
@@ -108,18 +111,10 @@ export class Graph<N extends InputNode, L extends InputLink> {
     return this.graph.links
   }
 
-  public get selectedPoints (): N[] {
-    const points = new Array(this.store.selectedIndices.length)
-    for (let i = 0; i < this.store.selectedIndices.length; i += 1) {
-      const selectedIndex = this.store.selectedIndices[i]
-      if (selectedIndex !== undefined) {
-        const index = this.graph.getInputIndexBySortedIndex(selectedIndex)
-        if (index !== undefined) points[i] = this.graph.nodes[index]
-      }
-    }
-    return points
-  }
-
+  /**
+   * Changes Cosmos configuration in real time.
+   * @param config Object with Cosmos configurations.
+   */
   public setConfig (config: Partial<GraphConfigInterface<N, L>>): void {
     const prevConfig = { ...this.config }
     this.config.init(config)
@@ -129,7 +124,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     if (prevConfig.linkWidth !== this.config.linkWidth) this.lines.updateWidth()
     if (prevConfig.backgroundColor !== this.config.backgroundColor) this.store.backgroundColor = getRgbaColor(this.config.backgroundColor)
     if (prevConfig.spaceSize !== this.config.spaceSize ||
-      prevConfig.simulation.repulsionQuadtreeLevels !== this.config.simulation.repulsionQuadtreeLevels) this.update(this.store.simulationIsRunning)
+      prevConfig.simulation.repulsionQuadtreeLevels !== this.config.simulation.repulsionQuadtreeLevels) this.update(this.store.isSimulationRunning)
     if (prevConfig.showFPSMonitor !== this.config.showFPSMonitor) {
       if (this.config.showFPSMonitor) {
         this.fpsMonitor = new FPSMonitor(this.canvas)
@@ -140,6 +135,12 @@ export class Graph<N extends InputNode, L extends InputLink> {
     }
   }
 
+  /**
+   * Set data to Cosmos.
+   * @param nodes Array of nodes.
+   * @param links Array of links.
+   * @param runSimulation Turns off the simulation.
+   */
   public setData (nodes: N[], links: L[], runSimulation = true): void {
     if (!nodes.length && !links.length) {
       this.destroy()
@@ -154,29 +155,59 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.update(runSimulation)
   }
 
+  /**
+   * Finds a Node by its ID.
+   * @param id ID of the Node.
+   * @returns Node or `undefined`.
+   */
   public findNodeById (id: string): N | undefined {
     return this.graph.getNodeById(id)
   }
 
-  public zoomToPointById (id: string): void {
+  /**
+   * Zoom in and center the camera on the Node by its ID.
+   * @param id ID of the Node.
+   */
+  public zoomToNodeById (id: string): void {
     const node = this.graph.getNodeById(id)
     if (!node) return
-    this.zoomToPoint(node)
+    this.zoomToNode(node)
   }
 
-  public zoomToPointByIndex (index: number): void {
+  /**
+   * Zoom in and center the camera on the Node by its index.
+   * @param index The index of the Node in the array of Nodes.
+   */
+  public zoomToNodeByIndex (index: number): void {
     const node = this.graph.getNodeByIndex(index)
     if (!node) return
-    this.zoomToPoint(node)
+    this.zoomToNode(node)
   }
 
-  public zoom (value: number, duration = 0): void {
+  /**
+   * Zoom in/out camera by level value.
+   * @param value The camera zoom in/out level value.
+   * @param duration The duration of the camera zoom in/out animation.
+   */
+  public setZoomLevel (value: number, duration = 0): void {
     select(this.canvas)
       .transition()
       .duration(duration)
       .call(this.zoomInstance.behavior.scaleTo, value)
   }
 
+  /**
+   * Get zoom in/out camera current level value.
+   * @returns The camera zoom in/out level value.
+   */
+  public getZoomLevel (): number {
+    return this.zoomInstance.eventTransform.k
+  }
+
+  /**
+   * Get current X and Y position of Nodes.
+   * @returns The object where keys are id of Nodes and values are X and Y position of that Nodes.
+   */
   public getNodePositions (): { [key: string]: { x: number; y: number } } {
     if (this.hasBeenRecentlyDestroyed) return {}
     const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
@@ -193,7 +224,11 @@ export class Graph<N extends InputNode, L extends InputLink> {
     }, {})
   }
 
-  public selectPointsInRange (selection: [[number, number], [number, number]] | null): void {
+  /** Selects Nodes inside a rectangular selection.
+   * @param selection - Is an array of two corner points `[[left, top], [bottom, right]]`.
+   * The `left` and `right` coordinates have a range from 0 to the width of the canvas.
+   * The `top` and `bottom` coordinates have a range from 0 to the height of the canvas. */
+  public selectNodesInRange (selection: [[number, number], [number, number]] | null): void {
     if (selection) {
       const h = this.store.screenSize[1]
       this.store.selectedArea = [[selection[0][0], (h - selection[1][1])], [selection[1][0], (h - selection[0][1])]]
@@ -211,9 +246,52 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.points.updateGreyoutStatus()
   }
 
+  /**
+   * Select Node by its ID.
+   * @param id ID of the Node.
+   */
+  public selectNodeById (id: string): void {
+    this.selectNodesByIds([id])
+  }
+
+  /**
+   * Selects Nodes by its IDs.
+   * @param ids IDs of Nodes.
+   */
+  public selectNodesByIds (ids: (string | undefined)[]): void {
+    const indices = ids.map(d => this.graph.getSortedIndexById(d))
+      .filter(d => d !== undefined) as number[]
+    if (indices.length !== 0) {
+      this.store.selectedIndices = new Float32Array(indices)
+    } else {
+      this.store.selectedIndices = new Float32Array()
+    }
+    this.points.updateGreyoutStatus()
+  }
+
+  /**
+   * Get Nodes that are currently selected.
+   * @returns Array of selected Nodes.
+   */
+  public getSelectedNodes (): N[] {
+    const points = new Array(this.store.selectedIndices.length)
+    for (let i = 0; i < this.store.selectedIndices.length; i += 1) {
+      const selectedIndex = this.store.selectedIndices[i]
+      if (selectedIndex !== undefined) {
+        const index = this.graph.getInputIndexBySortedIndex(selectedIndex)
+        if (index !== undefined) points[i] = this.graph.nodes[index]
+      }
+    }
+    return points
+  }
+
+  /**
+   * Starts the simulation.
+   * @param alpha The value from 0 to 1. If the value is set to 1, it reheats the simulation.
+   */
   public start (alpha = 1): void {
     if (!this.graph.nodes.length) return
-    this.store.simulationIsRunning = true
+    this.store.isSimulationRunning = true
     this.store.alpha = alpha
     this.store.simulationProgress = 0
     this.config.simulation.onStart?.()
@@ -221,22 +299,34 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.frame()
   }
 
+  /**
+   * Pauses the simulation.
+   */
   public pause (): void {
-    this.store.simulationIsRunning = false
+    this.store.isSimulationRunning = false
     this.config.simulation.onPause?.()
   }
 
+  /**
+   * Restarts the simulation.
+   */
   public restart (): void {
-    this.store.simulationIsRunning = true
+    this.store.isSimulationRunning = true
     this.config.simulation.onRestart?.()
   }
 
+  /**
+   * Stops the simulation and animation of the Cosmos and then draws only one frame.
+   */
   public drawOneFrame (): void {
-    this.store.simulationIsRunning = false
+    this.store.isSimulationRunning = false
     this.stopFrames()
     this.frame()
   }
 
+  /**
+   * Destroys the Cosmos.
+   */
   public destroy (): void {
     this.stopFrames()
     if (this.hasBeenRecentlyDestroyed) return
@@ -250,6 +340,9 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.hasBeenRecentlyDestroyed = true
   }
 
+  /**
+   * Creates the Cosmos.
+   */
   public create (): void {
     this.points.create()
     this.lines.create()
@@ -286,20 +379,20 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   private frame (): void {
-    const { config: { simulation, renderLinks }, store: { alpha, simulationIsRunning } } = this
-    if (alpha < ALPHA_MIN && simulationIsRunning) this.end()
+    const { config: { simulation, renderLinks }, store: { alpha, isSimulationRunning } } = this
+    if (alpha < ALPHA_MIN && isSimulationRunning) this.end()
 
     this.requestAnimationFrameId = window.requestAnimationFrame((now) => {
       this.fpsMonitor?.begin()
       this.resizeCanvas()
 
       if (this.isRightClickMouse) {
-        if (!simulationIsRunning) this.start(0.1)
+        if (!isSimulationRunning) this.start(0.1)
         this.forceMouse.run()
         this.points.updatePosition()
       }
 
-      if ((simulationIsRunning && !this.zoomInstance.isRunning)) {
+      if ((isSimulationRunning && !this.zoomInstance.isRunning)) {
         if (simulation.gravity) {
           this.forceGravity.run()
           this.points.updatePosition()
@@ -347,7 +440,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   private end (): void {
-    this.store.simulationIsRunning = false
+    this.store.isSimulationRunning = false
     this.store.simulationProgress = 1
     this.config.simulation.onEnd?.()
   }
@@ -403,7 +496,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     }
   }
 
-  private zoomToPoint (node: N): void {
+  private zoomToNode (node: N): void {
     const { graph } = this
     const positionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
     const nodeIndex = graph.getSortedIndexById(node.id)

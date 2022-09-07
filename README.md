@@ -64,7 +64,7 @@ graph.setData(nodes, links)
 | backgroundColor | Canvas background color | `#222222`
 | spaceSize | Simulation space size (max 8192) | `4096`
 | nodeColor | Node color accessor function or hex value | `#b3b3b3`
-| nodeGreyoutOpacity | Grey out node opacity value when the selection is active | `0.1`
+| nodeGreyoutOpacity | Greyed out node opacity value when the selection is active | `0.1`
 | nodeSize | Node size accessor function or value in pixels | `4`
 | nodeSizeScale | Scale factor for the node size | `1`
 | renderLinks | Turns link rendering on / off | `true`

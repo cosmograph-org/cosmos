@@ -17,7 +17,7 @@ export type ColorAccessor<Datum> = ((d: Datum, i?: number, ...rest: unknown[]) =
 export interface Events <N extends InputNode> {
   /**
    * Callback function that will be called on every canvas click.
-   * If clicked on a node, its data will be passed as an argument: `(node: Node<N> &vert; undefined) => void`.
+   * If clicked on a node, its data will be passed as an argument: `(node: N &vert; undefined) => void`.
    * Default value: `undefined`
    */
   onClick?: (clickedNode: N | undefined, index: number | undefined) => void;
@@ -53,7 +53,7 @@ export interface GraphSimulationSetting {
   /**
    * Barnes–Hut approximation depth.
    * Can only be used when `useQuadtree` is set `true`.
-   * Default value: 12
+   * Default value: `12`
    */
   repulsionQuadtreeLevels?: number;
   /**
@@ -127,8 +127,8 @@ export interface GraphConfigInterface<N extends InputNode, L extends InputLink> 
   */
   nodeColor?: ColorAccessor<N>;
   /**
-   * Grey out node opacity value when the selection is active.
-   * Default value: 0.1
+   * Greyed out node opacity value when the selection is active.
+   * Default value: `0.1`
   */
   nodeGreyoutOpacity?: number;
   /**

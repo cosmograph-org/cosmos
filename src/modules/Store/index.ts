@@ -11,7 +11,7 @@ export class Store {
   public screenSize: [number, number] = [0, 0]
   public mousePosition = [0, 0]
   public selectedArea = [[0, 0], [0, 0]]
-  public simulationIsRunning = false
+  public isSimulationRunning = false
   public simulationProgress = 0
   public selectedIndices: Float32Array = new Float32Array()
   private alphaTarget = 0

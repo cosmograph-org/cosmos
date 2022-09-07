@@ -1,18 +1,35 @@
 import { InputNode, InputLink } from '@/graph/types'
 
 export class GraphData <N extends InputNode, L extends InputLink> {
+  /** Links that have existing source and target nodes  */
   public completeLinks: Set<L> = new Set()
   public degree: number[] = []
+  /** Mapping the source node ID to Set of target node IDs that connected to the source node */
+  /** Mapping the target node ID to Set of source node IDs that connected to the target node */
   public groupedSourceToTargetLinks: Map<number, Set<number>> = new Map()
   public groupedTargetToSourceLinks: Map<number, Set<number>> = new Map()
   private _nodes: N[] = []
   private _links: L[] = []
+  /** Mapping the original ID to the original node */
   private idToNodeMap: Map<string, N> = new Map()
+
+  /** We want to display more important nodes (i.e. with the biggest number of connections)
+   * on top of the other. To render them in the right order,
+   * we create an array of node indices sorted by degree (number of connections)
+   * and and we store multiple maps that help us referencing the right data objects
+   * and other properties by original node index, sorted index, and id 👇. */
+
+  /** Mapping the sorted index to the original index */
   private sortedIndexToInputIndexMap: Map<number, number> = new Map()
+  /** Mapping the original index to the sorted index of the node */
   private inputIndexToSortedIndexMap: Map<number, number> = new Map()
+  /** Mapping the original ID to the sorted index of the node */
   private idToSortedIndexMap: Map<string, number> = new Map()
+  /** Mapping the original index to the original ID of the node */
   private inputIndexToIdMap: Map<number, string> = new Map()
+  /** Mapping the original ID to the indegree value of the node */
   private idToIndegreeMap: Map<string, number> = new Map()
+  /** Mapping the original ID to the outdegree value of the node */
   private idToOutdegreeMap: Map<string, number> = new Map()
 
   public get nodes (): N[] {
@@ -111,7 +128,7 @@ export class GraphData <N extends InputNode, L extends InputLink> {
     return this.sortedIndexToInputIndexMap.get(index)
   }
 
-  public getSortedIndexById (id: string): number | undefined {
-    return this.idToSortedIndexMap.get(id)
+  public getSortedIndexById (id: string | undefined): number | undefined {
+    return id !== undefined ? this.idToSortedIndexMap.get(id) : undefined
   }
 }
