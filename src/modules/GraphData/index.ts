@@ -4,13 +4,13 @@ export class GraphData <N extends InputNode, L extends InputLink> {
   /** Links that have existing source and target nodes  */
   public completeLinks: Set<L> = new Set()
   public degree: number[] = []
-  /** Mapping the source node ID to Set of target node IDs that connected to the source node */
-  /** Mapping the target node ID to Set of source node IDs that connected to the target node */
+  /** Mapping the source node index to a `Set` of target node indices connected to that node */
   public groupedSourceToTargetLinks: Map<number, Set<number>> = new Map()
+  /** Mapping the target node index to a `Set` of source node indices connected to that node */
   public groupedTargetToSourceLinks: Map<number, Set<number>> = new Map()
   private _nodes: N[] = []
   private _links: L[] = []
-  /** Mapping the original ID to the original node */
+  /** Mapping the original id to the original node */
   private idToNodeMap: Map<string, N> = new Map()
 
   /** We want to display more important nodes (i.e. with the biggest number of connections)
@@ -23,13 +23,13 @@ export class GraphData <N extends InputNode, L extends InputLink> {
   private sortedIndexToInputIndexMap: Map<number, number> = new Map()
   /** Mapping the original index to the sorted index of the node */
   private inputIndexToSortedIndexMap: Map<number, number> = new Map()
-  /** Mapping the original ID to the sorted index of the node */
+  /** Mapping the original id to the sorted index of the node */
   private idToSortedIndexMap: Map<string, number> = new Map()
-  /** Mapping the original index to the original ID of the node */
+  /** Mapping the original index to the original id of the node */
   private inputIndexToIdMap: Map<number, string> = new Map()
-  /** Mapping the original ID to the indegree value of the node */
+  /** Mapping the original id to the indegree value of the node */
   private idToIndegreeMap: Map<string, number> = new Map()
-  /** Mapping the original ID to the outdegree value of the node */
+  /** Mapping the original id to the outdegree value of the node */
   private idToOutdegreeMap: Map<string, number> = new Map()
 
   public get nodes (): N[] {
@@ -58,7 +58,7 @@ export class GraphData <N extends InputNode, L extends InputLink> {
       this.idToOutdegreeMap.set(n.id, 0)
     })
 
-    // Calculate node outdegree/indegree value
+    // Calculate node outdegree/indegree values
     // And filter links if source/target node does not exist
     this.completeLinks.clear()
     inputLinks.forEach(l => {

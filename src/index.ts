@@ -112,8 +112,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Changes Cosmos configuration in real time.
-   * @param config Object with Cosmos configurations.
+   * Set or update Cosmos configuration. The changes will be applied in real time.
+   * @param config Cosmos configuration object.
    */
   public setConfig (config: Partial<GraphConfigInterface<N, L>>): void {
     const prevConfig = { ...this.config }
@@ -136,10 +136,10 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Set data to Cosmos.
+   * Pass data to Cosmos.
    * @param nodes Array of nodes.
    * @param links Array of links.
-   * @param runSimulation Turns off the simulation.
+   * @param runSimulation When set to `false`, the simulation won't be started automatically (`true` by default).
    */
   public setData (nodes: N[], links: L[], runSimulation = true): void {
     if (!nodes.length && !links.length) {
@@ -156,8 +156,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Finds a Node by its ID.
-   * @param id ID of the Node.
+   * Find a node by its id.
+   * @param id Id of the node.
    * @returns Node or `undefined`.
    */
   public findNodeById (id: string): N | undefined {
@@ -165,8 +165,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Zoom in and center the camera on the Node by its ID.
-   * @param id ID of the Node.
+   * Center the view on a node and zoom in, by node id.
+   * @param id Id of the node.
    */
   public zoomToNodeById (id: string): void {
     const node = this.graph.getNodeById(id)
@@ -175,8 +175,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Zoom in and center the camera on the Node by its index.
-   * @param index The index of the Node in the array of Nodes.
+   * Center the view on a node and zoom in, by node index.
+   * @param index The index of the node in the array of nodes.
    */
   public zoomToNodeByIndex (index: number): void {
     const node = this.graph.getNodeByIndex(index)
@@ -185,9 +185,9 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Zoom in/out camera by level value.
-   * @param value The camera zoom in/out level value.
-   * @param duration The duration of the camera zoom in/out animation.
+   * Zoom the view in or out to the specified zoom level.
+   * @param value Zoom level
+   * @param duration Duration of the zoom in/out transition.
    */
   public setZoomLevel (value: number, duration = 0): void {
     select(this.canvas)
@@ -197,16 +197,16 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Get zoom in/out camera current level value.
-   * @returns The camera zoom in/out level value.
+   * Get zoom level.
+   * @returns Zoom level value of the view.
    */
   public getZoomLevel (): number {
     return this.zoomInstance.eventTransform.k
   }
 
   /**
-   * Get current X and Y position of Nodes.
-   * @returns The object where keys are id of Nodes and values are X and Y position of that Nodes.
+   * Get current X and Y coordinates of the nodes.
+   * @returns Object where keys are the ids of the nodes and values are corresponding `{ x: number; y: number }` objects.
    */
   public getNodePositions (): { [key: string]: { x: number; y: number } } {
     if (this.hasBeenRecentlyDestroyed) return {}
@@ -224,8 +224,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
     }, {})
   }
 
-  /** Selects Nodes inside a rectangular selection.
-   * @param selection - Is an array of two corner points `[[left, top], [bottom, right]]`.
+  /** Select nodes inside a rectangular area.
+   * @param selection - Array of two corner points `[[left, top], [bottom, right]]`.
    * The `left` and `right` coordinates have a range from 0 to the width of the canvas.
    * The `top` and `bottom` coordinates have a range from 0 to the height of the canvas. */
   public selectNodesInRange (selection: [[number, number], [number, number]] | null): void {
@@ -247,16 +247,16 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Select Node by its ID.
-   * @param id ID of the Node.
+   * Select node by id.
+   * @param id Id of the node.
    */
   public selectNodeById (id: string): void {
     this.selectNodesByIds([id])
   }
 
   /**
-   * Selects Nodes by its IDs.
-   * @param ids IDs of Nodes.
+   * Select multiples nodes by their ids.
+   * @param ids Array of nodes ids.
    */
   public selectNodesByIds (ids: (string | undefined)[]): void {
     const indices = ids.map(d => this.graph.getSortedIndexById(d))
@@ -270,8 +270,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Get Nodes that are currently selected.
-   * @returns Array of selected Nodes.
+   * Get nodes that are currently selected.
+   * @returns Array of selected nodes.
    */
   public getSelectedNodes (): N[] {
     const points = new Array(this.store.selectedIndices.length)
@@ -286,8 +286,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Starts the simulation.
-   * @param alpha The value from 0 to 1. If the value is set to 1, it reheats the simulation.
+   * Start the simulation.
+   * @param alpha Value from 0 to 1. The higher the value, the more initial energy the simulation will get.
    */
   public start (alpha = 1): void {
     if (!this.graph.nodes.length) return
@@ -300,7 +300,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Pauses the simulation.
+   * Pause the simulation.
    */
   public pause (): void {
     this.store.isSimulationRunning = false
@@ -308,7 +308,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Restarts the simulation.
+   * Restart the simulation.
    */
   public restart (): void {
     this.store.isSimulationRunning = true
@@ -316,7 +316,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Stops the simulation and animation of the Cosmos and then draws only one frame.
+   * Render only one frame of the simulation (stops the simulation if it was running).
    */
   public drawOneFrame (): void {
     this.store.isSimulationRunning = false
@@ -325,7 +325,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Destroys the Cosmos.
+   * Destroy this Cosmos instance.
    */
   public destroy (): void {
     this.stopFrames()
@@ -341,7 +341,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Creates the Cosmos.
+   * Create new Cosmos instance.
    */
   public create (): void {
     this.points.create()
