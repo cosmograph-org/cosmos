@@ -216,6 +216,43 @@ export class Graph<N extends InputNode, L extends InputLink> {
     }, {})
   }
 
+  /**
+   * Get current X and Y coordinates of the nodes.
+   * @returns Map where keys are the ids of the nodes and values are corresponding `[number, number]` with X and Y coordinates of the node.
+   */
+  public getNodePositionsMap (): Map<string, [number, number]> {
+    const positionMap = new Map()
+    if (this.hasBeenRecentlyDestroyed) return positionMap
+    const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
+    return this.graph.nodes.reduce<Map<string, [number, number]>>((acc, curr, i) => {
+      const posX = particlePositionPixels[i * 4 + 0]
+      const posY = particlePositionPixels[i * 4 + 1]
+      if (posX !== undefined && posY !== undefined) {
+        acc.set(curr.id, [posX, posY])
+      }
+      return acc
+    }, positionMap)
+  }
+
+  /**
+   * Get current X and Y coordinates of the nodes.
+   * @returns Array where values are `[number, number]` with X and Y coordinates of the node.
+   */
+  public getNodePositionsArray (): [number, number][] {
+    const positions: [number, number][] = []
+    if (this.hasBeenRecentlyDestroyed) return []
+    const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
+    positions.length = this.graph.nodes.length
+    for (let i = 0; i <= this.graph.nodes.length; i += 1) {
+      const posX = particlePositionPixels[i * 4 + 0]
+      const posY = particlePositionPixels[i * 4 + 1]
+      if (posX !== undefined && posY !== undefined) {
+        positions[i] = [posX, posY]
+      }
+    }
+    return positions
+  }
+
   /** Select nodes inside a rectangular area.
    * @param selection - Array of two corner points `[[left, top], [bottom, right]]`.
    * The `left` and `right` coordinates have a range from 0 to the width of the canvas.
