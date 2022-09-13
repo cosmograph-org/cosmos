@@ -34,7 +34,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   private forceCenter: ForceCenter<N, L>
   private forceManyBody: ForceManyBody<N, L> | ForceManyBodyQuadtree<N, L> | undefined
   private forceLinkIncoming: ForceLink<N, L>
-  private forceLinkOutcoming: ForceLink<N, L>
+  private forceLinkOutgoing: ForceLink<N, L>
   private forceMouse: ForceMouse<N, L>
   private zoomInstance = new Zoom(this.store)
   private fpsMonitor: FPSMonitor | undefined
@@ -84,7 +84,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
       ? new ForceManyBodyQuadtree(this.reglInstance, this.config, this.store, this.graph, this.points)
       : new ForceManyBody(this.reglInstance, this.config, this.store, this.graph, this.points)
     this.forceLinkIncoming = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
-    this.forceLinkOutcoming = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
+    this.forceLinkOutgoing = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
     this.forceMouse = new ForceMouse(this.reglInstance, this.config, this.store, this.graph, this.points)
 
     this.store.backgroundColor = getRgbaColor(this.config.backgroundColor)
@@ -101,14 +101,6 @@ export class Graph<N extends InputNode, L extends InputLink> {
    */
   public get isSimulationRunning (): boolean {
     return this.store.isSimulationRunning
-  }
-
-  public get nodes (): N[] {
-    return this.graph.nodes
-  }
-
-  public get links (): L[] {
-    return this.graph.links
   }
 
   /**
@@ -318,7 +310,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   /**
    * Render only one frame of the simulation (stops the simulation if it was running).
    */
-  public drawOneFrame (): void {
+  public step (): void {
     this.store.isSimulationRunning = false
     this.stopFrames()
     this.frame()
@@ -334,7 +326,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.lines.destroy()
     this.forceCenter.destroy()
     this.forceLinkIncoming.destroy()
-    this.forceLinkOutcoming.destroy()
+    this.forceLinkOutgoing.destroy()
     this.forceManyBody?.destroy()
     this.reglInstance.destroy()
     this.hasBeenRecentlyDestroyed = true
@@ -348,7 +340,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.lines.create()
     this.forceManyBody?.create()
     this.forceLinkIncoming.create(LinkDirection.INCOMING)
-    this.forceLinkOutcoming.create(LinkDirection.OUTCOMING)
+    this.forceLinkOutgoing.create(LinkDirection.OUTGOING)
     this.forceCenter.create()
     this.hasBeenRecentlyDestroyed = false
   }
@@ -363,7 +355,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     if (runSimulation) {
       this.start()
     } else {
-      this.drawOneFrame()
+      this.step()
     }
   }
 
@@ -372,7 +364,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.lines.initPrograms()
     this.forceGravity.initPrograms()
     this.forceLinkIncoming.initPrograms()
-    this.forceLinkOutcoming.initPrograms()
+    this.forceLinkOutgoing.initPrograms()
     this.forceMouse.initPrograms()
     this.forceManyBody?.initPrograms()
     this.forceCenter.initPrograms()
@@ -408,7 +400,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
 
         this.forceLinkIncoming.run()
         this.points.updatePosition()
-        this.forceLinkOutcoming.run()
+        this.forceLinkOutgoing.run()
         this.points.updatePosition()
 
         this.store.alpha += this.store.addAlpha(this.config.simulation.decay ?? defaultConfigValues.simulation.decay)

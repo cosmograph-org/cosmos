@@ -6,7 +6,7 @@ import updateVert from '@/graph/modules/Shared/quad.vert'
 import { InputNode, InputLink } from '@/graph/types'
 
 export enum LinkDirection {
-  OUTCOMING = 'outcoming',
+  OUTGOING = 'outgoing',
   INCOMING = 'incoming'
 }
 
