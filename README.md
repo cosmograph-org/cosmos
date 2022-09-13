@@ -108,6 +108,94 @@ It provides several simulation settings to adjust the layout. Each of them can b
 | simulation.onPause | Callback function that will be called when the simulation gets paused | | `undefined`
 | simulation.onRestart | Callback function that will be called when the simulation is restarted | | `undefined`
 
+### <a name="api_reference" href="#api_reference">#</a> API Reference
+
+<a name="set_config" href="#set_config">#</a> graph.<b>setConfig</b>(<i>config</i>)
+
+Sets or updates [Cosmos configuration](#cosmos_configuration). The changes will be applied in real time.
+The <i>config</i> is a Cosmos configuration object.
+
+<a name="set_data" href="#set_data">#</a> graph.<b>setData</b>(<i>nodes</i>, <i>links</i>, [<i>runSimulation</i>])
+
+Passes an array of <i>nodes</i> and an array of <i>links</i>  to Cosmos. When <i>runSimulation</i> set to `false`, the simulation won't be started automatically (`true` by default).
+
+<a name="find_node_by_id" href="#find_node_by_id">#</a> graph.<b>findNodeById</b>(<i>id</i>)
+
+Finds a node by its <i>id</i>.
+
+<a name="zoom_to_node_by_id" href="#zoom_to_node_by_id">#</a> graph.<b>zoomToNodeById</b>(<i>id</i>)
+
+Centers the view on a node and zoom in, by node <i>id</i>.
+
+<a name="zoom_to_node_by_index" href="#zoom_to_node_by_index">#</a> graph.<b>zoomToNodeByIndex</b>(<i>index</i>)
+
+Centers the view on a node and zoom in, by node <i>index</i> in the array of nodes.
+
+<a name="set_zoom_level" href="#set_zoom_level">#</a> graph.<b>setZoomLevel</b>(<i>value</i>, [<i>duration</i>])
+
+Zooms the view in or out to the specified zoom level <i>value</i> with the given animation <i>duration</i>. The default animation <i>duration</i> is 0.
+
+<a name="select_nodes_in_range" href="#select_nodes_in_range">#</a> graph.<b>selectNodesInRange</b>(<i>selection</i>)
+
+Selects nodes inside a rectangular <i>selection</i> area. <i>selection</i> is an array of two corner points `[[left, top], [bottom, right]]`. The `left` and `right` coordinates have a range from 0 to the width of the canvas. The `top` and `bottom` coordinates have a range from 0 to the height of the canvas.
+
+<a name="select_node_by_id" href="#select_node_by_id">#</a> graph.<b>selectNodeById</b>(<i>id</i>)
+
+Selects node by <i>id</i> of the node.
+
+<a name="select_node_by_ids" href="#select_node_by_ids">#</a> graph.<b>selectNodesByIds</b>(<i>ids</i>)
+
+Selects multiples nodes by array of nodes <i>ids</i>.
+
+
+<a name="start" href="#start">#</a> graph.<b>start</b>([<i>alpha</i>])
+
+Starts the simulation. The <i>alpha</i> value from 0 to 1 (1 by default). The higher the value, the more initial energy the simulation will get.
+
+<a name="pause" href="#pause">#</a> graph.<b>pause</b>()
+
+Pauses the simulation.
+
+<a name="restart" href="#restart">#</a> graph.<b>restart</b>()
+
+Restarts the simulation.
+
+<a name="step" href="#step">#</a> graph.<b>step</b>()
+
+Renders only one frame of the simulation (stops the simulation if it was running).
+
+<a name="destroy" href="#destroy">#</a> graph.<b>destroy</b>()
+
+Destroys this Cosmos instance.
+
+<a name="create" href="#create">#</a> graph.<b>create</b>()
+
+Creates new Cosmos instance.
+
+<a name="get_zoom_level" href="#get_zoom_level">#</a> graph.<b>getZoomLevel</b>()
+
+Returns zoom level value of the view.
+
+<a name="get_selected_nodes" href="#get_selected_nodes">#</a> graph.<b>getSelectedNodes</b>()
+
+Returns an array of nodes that are currently selected.
+
+<a name="get_node_positions" href="#get_node_positions">#</a> graph.<b>getNodePositions</b>()
+
+Returns object where keys are the ids of the nodes and values are corresponding `{ x: number; y: number }` objects.
+
+<a name="get_node_positions_map" href="#get_node_positions_map">#</a> graph.<b>getNodePositionsMap</b>()
+
+Returns map where keys are the ids of the nodes and values are corresponding `[number, number]` with X and Y coordinates of the node.
+
+<a name="get_node_positions_array" href="#get_node_positions_array">#</a> graph.<b>getNodePositionsArray</b>()
+
+Returns array where values are `[number, number]` with X and Y coordinates of the node.
+
+<a name="is_simulation_running" href="#is_simulation_running">#</a> graph.<b>isSimulationRunning</b>
+
+Returns a boolean value that gives information about the running simulation status.
+
 ### Known Issues
 Starting from version 15.4, iOS has stopped supporting the key WebGL extension powering our Many-Body force implementation (EXT_float_blend). We're trying to figure out why that happened and hope to find a way to solve the problem in the future.
 
