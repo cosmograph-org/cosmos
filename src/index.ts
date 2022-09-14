@@ -254,7 +254,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /** Select nodes inside a rectangular area.
-   * @param selection - Array of two corner points `[[left, top], [bottom, right]]`.
+   * @param selection - Array of two corner points `[[left, top], [right, bottom]]`.
    * The `left` and `right` coordinates have a range from 0 to the width of the canvas.
    * The `top` and `bottom` coordinates have a range from 0 to the height of the canvas. */
   public selectNodesInRange (selection: [[number, number], [number, number]] | null): void {

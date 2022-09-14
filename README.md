@@ -137,7 +137,7 @@ Zooms the view in or out to the specified zoom level <i>value</i> with the given
 
 <a name="select_nodes_in_range" href="#select_nodes_in_range">#</a> graph.<b>selectNodesInRange</b>(<i>selection</i>)
 
-Selects nodes inside a rectangular <i>selection</i> area. <i>selection</i> is an array of two corner points `[[left, top], [bottom, right]]`. The `left` and `right` coordinates have a range from 0 to the width of the canvas. The `top` and `bottom` coordinates have a range from 0 to the height of the canvas.
+Selects nodes inside a rectangular <i>selection</i> area. <i>selection</i> is an array of two corner points `[[left, top], [right, bottom]]`. The `left` and `right` coordinates have a range from 0 to the width of the canvas. The `top` and `bottom` coordinates have a range from 0 to the height of the canvas.
 
 <a name="select_node_by_id" href="#select_node_by_id">#</a> graph.<b>selectNodeById</b>(<i>id</i>)
 
