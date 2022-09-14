@@ -181,6 +181,16 @@ export class Graph<N extends InputNode, L extends InputLink> {
    * @param value Zoom level
    * @param duration Duration of the zoom in/out transition.
    */
+
+  public zoom (value: number, duration = 0): void {
+    this.setZoomLevel(value, duration)
+  }
+
+  /**
+   * Zoom the view in or out to the specified zoom level.
+   * @param value Zoom level
+   * @param duration Duration of the zoom in/out transition.
+   */
   public setZoomLevel (value: number, duration = 0): void {
     select(this.canvas)
       .transition()
