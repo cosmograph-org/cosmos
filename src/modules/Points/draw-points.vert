@@ -15,13 +15,20 @@ uniform float sizeScale;
 uniform float spaceSize;
 uniform vec2 screenSize;
 uniform float greyoutOpacity;
+uniform bool scalePointOnZoom;
 
 varying vec2 index;
 varying vec3 rgbColor;
 varying float alpha;
 
 float pointSize(float size) {
-  return size * ratio * min(5.0, max(1.0, transform[0][0] * 0.01));
+  float pSize;
+  if (scalePointOnZoom) { 
+    pSize = size * ratio * transform[0][0];
+  } else {
+    pSize = size * ratio * min(5.0, max(1.0, transform[0][0] * 0.01));
+  }
+  return pSize;
 }
 
 void main() {  

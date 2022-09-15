@@ -11,11 +11,19 @@ uniform float ratio;
 uniform mat3 transform;
 uniform vec2 selection[2];
 uniform bool isClick;
+uniform bool scalePointOnZoom;
+uniform float maxPointSize;
 
 varying vec2 index;
 
 float pointSize(float size) {
-  return size * ratio * min(5.0, max(1.0, transform[0][0] * 0.01));
+  float pSize;
+  if (scalePointOnZoom) { 
+    pSize = size * ratio * transform[0][0];
+  } else {
+    pSize = size * ratio * min(5.0, max(1.0, transform[0][0] * 0.01));
+  }
+  return min(pSize, maxPointSize);
 }
 
 void main() {

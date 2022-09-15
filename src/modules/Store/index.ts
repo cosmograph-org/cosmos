@@ -1,6 +1,7 @@
 import { mat3 } from 'gl-matrix'
 
 export const ALPHA_MIN = 0.001
+export const MAX_POINT_SIZE = 64
 
 export class Store {
   public pointsTextureSize = 0
@@ -14,6 +15,7 @@ export class Store {
   public isSimulationRunning = false
   public simulationProgress = 0
   public selectedIndices: Float32Array = new Float32Array()
+  public maxPointSize = MAX_POINT_SIZE
   private alphaTarget = 0
 
   public addAlpha (decay: number): number {

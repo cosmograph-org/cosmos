@@ -14,7 +14,7 @@ import { FPSMonitor } from '@/graph/modules/FPSMonitor'
 import { GraphData } from '@/graph/modules/GraphData'
 import { Lines } from '@/graph/modules/Lines'
 import { Points } from '@/graph/modules/Points'
-import { Store, ALPHA_MIN } from '@/graph/modules/Store'
+import { Store, ALPHA_MIN, MAX_POINT_SIZE } from '@/graph/modules/Store'
 import { Zoom } from '@/graph/modules/Zoom'
 import { InputNode, InputLink } from '@/graph/types'
 import { defaultConfigValues } from '@/graph/variables'
@@ -76,6 +76,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
       extensions: ['OES_texture_float', 'ANGLE_instanced_arrays'],
     })
 
+    this.store.maxPointSize = (this.reglInstance.limits.pointSizeDims[1] ?? MAX_POINT_SIZE) / this.config.pixelRatio
+
     this.points = new Points(this.reglInstance, this.config, this.store, this.graph)
     this.lines = new Lines(this.reglInstance, this.config, this.store, this.graph, this.points)
     this.forceGravity = new ForceGravity(this.reglInstance, this.config, this.store, this.graph, this.points)
@@ -104,6 +106,14 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
+   * The maximum point size.
+   * This value is a limitation of the maximum size of the `gl.POINTS` primitive that WebGL can render.
+   */
+  public get maxPointSize (): number {
+    return this.store.maxPointSize
+  }
+
+  /**
    * Set or update Cosmos configuration. The changes will be applied in real time.
    * @param config Cosmos configuration object.
    */
@@ -124,6 +134,9 @@ export class Graph<N extends InputNode, L extends InputLink> {
         this.fpsMonitor?.destroy()
         this.fpsMonitor = undefined
       }
+    }
+    if (prevConfig.pixelRatio !== this.config.pixelRatio) {
+      this.store.maxPointSize = (this.reglInstance.limits.pointSizeDims[1] ?? MAX_POINT_SIZE) / this.config.pixelRatio
     }
   }
 

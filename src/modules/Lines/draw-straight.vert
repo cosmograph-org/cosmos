@@ -15,6 +15,7 @@ uniform vec2 screenSize;
 uniform float ratio;
 uniform vec2 linkVisibilityDistanceRange;
 uniform float linkVisibilityMinTransparency;
+uniform bool scalePointOnZoom;
 
 varying vec4 rgbaColor;
 varying vec2 pos;
@@ -28,7 +29,13 @@ float map(float value, float min1, float max1, float min2, float max2) {
 }
 
 float pointSize(float size) {
-  return size * ratio * min(5.0, max(1.0, transform[0][0] * 0.01));
+  float pSize;
+  if (scalePointOnZoom) { 
+    pSize = size * ratio * transform[0][0];
+  } else {
+    pSize = size * ratio * min(5.0, max(1.0, transform[0][0] * 0.01));
+  }
+  return pSize;
 }
 
 void main() {

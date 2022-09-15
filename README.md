@@ -80,6 +80,8 @@ graph.setData(nodes, links)
 | events.onClick | Callback function that will be called on every canvas click. If clicked on a node, its data will be passed as a first argument and index as a second: <code>(node: Node<N> &vert; undefined, index: number &vert; undefined) => void</code> | `undefined`
 | showFPSMonitor | Show WebGL performance monitor | `false`
 | pixelRatio | Canvas pixel ratio | `2`
+| scalePointOnZoom | Linear scaling of the point size when zooming in or out | `true`
+
 
 
 
@@ -195,6 +197,11 @@ Returns array where values are `[number, number]` with X and Y coordinates of th
 <a name="is_simulation_running" href="#is_simulation_running">#</a> graph.<b>isSimulationRunning</b>
 
 Returns a boolean value that gives information about the running simulation status.
+
+<a name="max_point_size" href="#max_point_size">#</a> graph.<b>maxPointSize</b>
+
+Returns the maximum point size. This value is a limitation of the maximum size of the `gl.POINTS` primitive that WebGL can render.
+
 
 ### Known Issues
 Starting from version 15.4, iOS has stopped supporting the key WebGL extension powering our Many-Body force implementation (EXT_float_blend). We're trying to figure out why that happened and hope to find a way to solve the problem in the future.

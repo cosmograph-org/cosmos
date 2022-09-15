@@ -91,6 +91,7 @@ export class Lines<N extends InputNode, L extends InputLink> extends CoreModule<
         ratio: () => config.pixelRatio,
         linkVisibilityDistanceRange: () => config.linkVisibilityDistanceRange,
         linkVisibilityMinTransparency: () => config.linkVisibilityMinTransparency,
+        scalePointOnZoom: () => config.scalePointOnZoom,
       },
       cull: {
         enable: true,
