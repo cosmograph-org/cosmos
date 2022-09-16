@@ -69,6 +69,7 @@ graph.setData(nodes, links)
 | nodeSizeScale | Scale factor for the node size | `1`
 | renderLinks | Turns link rendering on / off | `true`
 | linkColor | Link color accessor function or hex value | `#666666`
+| linkGreyoutOpacity | Greyed out link opacity value when the selection is active | `0.1`
 | linkWidth | Link width accessor function or value in pixels | `1`
 | linkWidthScale | Scale factor for the link width | `1`
 | linkArrows | Turns link arrow rendering on / off | `true`

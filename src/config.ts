@@ -4,6 +4,7 @@ import {
   defaultGreyoutNodeOpacity,
   defaultNodeSize,
   defaultLinkColor,
+  defaultGreyoutLinkOpacity,
   defaultLinkWidth,
   defaultBackgroundColor,
   defaultConfigValues,
@@ -153,6 +154,11 @@ export interface GraphConfigInterface<N extends InputNode, L extends InputLink> 
    */
   linkColor?: ColorAccessor<L>;
   /**
+   * Greyed out link opacity value when the selection is active.
+   * Default value: `0.1`
+  */
+  linkGreyoutOpacity?: number;
+  /**
    * Link width accessor function or value in pixels.
    * Default value: `1`
   */
@@ -227,6 +233,7 @@ export class GraphConfig<N extends InputNode, L extends InputLink> implements Gr
   public nodeSize = defaultNodeSize
   public nodeSizeScale = defaultConfigValues.nodeSizeScale
   public linkColor = defaultLinkColor
+  public linkGreyoutOpacity = defaultGreyoutLinkOpacity
   public linkWidth = defaultLinkWidth
   public linkWidthScale = defaultConfigValues.linkWidthScale
   public renderLinks = defaultConfigValues.renderLinks

@@ -80,6 +80,7 @@ export class Lines<N extends InputNode, L extends InputLink> extends CoreModule<
       uniforms: {
         positions: () => points?.currentPositionFbo,
         particleSize: () => points?.sizeFbo,
+        particleGreyoutStatus: () => points?.greyoutStatusFbo,
         transform: () => store.transform,
         pointsTextureSize: () => store.pointsTextureSize,
         nodeSizeScale: () => config.nodeSizeScale,
@@ -91,6 +92,7 @@ export class Lines<N extends InputNode, L extends InputLink> extends CoreModule<
         ratio: () => config.pixelRatio,
         linkVisibilityDistanceRange: () => config.linkVisibilityDistanceRange,
         linkVisibilityMinTransparency: () => config.linkVisibilityMinTransparency,
+        greyoutOpacity: () => config.linkGreyoutOpacity,
         scaleNodesOnZoom: () => config.scaleNodesOnZoom,
       },
       cull: {

@@ -4,6 +4,7 @@ attribute vec4 color;
 attribute float width;
 uniform sampler2D positions;
 uniform sampler2D particleSize;
+uniform sampler2D particleGreyoutStatus;
 uniform mat3 transform;
 uniform float pointsTextureSize;
 uniform float widthScale;
@@ -15,6 +16,7 @@ uniform vec2 screenSize;
 uniform float ratio;
 uniform vec2 linkVisibilityDistanceRange;
 uniform float linkVisibilityMinTransparency;
+uniform float greyoutOpacity;
 uniform bool scaleNodesOnZoom;
 
 varying vec4 rgbaColor;
@@ -40,11 +42,17 @@ float pointSize(float size) {
 
 void main() {
   pos = position;
+
+  vec2 pointTexturePosA = (pointA + 0.5) / pointsTextureSize;
+  vec2 pointTexturePosB = (pointB + 0.5) / pointsTextureSize;
+  // Greyed out status of points
+  vec4 greyoutStatusA = texture2D(particleGreyoutStatus, pointTexturePosA);
+  vec4 greyoutStatusB = texture2D(particleGreyoutStatus, pointTexturePosB);
   // Target particle size
-  targetPointSize = pointSize(texture2D(particleSize, (pointB + 0.5) / pointsTextureSize).r * nodeSizeScale);
+  targetPointSize = pointSize(texture2D(particleSize, pointTexturePosB).r * nodeSizeScale);
   // Position
-  vec4 pointPositionA = texture2D(positions, (pointA + 0.5) / pointsTextureSize);
-  vec4 pointPositionB = texture2D(positions, (pointB + 0.5) / pointsTextureSize);
+  vec4 pointPositionA = texture2D(positions, pointTexturePosA);
+  vec4 pointPositionB = texture2D(positions, pointTexturePosB);
   vec2 a = pointPositionA.xy;
   vec2 b = pointPositionB.xy;
   vec2 xBasis = b - a;
@@ -79,6 +87,10 @@ void main() {
   // Color
   vec3 rgbColor = color.rgb;
   float opacity = color.a * max(linkVisibilityMinTransparency, map(linkDistPx, linkVisibilityDistanceRange.g, linkVisibilityDistanceRange.r, 0.0, 1.0));
+
+  if (greyoutStatusA.r > 0.0 || greyoutStatusB.r > 0.0) {
+    opacity *= greyoutOpacity;
+  }
 
   rgbaColor = vec4(rgbColor, opacity);
 
