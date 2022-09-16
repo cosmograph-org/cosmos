@@ -508,8 +508,6 @@ export class Graph<N extends InputNode, L extends InputLink> {
         else return -1
       })
       .filter(d => d !== -1)
-    this.store.selectedIndices = new Float32Array()
-    this.points.updateGreyoutStatus()
     const clickedIndex = this.graph.getInputIndexBySortedIndex(pixelsInSelectedArea[pixelsInSelectedArea.length - 1] as number)
     const clickedParticle = (pixelsInSelectedArea.length && clickedIndex !== undefined) ? this.graph.nodes[clickedIndex] : undefined
     this.config.events.onClick?.(clickedParticle, clickedIndex)
