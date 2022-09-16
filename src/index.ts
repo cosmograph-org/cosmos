@@ -36,7 +36,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   private forceLinkIncoming: ForceLink<N, L>
   private forceLinkOutgoing: ForceLink<N, L>
   private forceMouse: ForceMouse<N, L>
-  private zoomInstance = new Zoom(this.store)
+  private zoomInstance = new Zoom(this.store, this.config)
   private fpsMonitor: FPSMonitor | undefined
   private hasBeenRecentlyDestroyed = false
 
@@ -266,7 +266,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     if (this.hasBeenRecentlyDestroyed) return []
     const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
     positions.length = this.graph.nodes.length
-    for (let i = 0; i <= this.graph.nodes.length; i += 1) {
+    for (let i = 0; i < this.graph.nodes.length; i += 1) {
       const posX = particlePositionPixels[i * 4 + 0]
       const posY = particlePositionPixels[i * 4 + 1]
       if (posX !== undefined && posY !== undefined) {
@@ -274,6 +274,21 @@ export class Graph<N extends InputNode, L extends InputLink> {
       }
     }
     return positions
+  }
+
+  /**
+   * Center and zoom in/out the view to fit all nodes in the scene.
+   * @param duration Duration of the center and zoom in/out animation in milliseconds (`500` by default).
+   */
+  public fitView (duration = 500): void {
+    const { transform, scale } = this.zoomInstance.getTransform(this.getNodePositionsArray())
+    select(this.canvas)
+      .transition()
+      .duration(duration / 2)
+      .call(this.zoomInstance.behavior.transform, transform)
+      .transition()
+      .duration(duration / 2)
+      .call(this.zoomInstance.behavior.scaleTo, scale)
   }
 
   /** Select nodes inside a rectangular area.

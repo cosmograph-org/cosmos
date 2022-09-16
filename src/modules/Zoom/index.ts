@@ -1,15 +1,18 @@
-import { zoom, D3ZoomEvent, ZoomBehavior, zoomIdentity } from 'd3-zoom'
+import { zoom, ZoomTransform, zoomIdentity } from 'd3-zoom'
 import { mat3 } from 'gl-matrix'
 import { Store } from '@/graph/modules/Store'
+import { GraphConfigInterface } from '@/graph/config'
+import { InputNode, InputLink } from '@/graph/types'
 
-export class Zoom <Datum> {
+export class Zoom <N extends InputNode, L extends InputLink> {
   public readonly store: Store
+  public readonly config: GraphConfigInterface<N, L>
   public eventTransform = zoomIdentity
-  public behavior: ZoomBehavior<HTMLCanvasElement, Datum> = zoom<HTMLCanvasElement, Datum>()
+  public behavior = zoom<HTMLCanvasElement, unknown>()
     .on('start', () => {
       this.isRunning = true
     })
-    .on('zoom', (event: D3ZoomEvent<HTMLCanvasElement, Datum>) => {
+    .on('zoom', (event) => {
       this.eventTransform = event.transform
       const { eventTransform: { x, y, k }, store: { transform, screenSize } } = this
       const w = screenSize[0]
@@ -27,7 +30,33 @@ export class Zoom <Datum> {
 
   public isRunning = false
 
-  public constructor (store: Store) {
+  public constructor (store: Store, config: GraphConfigInterface<N, L>) {
     this.store = store
+    this.config = config
+  }
+
+  public getTransform (positions: [number, number][]): { transform: ZoomTransform; scale: number } {
+    const { store: { screenSize, maxPointSize }, config: { spaceSize } } = this
+    const w = screenSize[0]
+    const h = screenSize[1]
+    const xArray = positions.map(d => d[0])
+    const yArray = positions.map(d => d[1])
+    const xExtent = [Math.min(...xArray), Math.max(...xArray)] as [number, number]
+    const yExtent = [Math.min(...yArray), Math.max(...yArray)] as [number, number]
+
+    const xScale = w / (xExtent[1] - xExtent[0] + maxPointSize)
+    const yScale = h / (yExtent[1] - yExtent[0] + maxPointSize)
+
+    const clampedScale = Math.min(xScale, yScale)
+
+    const xCenter = ((xExtent[1] + xExtent[0]) / 2)
+    const yCenter = ((yExtent[1] + yExtent[0]) / 2)
+    const translateX = (spaceSize as number) / 2 - xCenter
+    const translateY = yCenter - (spaceSize as number) / 2
+    const transform = zoomIdentity
+      .translate(translateX, translateY)
+      .scale(1)
+
+    return { transform, scale: clampedScale }
   }
 }

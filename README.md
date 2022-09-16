@@ -135,9 +135,13 @@ Center the view on a node and zoom in; by node <i>index</i>.
 
 Zoom the view in or out to the specified zoom level <i>value</i> with given animation <i>duration</i>. The default <i>duration</i> is 0.
 
+<a name="fit_view" href="#fit_view">#</a> graph.<b>fitView</b>(<i>duration</i>)
+
+Center and zoom in/out the view to fit all nodes in the scene with given animation <i>duration</i>. The default <i>duration</i> is 500 ms.
+
 <a name="select_nodes_in_range" href="#select_nodes_in_range">#</a> graph.<b>selectNodesInRange</b>(<i>selection</i>)
 
-Select nodes inside a rectangular area defined by two corner points `[[left, top], [right, bottom
+Select nodes inside a rectangular area defined by two corner points `[[left, top], [right, bottom]]`.
 The `left` and `right` values should be from 0 to the width of the canvas in pixels.
 
 The `top` and `bottom` values should be from 0 to the height of the canvas in pixels.
