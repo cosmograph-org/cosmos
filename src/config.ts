@@ -213,10 +213,10 @@ export interface GraphConfigInterface<N extends InputNode, L extends InputLink> 
    */
   pixelRatio?: number;
   /**
-   * Linear scaling of the point size when zooming in or out.
+   * Increase or decrease the size of the nodes when zooming in or out.
    * Default value: true
    */
-  scalePointOnZoom?: boolean;
+  scaleNodesOnZoom?: boolean;
 }
 
 export class GraphConfig<N extends InputNode, L extends InputLink> implements GraphConfigInterface<N, L> {
@@ -263,7 +263,7 @@ export class GraphConfig<N extends InputNode, L extends InputLink> implements Gr
 
   public pixelRatio = defaultConfigValues.pixelRatio
 
-  public scalePointOnZoom = defaultConfigValues.scalePointOnZoom
+  public scaleNodesOnZoom = defaultConfigValues.scaleNodesOnZoom
 
   public init (config: GraphConfigInterface<N, L>): GraphConfigInterface<N, L> {
     const currentConfig = this.getConfig()

@@ -11,14 +11,14 @@ uniform float ratio;
 uniform mat3 transform;
 uniform vec2 selection[2];
 uniform bool isClick;
-uniform bool scalePointOnZoom;
+uniform bool scaleNodesOnZoom;
 uniform float maxPointSize;
 
 varying vec2 index;
 
 float pointSize(float size) {
   float pSize;
-  if (scalePointOnZoom) { 
+  if (scaleNodesOnZoom) { 
     pSize = size * ratio * transform[0][0];
   } else {
     pSize = size * ratio * min(5.0, max(1.0, transform[0][0] * 0.01));

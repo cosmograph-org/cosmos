@@ -120,7 +120,7 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
         spaceSize: () => config.spaceSize,
         screenSize: () => store.screenSize,
         greyoutOpacity: () => config.nodeGreyoutOpacity,
-        scalePointOnZoom: () => config.scalePointOnZoom,
+        scaleNodesOnZoom: () => config.scaleNodesOnZoom,
       },
       blend: {
         enable: true,
@@ -158,7 +158,7 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
         'selection[0]': () => store.selectedArea[0],
         'selection[1]': () => store.selectedArea[1],
         isClick: (_, props: { isClick: boolean }) => props.isClick,
-        scalePointOnZoom: () => config.scalePointOnZoom,
+        scaleNodesOnZoom: () => config.scaleNodesOnZoom,
         maxPointSize: () => store.maxPointSize,
       },
     })

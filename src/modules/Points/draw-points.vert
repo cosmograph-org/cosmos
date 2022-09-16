@@ -15,7 +15,7 @@ uniform float sizeScale;
 uniform float spaceSize;
 uniform vec2 screenSize;
 uniform float greyoutOpacity;
-uniform bool scalePointOnZoom;
+uniform bool scaleNodesOnZoom;
 
 varying vec2 index;
 varying vec3 rgbColor;
@@ -23,7 +23,7 @@ varying float alpha;
 
 float pointSize(float size) {
   float pSize;
-  if (scalePointOnZoom) { 
+  if (scaleNodesOnZoom) { 
     pSize = size * ratio * transform[0][0];
   } else {
     pSize = size * ratio * min(5.0, max(1.0, transform[0][0] * 0.01));

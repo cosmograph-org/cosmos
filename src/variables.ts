@@ -30,5 +30,5 @@ export const defaultConfigValues = {
   },
   showFPSMonitor: false,
   pixelRatio: 2,
-  scalePointOnZoom: true,
+  scaleNodesOnZoom: true,
 }

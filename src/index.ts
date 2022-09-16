@@ -107,7 +107,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
 
   /**
    * The maximum point size.
-   * This value is a limitation of the maximum size of the `gl.POINTS` primitive that WebGL can render.
+   * This value is the maximum size of the `gl.POINTS` primitive that WebGL can render on the user's hardware.
    */
   public get maxPointSize (): number {
     return this.store.maxPointSize
@@ -259,7 +259,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
 
   /**
    * Get current X and Y coordinates of the nodes.
-   * @returns Array where values are `[number, number]` with X and Y coordinates of the node.
+   * @returns Array of `[x: number, y: number]` arrays.
    */
   public getNodePositionsArray (): [number, number][] {
     const positions: [number, number][] = []
@@ -278,8 +278,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
 
   /** Select nodes inside a rectangular area.
    * @param selection - Array of two corner points `[[left, top], [right, bottom]]`.
-   * The `left` and `right` coordinates have a range from 0 to the width of the canvas.
-   * The `top` and `bottom` coordinates have a range from 0 to the height of the canvas. */
+   * The `left` and `right` coordinates should be from 0 to the width of the canvas.
+   * The `top` and `bottom` coordinates should be from 0 to the height of the canvas. */
   public selectNodesInRange (selection: [[number, number], [number, number]] | null): void {
     if (selection) {
       const h = this.store.screenSize[1]
@@ -299,7 +299,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Select node by id.
+   * Select a node by id.
    * @param id Id of the node.
    */
   public selectNodeById (id: string): void {
