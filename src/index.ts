@@ -283,7 +283,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
    * Center and zoom in/out the view to fit all nodes in the scene.
    * @param duration Duration of the center and zoom in/out animation in milliseconds (`500` by default).
    */
-  public fitView (duration = 500): void {
+  public fitView (duration = 250): void {
     const transform = this.zoomInstance.getTransform(this.getNodePositionsArray())
     select(this.canvas)
       .transition()
@@ -570,7 +570,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     const posX = positionPixels[nodeIndex * 4 + 0]
     const posY = positionPixels[nodeIndex * 4 + 1]
     if (posX === undefined || posY === undefined) return
-    const transform = this.zoomInstance.getTransform([[posX, posY]], 8)
+    const transform = this.zoomInstance.getTransform([[posX, posY]], 3)
     select(this.canvas)
       .transition()
       .ease(easeQuadIn)
