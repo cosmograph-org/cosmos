@@ -123,13 +123,13 @@ Pass data to Cosmos: an array of <i>nodes</i> and an array of <i>links</i>. When
 
 Find a node by its <i>id</i>.
 
-<a name="zoom_to_node_by_id" href="#zoom_to_node_by_id">#</a> graph.<b>zoomToNodeById</b>(<i>id</i>)
+<a name="zoom_to_node_by_id" href="#zoom_to_node_by_id">#</a> graph.<b>zoomToNodeById</b>(<i>id</i>, [<i>duration</i>])
 
-Center the view on a node and zoom in; by node <i>id</i>.
+Center the view on a node and zoom in; by node <i>id</i> with given animation <i>duration</i>. The default <i>duration</i> is 700.
 
-<a name="zoom_to_node_by_index" href="#zoom_to_node_by_index">#</a> graph.<b>zoomToNodeByIndex</b>(<i>index</i>)
+<a name="zoom_to_node_by_index" href="#zoom_to_node_by_index">#</a> graph.<b>zoomToNodeByIndex</b>(<i>index</i>, [<i>duration</i>])
 
-Center the view on a node and zoom in; by node <i>index</i>.
+Center the view on a node and zoom in; by node <i>index</i> with given animation <i>duration</i>. The default <i>duration</i> is 700.
 
 <a name="set_zoom_level" href="#set_zoom_level">#</a> graph.<b>setZoomLevel</b>(<i>value</i>, [<i>duration</i>])
 

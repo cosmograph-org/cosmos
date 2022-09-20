@@ -1,6 +1,7 @@
 import { select } from 'd3-selection'
 import 'd3-transition'
 import { zoomIdentity } from 'd3-zoom'
+import { easeQuadIn, easeQuadOut, easeQuadInOut } from 'd3-ease'
 import regl from 'regl'
 import { GraphConfig, GraphConfigInterface } from '@/graph/config'
 import { getRgbaColor, readPixels } from '@/graph/helper'
@@ -45,7 +46,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
 
     const w = canvas.clientWidth
     const h = canvas.clientHeight
-    this.store.screenSize = [w, h]
+    this.store.updateScreenSize(w, h, this.config.spaceSize)
 
     canvas.width = w * this.config.pixelRatio
     canvas.height = h * this.config.pixelRatio
@@ -172,21 +173,23 @@ export class Graph<N extends InputNode, L extends InputLink> {
   /**
    * Center the view on a node and zoom in, by node id.
    * @param id Id of the node.
+   * @param duration Duration of the animation transition in milliseconds (`700` by default).
    */
-  public zoomToNodeById (id: string): void {
+  public zoomToNodeById (id: string, duration = 700): void {
     const node = this.graph.getNodeById(id)
     if (!node) return
-    this.zoomToNode(node)
+    this.zoomToNode(node, duration)
   }
 
   /**
    * Center the view on a node and zoom in, by node index.
    * @param index The index of the node in the array of nodes.
+   * @param duration Duration of the animation transition in milliseconds (`700` by default).
    */
-  public zoomToNodeByIndex (index: number): void {
+  public zoomToNodeByIndex (index: number, duration = 700): void {
     const node = this.graph.getNodeByIndex(index)
     if (!node) return
-    this.zoomToNode(node)
+    this.zoomToNode(node, duration)
   }
 
   /**
@@ -281,14 +284,12 @@ export class Graph<N extends InputNode, L extends InputLink> {
    * @param duration Duration of the center and zoom in/out animation in milliseconds (`500` by default).
    */
   public fitView (duration = 500): void {
-    const { transform, scale } = this.zoomInstance.getTransform(this.getNodePositionsArray())
+    const transform = this.zoomInstance.getTransform(this.getNodePositionsArray())
     select(this.canvas)
       .transition()
-      .duration(duration / 2)
+      .ease(easeQuadInOut)
+      .duration(duration)
       .call(this.zoomInstance.behavior.transform, transform)
-      .transition()
-      .duration(duration / 2)
-      .call(this.zoomInstance.behavior.scaleTo, scale)
   }
 
   /** Select nodes inside a rectangular area.
@@ -552,7 +553,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     const h = this.canvas.clientHeight
 
     if (prevWidth !== w * this.config.pixelRatio || prevHeight !== h * this.config.pixelRatio) {
-      this.store.screenSize = [w, h]
+      this.store.updateScreenSize(w, h, this.config.spaceSize)
       this.canvas.width = w * this.config.pixelRatio
       this.canvas.height = h * this.config.pixelRatio
       this.reglInstance.poll()
@@ -561,7 +562,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     }
   }
 
-  private zoomToNode (node: N): void {
+  private zoomToNode (node: N, duration: number): void {
     const { graph } = this
     const positionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
     const nodeIndex = graph.getSortedIndexById(node.id)
@@ -569,20 +570,19 @@ export class Graph<N extends InputNode, L extends InputLink> {
     const posX = positionPixels[nodeIndex * 4 + 0]
     const posY = positionPixels[nodeIndex * 4 + 1]
     if (posX === undefined || posY === undefined) return
-    const scale = 8
-    const translateX = posX - this.config.spaceSize / 2
-    const translateY = posY - this.config.spaceSize / 2
+    const transform = this.zoomInstance.getTransform([[posX, posY]], 8)
     select(this.canvas)
       .transition()
-      .duration(250)
+      .ease(easeQuadIn)
+      .duration(duration / 2)
       .call(this.zoomInstance.behavior.transform, zoomIdentity
         .translate(0, 0)
         .scale(1)
-        .translate(-translateX, translateY)
       )
       .transition()
-      .duration(500)
-      .call(this.zoomInstance.behavior.scaleTo, scale)
+      .ease(easeQuadOut)
+      .duration(duration / 2)
+      .call(this.zoomInstance.behavior.transform, transform)
   }
 }
 
