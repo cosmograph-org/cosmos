@@ -61,4 +61,32 @@ export class Zoom <N extends InputNode, L extends InputLink> {
 
     return transform
   }
+
+  public getDistanceToPoint (position: [number, number]): number {
+    const { x, y, k } = this.eventTransform
+    const point = this.getTransform([position], k)
+    const dx = x - point.x
+    const dy = y - point.y
+    return Math.sqrt(dx * dx + dy * dy)
+  }
+
+  public getMiddlePointTransform (position: [number, number]): ZoomTransform {
+    const { store: { screenSize }, eventTransform: { x, y, k } } = this
+    const width = screenSize[0]
+    const height = screenSize[1]
+    const currX = (width / 2 - x) / k
+    const currY = (height / 2 - y) / k
+    const pointX = this.store.scaleX(position[0])
+    const pointY = this.store.scaleY(position[1])
+    const centerX = (currX + pointX) / 2
+    const centerY = (currY + pointY) / 2
+
+    const scale = 1
+    const translateX = width / 2 - centerX * scale
+    const translateY = height / 2 - centerY * scale
+
+    return zoomIdentity
+      .translate(translateX, translateY)
+      .scale(scale)
+  }
 }

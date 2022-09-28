@@ -1,6 +1,5 @@
 import { select } from 'd3-selection'
 import 'd3-transition'
-import { zoomIdentity } from 'd3-zoom'
 import { easeQuadIn, easeQuadOut, easeQuadInOut } from 'd3-ease'
 import regl from 'regl'
 import { GraphConfig, GraphConfigInterface } from '@/graph/config'
@@ -574,26 +573,33 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   private zoomToNode (node: N, duration: number): void {
-    const { graph } = this
+    const { graph, store: { screenSize } } = this
     const positionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
     const nodeIndex = graph.getSortedIndexById(node.id)
     if (nodeIndex === undefined) return
     const posX = positionPixels[nodeIndex * 4 + 0]
     const posY = positionPixels[nodeIndex * 4 + 1]
     if (posX === undefined || posY === undefined) return
+    const distance = this.zoomInstance.getDistanceToPoint([posX, posY])
     const transform = this.zoomInstance.getTransform([[posX, posY]], 3)
-    select(this.canvas)
-      .transition()
-      .ease(easeQuadIn)
-      .duration(duration / 2)
-      .call(this.zoomInstance.behavior.transform, zoomIdentity
-        .translate(0, 0)
-        .scale(1)
-      )
-      .transition()
-      .ease(easeQuadOut)
-      .duration(duration / 2)
-      .call(this.zoomInstance.behavior.transform, transform)
+    if (distance < Math.min(screenSize[0], screenSize[1])) {
+      select(this.canvas)
+        .transition()
+        .ease(easeQuadInOut)
+        .duration(duration)
+        .call(this.zoomInstance.behavior.transform, transform)
+    } else {
+      const middle = this.zoomInstance.getMiddlePointTransform([posX, posY])
+      select(this.canvas)
+        .transition()
+        .ease(easeQuadIn)
+        .duration(duration / 2)
+        .call(this.zoomInstance.behavior.transform, middle)
+        .transition()
+        .ease(easeQuadOut)
+        .duration(duration / 2)
+        .call(this.zoomInstance.behavior.transform, transform)
+    }
   }
 }
 
