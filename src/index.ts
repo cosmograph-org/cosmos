@@ -322,14 +322,29 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
+   * Select a node by index.
+   * @param index The index of the node in the array of nodes.
+   */
+  public selectNodeByIndex (index: number): void {
+    this.selectNodesByIndices([index])
+  }
+
+  /**
    * Select multiples nodes by their ids.
    * @param ids Array of nodes ids.
    */
   public selectNodesByIds (ids: (string | undefined)[]): void {
-    const indices = ids.map(d => this.graph.getSortedIndexById(d))
-      .filter(d => d !== undefined) as number[]
+    this.selectNodesByIndices(ids.map(d => this.graph.getSortedIndexById(d)))
+  }
+
+  /**
+   * Select multiples nodes by their indices.
+   * @param indices Array of nodes indices.
+   */
+  public selectNodesByIndices (indices: (number | undefined)[]): void {
+    const filteredIndices = indices.filter(d => d !== undefined) as number[]
     if (indices.length !== 0) {
-      this.store.selectedIndices = new Float32Array(indices)
+      this.store.selectedIndices = new Float32Array(filteredIndices)
     } else {
       this.store.selectedIndices = new Float32Array()
     }

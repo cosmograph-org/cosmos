@@ -150,9 +150,17 @@ The `top` and `bottom` values should be from 0 to the height of the canvas in pi
 
 Select a node by <i>id</i>.
 
+<a name="select_node_by_index" href="#select_node_by_index">#</a> graph.<b>selectNodeByIndex</b>(<i>index</i>)
+
+Select a node by <i>index</i>.
+
 <a name="select_node_by_ids" href="#select_node_by_ids">#</a> graph.<b>selectNodesByIds</b>(<i>ids</i>)
 
 Select multiple nodes by an array of their <i>ids</i>.
+
+<a name="select_node_by_indices" href="#select_node_by_indices">#</a> graph.<b>selectNodesByIndices</b>(<i>indices</i>)
+
+Select multiple nodes by an array of their <i>indices</i>.
 
 <a name="unselect_nodes" href="#unselect_nodes">#</a> graph.<b>unselectNodes</b>()
 
