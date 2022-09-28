@@ -152,7 +152,11 @@ Select a node by <i>id</i>.
 
 <a name="select_node_by_ids" href="#select_node_by_ids">#</a> graph.<b>selectNodesByIds</b>(<i>ids</i>)
 
-Select multiple nodes by an array of their  <i>ids</i>.
+Select multiple nodes by an array of their <i>ids</i>.
+
+<a name="unselect_nodes" href="#unselect_nodes">#</a> graph.<b>unselectNodes</b>()
+
+Unselect all nodes.
 
 <a name="get_selected_nodes" href="#get_selected_nodes">#</a> graph.<b>getSelectedNodes</b>()
 
@@ -185,7 +189,7 @@ Get current zoom level of the view.
 
 <a name="get_node_positions" href="#get_node_positions">#</a> graph.<b>getNodePositions</b>()
 
-Get an object with node coordinates, where keys are the _ids_ of the nodes and values are their X and Y coordinates in the  `{ x: number; y: number }` format.
+Get an object with node coordinates, where keys are the _ids_ of the nodes and values are their X and Y coordinates in the `{ x: number; y: number }` format.
 
 <a name="get_node_positions_map" href="#get_node_positions_map">#</a> graph.<b>getNodePositionsMap</b>()
 

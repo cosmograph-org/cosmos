@@ -338,6 +338,14 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
+   * Unselect all nodes.
+   */
+  public unselectNodes (): void {
+    this.store.selectedIndices = new Float32Array()
+    this.points.updateGreyoutStatus()
+  }
+
+  /**
    * Get nodes that are currently selected.
    * @returns Array of selected nodes.
    */
