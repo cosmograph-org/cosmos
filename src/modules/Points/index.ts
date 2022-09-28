@@ -157,7 +157,6 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
         ratio: () => config.pixelRatio,
         'selection[0]': () => store.selectedArea[0],
         'selection[1]': () => store.selectedArea[1],
-        isClick: (_, props: { isClick: boolean }) => props.isClick,
         scaleNodesOnZoom: () => config.scaleNodesOnZoom,
         maxPointSize: () => store.maxPointSize,
       },
@@ -188,8 +187,8 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
     this.swapFbo()
   }
 
-  public findPoint (isClick: boolean): void {
-    this.findPointCommand?.({ isClick })
+  public findPoint (): void {
+    this.findPointCommand?.()
   }
 
   public destroy (): void {

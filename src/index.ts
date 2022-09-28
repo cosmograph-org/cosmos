@@ -300,7 +300,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     if (selection) {
       const h = this.store.screenSize[1]
       this.store.selectedArea = [[selection[0][0], (h - selection[1][1])], [selection[1][0], (h - selection[0][1])]]
-      this.points.findPoint(false)
+      this.points.findPoint()
       const pixels = readPixels(this.reglInstance, this.points.selectedFbo as regl.Framebuffer2D)
       this.store.selectedIndices = pixels
         .map((pixel, i) => {
@@ -524,17 +524,20 @@ export class Graph<N extends InputNode, L extends InputLink> {
   private onClick (event: MouseEvent): void {
     const h = this.store.screenSize[1]
     this.store.selectedArea = [[event.offsetX, (h - event.offsetY)], [event.offsetX, (h - event.offsetY)]]
-    this.points.findPoint(true)
+    this.points.findPoint()
     const pixels = readPixels(this.reglInstance, this.points.selectedFbo as regl.Framebuffer2D)
+    let position: [number, number] | undefined
     const pixelsInSelectedArea = pixels
       .map((pixel, i) => {
-        if (i % 4 === 0 && pixel !== 0) return i / 4
-        else return -1
+        if (i % 4 === 0 && pixel !== 0) {
+          position = [pixels[i + 2] as number, this.config.spaceSize - (pixels[i + 3] as number)]
+          return i / 4
+        } else return -1
       })
       .filter(d => d !== -1)
     const clickedIndex = this.graph.getInputIndexBySortedIndex(pixelsInSelectedArea[pixelsInSelectedArea.length - 1] as number)
     const clickedParticle = (pixelsInSelectedArea.length && clickedIndex !== undefined) ? this.graph.nodes[clickedIndex] : undefined
-    this.config.events.onClick?.(clickedParticle, clickedIndex)
+    this.config.events.onClick?.(clickedParticle, clickedIndex, position, event)
   }
 
   private onMouseMove (event: MouseEvent): void {

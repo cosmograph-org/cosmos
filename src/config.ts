@@ -18,10 +18,13 @@ export type ColorAccessor<Datum> = ((d: Datum, i?: number, ...rest: unknown[]) =
 export interface Events <N extends InputNode> {
   /**
    * Callback function that will be called on every canvas click.
-   * If clicked on a node, its data will be passed as an argument: `(node: N &vert; undefined) => void`.
+   * If clicked on a node, its data will be passed as a first argument,
+   * an index as a second argument, a position of the node as a third argument
+   * and also mouse event as a forth argument:
+   * `(node: Node | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void`.
    * Default value: `undefined`
    */
-  onClick?: (clickedNode: N | undefined, index: number | undefined) => void;
+  onClick?: (clickedNode: N | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void;
 }
 
 export interface GraphSimulationSetting {

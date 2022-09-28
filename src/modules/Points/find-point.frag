@@ -10,7 +10,6 @@ uniform vec2 screenSize;
 uniform float ratio;
 uniform mat3 transform;
 uniform vec2 selection[2];
-uniform bool isClick;
 uniform bool scaleNodesOnZoom;
 uniform float maxPointSize;
 
@@ -40,11 +39,9 @@ void main() {
   float top =  2.0 * (selection[0].y - 0.5 * pointSize(size)) / screenSize.y - 1.0;
   float bottom =  2.0 * (selection[1].y + 0.5 * pointSize(size)) / screenSize.y - 1.0;
 
-
+  gl_FragColor = vec4(0.0, 0.0, pointPosition.rg);
   if (final.x >= left && final.x <= right && final.y >= top && final.y <= bottom) {
-    gl_FragColor = vec4(1.0, isClick ? 1.0 : 0.0, 1.0, 1.0);
-  } else {
-    gl_FragColor = vec4(0.0);
+    gl_FragColor.r = 1.0;
   }
 }
 
