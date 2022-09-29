@@ -119,10 +119,6 @@ Set [Cosmos configuration](#cosmos_configuration). The changes will be applied i
 
 Pass data to Cosmos: an array of <i>nodes</i> and an array of <i>links</i>. When <i>runSimulation</i> is set to `false`, the simulation won't be started automatically (`true` by default).
 
-<a name="find_node_by_id" href="#find_node_by_id">#</a> graph.<b>findNodeById</b>(<i>id</i>)
-
-Find a node by its <i>id</i>.
-
 <a name="zoom_to_node_by_id" href="#zoom_to_node_by_id">#</a> graph.<b>zoomToNodeById</b>(<i>id</i>, [<i>duration</i>])
 
 Center the view on a node and zoom in; by node <i>id</i> with given animation <i>duration</i>. The default <i>duration</i> is 700.

@@ -161,15 +161,6 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Find a node by its id.
-   * @param id Id of the node.
-   * @returns Node or `undefined`.
-   */
-  public findNodeById (id: string): N | undefined {
-    return this.graph.getNodeById(id)
-  }
-
-  /**
    * Center the view on a node and zoom in, by node id.
    * @param id Id of the node.
    * @param duration Duration of the animation transition in milliseconds (`700` by default).
