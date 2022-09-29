@@ -19,8 +19,8 @@ export interface Events <N extends InputNode> {
   /**
    * Callback function that will be called on every canvas click.
    * If clicked on a node, its data will be passed as a first argument,
-   * an index as a second argument, a position of the node as a third argument
-   * and also mouse event as a forth argument:
+   * index as a second argument, position as a third argument
+   * and the corresponding mouse event as a forth argument:
    * `(node: Node | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void`.
    * Default value: `undefined`
    */
