@@ -326,7 +326,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
    * @param index The index of the node in the array of nodes.
    */
   public selectNodeByIndex (index: number): void {
-    this.selectNodesByIndices([index])
+    this.selectNodesByIndices([this.graph.getSortedIndexByInputIndex(index)])
   }
 
   /**
