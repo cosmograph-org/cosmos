@@ -7,7 +7,7 @@
   "license": "CC-BY-NC-4.0",
   "repository": "git://github.com/cosmograph-org/cosmos.git",
   "scripts": {
-    "build": "rollup -c",
+    "build": "rm -rf dist; rollup -c",
     "watch": "rollup -c -w",
     "lint": "eslint --cache ./src --ext .ts --ignore-path .gitignore",
     "lint:staged": "npx lint-staged"
