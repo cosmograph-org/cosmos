@@ -7,7 +7,7 @@
   "license": "CC-BY-NC-4.0",
   "repository": "git://github.com/cosmograph-org/cosmos.git",
   "scripts": {
-    "build": "rollup -c",
+    "build": "rm -rf dist; rollup -c",
     "watch": "rollup -c -w",
     "lint": "eslint --cache ./src --ext .ts --ignore-path .gitignore",
     "lint:staged": "npx lint-staged"
@@ -29,7 +29,10 @@
     "@rollup/plugin-alias": "^3.1.9",
     "@rollup/plugin-commonjs": "^22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
+    "@types/d3-array": "^3.0.3",
     "@types/d3-color": "^3.1.0",
+    "@types/d3-ease": "^3.0.0",
+    "@types/d3-scale": "^4.0.2",
     "@types/d3-selection": "^3.0.2",
     "@types/d3-transition": "^3.0.1",
     "@types/d3-zoom": "^3.0.1",
@@ -51,7 +54,10 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
+    "d3-array": "^3.2.0",
     "d3-color": "^3.1.0",
+    "d3-ease": "^3.0.1",
+    "d3-scale": "^4.0.2",
     "d3-selection": "^3.0.0",
     "d3-transition": "^3.0.1",
     "d3-zoom": "^3.0.0",

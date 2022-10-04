@@ -64,10 +64,12 @@ graph.setData(nodes, links)
 | backgroundColor | Canvas background color | `#222222`
 | spaceSize | Simulation space size (max 8192) | `4096`
 | nodeColor | Node color accessor function or hex value | `#b3b3b3`
+| nodeGreyoutOpacity | Greyed out node opacity value when the selection is active | `0.1`
 | nodeSize | Node size accessor function or value in pixels | `4`
 | nodeSizeScale | Scale factor for the node size | `1`
 | renderLinks | Turns link rendering on / off | `true`
 | linkColor | Link color accessor function or hex value | `#666666`
+| linkGreyoutOpacity | Greyed out link opacity value when the selection is active | `0.1`
 | linkWidth | Link width accessor function or value in pixels | `1`
 | linkWidthScale | Scale factor for the link width | `1`
 | linkArrows | Turns link arrow rendering on / off | `true`
@@ -76,10 +78,10 @@ graph.setData(nodes, links)
 | linkVisibilityMinTransparency | The transparency value that the link will have when its length reaches the maximum link distance value from `linkVisibilityDistanceRange`. | `0.25`
 | useQuadtree | Use the classic [quadtree algorithm](https://en.wikipedia.org/wiki/Barnes%E2%80%93Hut_simulation) for the Many-Body force. This property will be applied only on component initialization and it can't be changed using the `setConfig` method. <br /><br /> ⚠ The algorithm might not work on some GPUs (e.g. Nvidia) and on Windows (unless you disable ANGLE in the browser settings). | `false`
 | simulation | Simulation parameters and event listeners | See [Simulation configuration](#simulation_configuration) table for more details
-| events.onClick | Callback function that will be called on every canvas click. If clicked on a node, its data will be passed as an argument: <code>(node: Node<N> &vert; undefined) => void</code> | `undefined`
+| events.onClick | Callback function that will be called on every canvas click. If clicked on a node, its data will be passed as a first argument, index as a second argument, position as a third argument and the corresponding mouse event as a forth argument: <code>(node: Node &vert; undefined, index: number &vert; undefined, nodePosition: [number, number] &vert; undefined, event: MouseEvent) => void</code> | `undefined`
 | showFPSMonitor | Show WebGL performance monitor | `false`
 | pixelRatio | Canvas pixel ratio | `2`
-
+| scaleNodesOnZoom | Scale the nodes when zooming in or out | `true`
 
 
 ### <a name="simulation_configuration" href="#simulation_configuration">#</a> Simulation configuration
@@ -106,6 +108,109 @@ It provides several simulation settings to adjust the layout. Each of them can b
 | simulation.onEnd | Callback function that will be called when the simulation stops | | `undefined`
 | simulation.onPause | Callback function that will be called when the simulation gets paused | | `undefined`
 | simulation.onRestart | Callback function that will be called when the simulation is restarted | | `undefined`
+
+### <a name="api_reference" href="#api_reference">#</a> API Reference
+
+<a name="set_config" href="#set_config">#</a> graph.<b>setConfig</b>(<i>config</i>)
+
+Set [Cosmos configuration](#cosmos_configuration). The changes will be applied in real time.
+
+<a name="set_data" href="#set_data">#</a> graph.<b>setData</b>(<i>nodes</i>, <i>links</i>, [<i>runSimulation</i>])
+
+Pass data to Cosmos: an array of <i>nodes</i> and an array of <i>links</i>. When <i>runSimulation</i> is set to `false`, the simulation won't be started automatically (`true` by default).
+
+<a name="zoom_to_node_by_id" href="#zoom_to_node_by_id">#</a> graph.<b>zoomToNodeById</b>(<i>id</i>, [<i>duration</i>])
+
+Center the view on a node and zoom in; by node <i>id</i> with given animation <i>duration</i>. The default <i>duration</i> is 700.
+
+<a name="zoom_to_node_by_index" href="#zoom_to_node_by_index">#</a> graph.<b>zoomToNodeByIndex</b>(<i>index</i>, [<i>duration</i>])
+
+Center the view on a node and zoom in; by node <i>index</i> with given animation <i>duration</i>. The default <i>duration</i> is 700.
+
+<a name="set_zoom_level" href="#set_zoom_level">#</a> graph.<b>setZoomLevel</b>(<i>value</i>, [<i>duration</i>])
+
+Zoom the view in or out to the specified zoom level <i>value</i> with given animation <i>duration</i>. The default <i>duration</i> is 0.
+
+<a name="fit_view" href="#fit_view">#</a> graph.<b>fitView</b>(<i>duration</i>)
+
+Center and zoom in/out the view to fit all nodes in the scene with given animation <i>duration</i>. The default <i>duration</i> is 500 ms.
+
+<a name="select_nodes_in_range" href="#select_nodes_in_range">#</a> graph.<b>selectNodesInRange</b>(<i>selection</i>)
+
+Select nodes inside a rectangular area defined by two corner points `[[left, top], [right, bottom]]`.
+The `left` and `right` values should be from 0 to the width of the canvas in pixels.
+
+The `top` and `bottom` values should be from 0 to the height of the canvas in pixels.
+
+<a name="select_node_by_id" href="#select_node_by_id">#</a> graph.<b>selectNodeById</b>(<i>id</i>)
+
+Select a node by <i>id</i>.
+
+<a name="select_node_by_index" href="#select_node_by_index">#</a> graph.<b>selectNodeByIndex</b>(<i>index</i>)
+
+Select a node by <i>index</i>.
+
+<a name="select_node_by_ids" href="#select_node_by_ids">#</a> graph.<b>selectNodesByIds</b>(<i>ids</i>)
+
+Select multiple nodes by an array of their <i>ids</i>.
+
+<a name="select_node_by_indices" href="#select_node_by_indices">#</a> graph.<b>selectNodesByIndices</b>(<i>indices</i>)
+
+Select multiple nodes by an array of their <i>indices</i>.
+
+<a name="unselect_nodes" href="#unselect_nodes">#</a> graph.<b>unselectNodes</b>()
+
+Unselect all nodes.
+
+<a name="get_selected_nodes" href="#get_selected_nodes">#</a> graph.<b>getSelectedNodes</b>()
+
+Get an array of currently selected nodes.
+
+<a name="start" href="#start">#</a> graph.<b>start</b>([<i>alpha</i>])
+
+Start the simulation. The <i>alpha</i> value can be from 0 to 1 (1 by default). The higher the value, the more initial energy the simulation will get.
+
+<a name="pause" href="#pause">#</a> graph.<b>pause</b>()
+
+Pause the simulation.
+
+<a name="restart" href="#restart">#</a> graph.<b>restart</b>()
+
+Restart the simulation.
+
+<a name="step" href="#step">#</a> graph.<b>step</b>()
+
+Render only one frame of the simulation. The simulation will be paused if it was active.
+
+<a name="destroy" href="#destroy">#</a> graph.<b>destroy</b>()
+
+Destroy this Cosmos instance.
+
+
+<a name="get_zoom_level" href="#get_zoom_level">#</a> graph.<b>getZoomLevel</b>()
+
+Get current zoom level of the view.
+
+<a name="get_node_positions" href="#get_node_positions">#</a> graph.<b>getNodePositions</b>()
+
+Get an object with node coordinates, where keys are the _ids_ of the nodes and values are their X and Y coordinates in the `{ x: number; y: number }` format.
+
+<a name="get_node_positions_map" href="#get_node_positions_map">#</a> graph.<b>getNodePositionsMap</b>()
+
+Get a `Map` object with node coordinates, where keys are the _ids_ of the nodes and the values are their X and Y coordinates in the `[number, number]` format.
+
+<a name="get_node_positions_array" href="#get_node_positions_array">#</a> graph.<b>getNodePositionsArray</b>()
+
+Get an array of `[number, number]` arrays corresponding to the X and Y coordinates of the nodes.
+
+<a name="is_simulation_running" href="#is_simulation_running">#</a> graph.<b>isSimulationRunning</b>
+
+A boolean value showing whether the simulation is active or not.
+
+<a name="max_point_size" href="#max_point_size">#</a> graph.<b>maxPointSize</b>
+
+The maximum point size the user's hardware can render. This value is a limitation of the `gl.POINTS` primitive of WebGL and differs from GPU to GPU.
+
 
 ### Known Issues
 Starting from version 15.4, iOS has stopped supporting the key WebGL extension powering our Many-Body force implementation (EXT_float_blend). We're trying to figure out why that happened and hope to find a way to solve the problem in the future.

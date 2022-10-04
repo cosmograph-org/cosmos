@@ -4,7 +4,7 @@ import { CoreModule } from '@/graph/modules/core-module'
 import drawStraightFrag from '@/graph/modules/Lines/draw-straight.frag'
 import drawStraightVert from '@/graph/modules/Lines/draw-straight.vert'
 import { defaultLinkColor, defaultLinkWidth } from '@/graph/variables'
-import { Link, InputNode, InputLink } from '@/graph/types'
+import { InputNode, InputLink } from '@/graph/types'
 
 export class Lines<N extends InputNode, L extends InputLink> extends CoreModule<N, L> {
   private drawStraightCommand: regl.DrawCommand | undefined
@@ -33,12 +33,14 @@ export class Lines<N extends InputNode, L extends InputLink> extends CoreModule<
     }
 
     const instancePoints: number[][] = []
-    data.links.forEach(l => {
-      const fromX = l.from % pointsTextureSize
-      const fromY = Math.floor(l.from / pointsTextureSize)
+    data.completeLinks.forEach(l => {
+      const toIndex = data.getSortedIndexById(l.target) as number
+      const fromIndex = data.getSortedIndexById(l.source) as number
+      const fromX = fromIndex % pointsTextureSize
+      const fromY = Math.floor(fromIndex / pointsTextureSize)
 
-      const toX = l.to % pointsTextureSize
-      const toY = Math.floor(l.to / pointsTextureSize)
+      const toX = toIndex % pointsTextureSize
+      const toY = Math.floor(toIndex / pointsTextureSize)
       instancePoints.push([fromX, fromY])
       instancePoints.push([toX, toY])
     })
@@ -78,6 +80,7 @@ export class Lines<N extends InputNode, L extends InputLink> extends CoreModule<
       uniforms: {
         positions: () => points?.currentPositionFbo,
         particleSize: () => points?.sizeFbo,
+        particleGreyoutStatus: () => points?.greyoutStatusFbo,
         transform: () => store.transform,
         pointsTextureSize: () => store.pointsTextureSize,
         nodeSizeScale: () => config.nodeSizeScale,
@@ -89,6 +92,8 @@ export class Lines<N extends InputNode, L extends InputLink> extends CoreModule<
         ratio: () => config.pixelRatio,
         linkVisibilityDistanceRange: () => config.linkVisibilityDistanceRange,
         linkVisibilityMinTransparency: () => config.linkVisibilityMinTransparency,
+        greyoutOpacity: () => config.linkGreyoutOpacity,
+        scaleNodesOnZoom: () => config.scaleNodesOnZoom,
       },
       cull: {
         enable: true,
@@ -112,7 +117,7 @@ export class Lines<N extends InputNode, L extends InputLink> extends CoreModule<
         mask: false,
       },
       count: 6, // segmentInstanceGeometry length
-      instances: () => data.links.length,
+      instances: () => data.linksNumber,
     })
   }
 
@@ -122,10 +127,10 @@ export class Lines<N extends InputNode, L extends InputLink> extends CoreModule<
   }
 
   public updateColor (): void {
-    const { reglInstance, config, data: { links } } = this
+    const { reglInstance, config, data } = this
     const instancePoints: number[][] = []
-    links.forEach(l => {
-      const c = getValue<Link<N, L>, string | [number, number, number, number]>(l, config.linkColor) ?? defaultLinkColor
+    data.completeLinks.forEach(l => {
+      const c = getValue<L, string | [number, number, number, number]>(l, config.linkColor) ?? defaultLinkColor
       const rgba = getRgbaColor(c)
       instancePoints.push(rgba)
     })
@@ -133,10 +138,10 @@ export class Lines<N extends InputNode, L extends InputLink> extends CoreModule<
   }
 
   public updateWidth (): void {
-    const { reglInstance, config, data: { links } } = this
+    const { reglInstance, config, data } = this
     const instancePoints: number[][] = []
-    links.forEach(l => {
-      const linkWidth = getValue<Link<N, L>, number>(l, config.linkWidth)
+    data.completeLinks.forEach(l => {
+      const linkWidth = getValue<L, number>(l, config.linkWidth)
       instancePoints.push([linkWidth ?? defaultLinkWidth])
     })
     this.widthBuffer = reglInstance.buffer(instancePoints)

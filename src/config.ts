@@ -1,8 +1,10 @@
-import { Node, Link, InputNode, InputLink } from '@/graph/types'
+import { InputNode, InputLink } from '@/graph/types'
 import {
   defaultNodeColor,
+  defaultGreyoutNodeOpacity,
   defaultNodeSize,
   defaultLinkColor,
+  defaultGreyoutLinkOpacity,
   defaultLinkWidth,
   defaultBackgroundColor,
   defaultConfigValues,
@@ -16,10 +18,13 @@ export type ColorAccessor<Datum> = ((d: Datum, i?: number, ...rest: unknown[]) =
 export interface Events <N extends InputNode> {
   /**
    * Callback function that will be called on every canvas click.
-   * If clicked on a node, its data will be passed as an argument: `(node: Node<N> &vert; undefined) => void`.
+   * If clicked on a node, its data will be passed as a first argument,
+   * index as a second argument, position as a third argument
+   * and the corresponding mouse event as a forth argument:
+   * `(node: Node | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void`.
    * Default value: `undefined`
    */
-  onClick?: (clickedNode: Node<N> | undefined) => void;
+  onClick?: (clickedNode: N | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void;
 }
 
 export interface GraphSimulationSetting {
@@ -52,7 +57,7 @@ export interface GraphSimulationSetting {
   /**
    * Barnes–Hut approximation depth.
    * Can only be used when `useQuadtree` is set `true`.
-   * Default value: 12
+   * Default value: `12`
    */
   repulsionQuadtreeLevels?: number;
   /**
@@ -126,6 +131,11 @@ export interface GraphConfigInterface<N extends InputNode, L extends InputLink> 
   */
   nodeColor?: ColorAccessor<N>;
   /**
+   * Greyed out node opacity value when the selection is active.
+   * Default value: `0.1`
+  */
+  nodeGreyoutOpacity?: number;
+  /**
    * Node size accessor function or value in pixels.
    * Default value: `4`
   */
@@ -146,6 +156,11 @@ export interface GraphConfigInterface<N extends InputNode, L extends InputLink> 
    * Default value: '#666666'
    */
   linkColor?: ColorAccessor<L>;
+  /**
+   * Greyed out link opacity value when the selection is active.
+   * Default value: `0.1`
+  */
+  linkGreyoutOpacity?: number;
   /**
    * Link width accessor function or value in pixels.
    * Default value: `1`
@@ -206,15 +221,22 @@ export interface GraphConfigInterface<N extends InputNode, L extends InputLink> 
    * Default value: `2`
    */
   pixelRatio?: number;
+  /**
+   * Increase or decrease the size of the nodes when zooming in or out.
+   * Default value: true
+   */
+  scaleNodesOnZoom?: boolean;
 }
 
-export class GraphConfig<N extends InputNode, L extends InputLink> implements GraphConfigInterface<Node<N>, Link<N, L>> {
+export class GraphConfig<N extends InputNode, L extends InputLink> implements GraphConfigInterface<N, L> {
   public backgroundColor = defaultBackgroundColor
   public spaceSize = defaultConfigValues.spaceSize
   public nodeColor = defaultNodeColor
+  public nodeGreyoutOpacity = defaultGreyoutNodeOpacity
   public nodeSize = defaultNodeSize
   public nodeSizeScale = defaultConfigValues.nodeSizeScale
   public linkColor = defaultLinkColor
+  public linkGreyoutOpacity = defaultGreyoutLinkOpacity
   public linkWidth = defaultLinkWidth
   public linkWidthScale = defaultConfigValues.linkWidthScale
   public renderLinks = defaultConfigValues.renderLinks
@@ -250,6 +272,8 @@ export class GraphConfig<N extends InputNode, L extends InputLink> implements Gr
   public showFPSMonitor = defaultConfigValues.showFPSMonitor
 
   public pixelRatio = defaultConfigValues.pixelRatio
+
+  public scaleNodesOnZoom = defaultConfigValues.scaleNodesOnZoom
 
   public init (config: GraphConfigInterface<N, L>): GraphConfigInterface<N, L> {
     const currentConfig = this.getConfig()

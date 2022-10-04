@@ -1,5 +1,4 @@
 import regl from 'regl'
-import { group } from '@/graph/helper'
 import { CoreModule } from '@/graph/modules/core-module'
 import { forceFrag } from '@/graph/modules/ForceLink/force-spring'
 import { createQuadBuffer } from '@/graph/modules/Shared/buffer'
@@ -7,7 +6,7 @@ import updateVert from '@/graph/modules/Shared/quad.vert'
 import { InputNode, InputLink } from '@/graph/types'
 
 export enum LinkDirection {
-  OUTCOMING = 'outcoming',
+  OUTGOING = 'outgoing',
   INCOMING = 'incoming'
 }
 
@@ -22,27 +21,27 @@ export class ForceLink<N extends InputNode, L extends InputLink> extends CoreMod
   private runCommand: regl.DrawCommand | undefined
 
   public create (direction: LinkDirection): void {
-    const { reglInstance, store: { pointsTextureSize, linksTextureSize }, data: { links } } = this
+    const { reglInstance, store: { pointsTextureSize, linksTextureSize }, data } = this
     this.linkFirstIndicesAndAmount = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
     this.indices = new Float32Array(linksTextureSize * linksTextureSize * 4)
     const linkBiasAndStrengthState = new Float32Array(linksTextureSize * linksTextureSize * 4)
     const linkDistanceState = new Float32Array(linksTextureSize * linksTextureSize * 4)
 
-    const linksByDirection = group(links, d => direction === LinkDirection.INCOMING ? d.to : d.from)
+    const grouped = direction === LinkDirection.INCOMING ? data.groupedSourceToTargetLinks : data.groupedTargetToSourceLinks
     this.maxPointDegree = 0
     let linkIndex = 0
-    linksByDirection.forEach((oneDirectionLinks, nodeId) => {
-      this.linkFirstIndicesAndAmount[nodeId * 4 + 0] = linkIndex % linksTextureSize
-      this.linkFirstIndicesAndAmount[nodeId * 4 + 1] = Math.floor(linkIndex / linksTextureSize)
-      this.linkFirstIndicesAndAmount[nodeId * 4 + 2] = oneDirectionLinks.length
+    grouped.forEach((connectedNodeIndices, nodeIndex) => {
+      this.linkFirstIndicesAndAmount[nodeIndex * 4 + 0] = linkIndex % linksTextureSize
+      this.linkFirstIndicesAndAmount[nodeIndex * 4 + 1] = Math.floor(linkIndex / linksTextureSize)
+      this.linkFirstIndicesAndAmount[nodeIndex * 4 + 2] = connectedNodeIndices.size
 
-      oneDirectionLinks.forEach((link) => {
-        const connectedNodeId = direction === LinkDirection.OUTCOMING ? link.to : link.from
-        this.indices[linkIndex * 4 + 0] = connectedNodeId % pointsTextureSize
-        this.indices[linkIndex * 4 + 1] = Math.floor(connectedNodeId / pointsTextureSize)
-        let bias = (link.source.degree ?? 0) / ((link.source.degree ?? 0) + (link.target.degree ?? 0))
-        if (direction === LinkDirection.OUTCOMING) bias = 1 - bias
-        let strength = 1 / Math.min((link.source.degree ?? 0), (link.target.degree ?? 0))
+      connectedNodeIndices.forEach((connectedNodeIndex) => {
+        this.indices[linkIndex * 4 + 0] = connectedNodeIndex % pointsTextureSize
+        this.indices[linkIndex * 4 + 1] = Math.floor(connectedNodeIndex / pointsTextureSize)
+        const degree = data.degree[data.getInputIndexBySortedIndex(connectedNodeIndex) as number] ?? 0
+        const connectedDegree = data.degree[data.getInputIndexBySortedIndex(nodeIndex) as number] ?? 0
+        const bias = degree / (degree + connectedDegree)
+        let strength = 1 / Math.min(degree, connectedDegree)
         strength = Math.sqrt(strength)
         linkBiasAndStrengthState[linkIndex * 4 + 0] = bias
         linkBiasAndStrengthState[linkIndex * 4 + 1] = strength
@@ -51,7 +50,7 @@ export class ForceLink<N extends InputNode, L extends InputLink> extends CoreMod
         linkIndex += 1
       })
 
-      this.maxPointDegree = Math.max(this.maxPointDegree, oneDirectionLinks.length)
+      this.maxPointDegree = Math.max(this.maxPointDegree, connectedNodeIndices.size)
     })
 
     this.linkFirstIndicesAndAmountFbo = reglInstance.framebuffer({

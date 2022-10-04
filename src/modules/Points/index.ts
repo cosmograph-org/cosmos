@@ -1,6 +1,6 @@
 import regl from 'regl'
 import { CoreModule } from '@/graph/modules/core-module'
-import { createColorBuffer } from '@/graph/modules/Points/color-buffer'
+import { createColorBuffer, createGreyoutStatusBuffer } from '@/graph/modules/Points/color-buffer'
 import drawPointsFrag from '@/graph/modules/Points/draw-points.frag'
 import drawPointsVert from '@/graph/modules/Points/draw-points.vert'
 import findPointFrag from '@/graph/modules/Points/find-point.frag'
@@ -17,21 +17,25 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
   public velocityFbo: regl.Framebuffer2D | undefined
   public selectedFbo: regl.Framebuffer2D | undefined
   public colorFbo: regl.Framebuffer2D | undefined
+  public greyoutStatusFbo: regl.Framebuffer2D | undefined
   public sizeFbo: regl.Framebuffer2D | undefined
   private drawCommand: regl.DrawCommand | undefined
   private updatePositionCommand: regl.DrawCommand | undefined
   private findPointCommand: regl.DrawCommand | undefined
 
   public create (): void {
-    const { reglInstance, config, store, data: { nodes } } = this
+    const { reglInstance, config, store, data } = this
     const { spaceSize } = config
     const { pointsTextureSize } = store
-    const numParticles = nodes.length
+    const numParticles = data.nodes.length
     const initialState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
     for (let i = 0; i < numParticles; ++i) {
-      const node = nodes[i]
-      initialState[i * 4 + 0] = node?.x ?? (spaceSize ?? defaultConfigValues.spaceSize) * (Math.random() * (0.505 - 0.495) + 0.495)
-      initialState[i * 4 + 1] = node?.y ?? (spaceSize ?? defaultConfigValues.spaceSize) * (Math.random() * (0.505 - 0.495) + 0.495)
+      const sortedIndex = this.data.getSortedIndexByInputIndex(i)
+      const node = data.nodes[i]
+      if (node && sortedIndex !== undefined) {
+        initialState[sortedIndex * 4 + 0] = node.x ?? (spaceSize ?? defaultConfigValues.spaceSize) * (Math.random() * (0.505 - 0.495) + 0.495)
+        initialState[sortedIndex * 4 + 1] = node.y ?? (spaceSize ?? defaultConfigValues.spaceSize) * (Math.random() * (0.505 - 0.495) + 0.495)
+      }
     }
 
     // Create position buffer
@@ -79,6 +83,7 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
 
     this.updateSize()
     this.updateColor()
+    this.updateGreyoutStatus()
   }
 
   public initPrograms (): void {
@@ -106,6 +111,7 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
       uniforms: {
         positions: () => this.currentPositionFbo,
         particleColor: () => this.colorFbo,
+        particleGreyoutStatus: () => this.greyoutStatusFbo,
         particleSize: () => this.sizeFbo,
         ratio: () => config.pixelRatio,
         sizeScale: () => config.nodeSizeScale,
@@ -113,6 +119,8 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
         transform: () => store.transform,
         spaceSize: () => config.spaceSize,
         screenSize: () => store.screenSize,
+        greyoutOpacity: () => config.nodeGreyoutOpacity,
+        scaleNodesOnZoom: () => config.scaleNodesOnZoom,
       },
       blend: {
         enable: true,
@@ -149,19 +157,25 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
         ratio: () => config.pixelRatio,
         'selection[0]': () => store.selectedArea[0],
         'selection[1]': () => store.selectedArea[1],
-        isClick: (_, props: { isClick: boolean }) => props.isClick,
+        scaleNodesOnZoom: () => config.scaleNodesOnZoom,
+        maxPointSize: () => store.maxPointSize,
       },
     })
   }
 
   public updateColor (): void {
-    const { reglInstance, config, store, data: { nodes } } = this
-    this.colorFbo = createColorBuffer(nodes, reglInstance, store.pointsTextureSize, config.nodeColor)
+    const { reglInstance, config, store, data } = this
+    this.colorFbo = createColorBuffer(data, reglInstance, store.pointsTextureSize, config.nodeColor)
+  }
+
+  public updateGreyoutStatus (): void {
+    const { reglInstance, store } = this
+    this.greyoutStatusFbo = createGreyoutStatusBuffer(store.selectedIndices, reglInstance, store.pointsTextureSize)
   }
 
   public updateSize (): void {
-    const { reglInstance, config, store, data: { nodes } } = this
-    this.sizeFbo = createSizeBuffer(nodes, reglInstance, store.pointsTextureSize, config.nodeSize)
+    const { reglInstance, config, store, data } = this
+    this.sizeFbo = createSizeBuffer(data, reglInstance, store.pointsTextureSize, config.nodeSize)
   }
 
   public draw (): void {
@@ -173,8 +187,8 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
     this.swapFbo()
   }
 
-  public findPoint (isClick: boolean): void {
-    this.findPointCommand?.({ isClick })
+  public findPoint (): void {
+    this.findPointCommand?.()
   }
 
   public destroy (): void {
@@ -184,6 +198,7 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
     this.selectedFbo?.destroy()
     this.colorFbo?.destroy()
     this.sizeFbo?.destroy()
+    this.greyoutStatusFbo?.destroy()
   }
 
   private swapFbo (): void {

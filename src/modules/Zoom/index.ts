@@ -1,15 +1,20 @@
-import { zoom, D3ZoomEvent, ZoomBehavior, zoomIdentity } from 'd3-zoom'
+import { zoom, ZoomTransform, zoomIdentity } from 'd3-zoom'
+import { extent } from 'd3-array'
 import { mat3 } from 'gl-matrix'
 import { Store } from '@/graph/modules/Store'
+import { GraphConfigInterface } from '@/graph/config'
+import { InputNode, InputLink } from '@/graph/types'
+import { clamp } from '@/graph/helper'
 
-export class Zoom <Datum> {
+export class Zoom <N extends InputNode, L extends InputLink> {
   public readonly store: Store
+  public readonly config: GraphConfigInterface<N, L>
   public eventTransform = zoomIdentity
-  public behavior: ZoomBehavior<HTMLCanvasElement, Datum> = zoom<HTMLCanvasElement, Datum>()
+  public behavior = zoom<HTMLCanvasElement, unknown>()
     .on('start', () => {
       this.isRunning = true
     })
-    .on('zoom', (event: D3ZoomEvent<HTMLCanvasElement, Datum>) => {
+    .on('zoom', (event) => {
       this.eventTransform = event.transform
       const { eventTransform: { x, y, k }, store: { transform, screenSize } } = this
       const w = screenSize[0]
@@ -27,7 +32,61 @@ export class Zoom <Datum> {
 
   public isRunning = false
 
-  public constructor (store: Store) {
+  public constructor (store: Store, config: GraphConfigInterface<N, L>) {
     this.store = store
+    this.config = config
+  }
+
+  public getTransform (positions: [number, number][], scale?: number): ZoomTransform {
+    const { store: { screenSize, maxPointSize } } = this
+    const width = screenSize[0]
+    const height = screenSize[1]
+    const xExtent = extent(positions.map(d => d[0])) as [number, number]
+    const yExtent = extent(positions.map(d => d[1])) as [number, number]
+    xExtent[0] = this.store.scaleX(xExtent[0] - maxPointSize / 2)
+    xExtent[1] = this.store.scaleX(xExtent[1] + maxPointSize / 2)
+    yExtent[0] = this.store.scaleY(yExtent[0] - maxPointSize / 2)
+    yExtent[1] = this.store.scaleY(yExtent[1] + maxPointSize / 2)
+    const xScale = width / (xExtent[1] - xExtent[0])
+    const yScale = height / (yExtent[0] - yExtent[1])
+    const clampedScale = clamp(scale ?? Math.min(xScale, yScale), ...this.behavior.scaleExtent())
+    const xCenter = (xExtent[1] + xExtent[0]) / 2
+    const yCenter = (yExtent[1] + yExtent[0]) / 2
+    const translateX = width / 2 - xCenter * clampedScale
+    const translateY = height / 2 - yCenter * clampedScale
+
+    const transform = zoomIdentity
+      .translate(translateX, translateY)
+      .scale(clampedScale)
+
+    return transform
+  }
+
+  public getDistanceToPoint (position: [number, number]): number {
+    const { x, y, k } = this.eventTransform
+    const point = this.getTransform([position], k)
+    const dx = x - point.x
+    const dy = y - point.y
+    return Math.sqrt(dx * dx + dy * dy)
+  }
+
+  public getMiddlePointTransform (position: [number, number]): ZoomTransform {
+    const { store: { screenSize }, eventTransform: { x, y, k } } = this
+    const width = screenSize[0]
+    const height = screenSize[1]
+    const currX = (width / 2 - x) / k
+    const currY = (height / 2 - y) / k
+    const pointX = this.store.scaleX(position[0])
+    const pointY = this.store.scaleY(position[1])
+    const centerX = (currX + pointX) / 2
+    const centerY = (currY + pointY) / 2
+
+    const scale = 1
+    const translateX = width / 2 - centerX * scale
+    const translateY = height / 2 - centerY * scale
+
+    return zoomIdentity
+      .translate(translateX, translateY)
+      .scale(scale)
   }
 }
