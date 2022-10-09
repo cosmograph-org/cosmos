@@ -220,8 +220,12 @@ export class Graph<N extends InputNode, L extends InputLink> {
     if (this.hasBeenRecentlyDestroyed) return {}
     const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
     return this.graph.nodes.reduce<{ [key: string]: { x: number; y: number } }>((acc, curr, i) => {
-      const posX = particlePositionPixels[i * 4 + 0]
-      const posY = particlePositionPixels[i * 4 + 1]
+      let index = this.graph.getSortedIndexById(curr.id)
+      if (index === undefined) {
+        index = i
+      }
+      const posX = particlePositionPixels[index * 4 + 0]
+      const posY = particlePositionPixels[index * 4 + 1]
       if (posX !== undefined && posY !== undefined) {
         acc[curr.id] = {
           x: posX,
@@ -241,8 +245,12 @@ export class Graph<N extends InputNode, L extends InputLink> {
     if (this.hasBeenRecentlyDestroyed) return positionMap
     const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
     return this.graph.nodes.reduce<Map<string, [number, number]>>((acc, curr, i) => {
-      const posX = particlePositionPixels[i * 4 + 0]
-      const posY = particlePositionPixels[i * 4 + 1]
+      let index = this.graph.getSortedIndexById(curr.id)
+      if (index === undefined) {
+        index = i
+      }
+      const posX = particlePositionPixels[index * 4 + 0]
+      const posY = particlePositionPixels[index * 4 + 1]
       if (posX !== undefined && posY !== undefined) {
         acc.set(curr.id, [posX, posY])
       }
