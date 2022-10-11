@@ -219,11 +219,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
   public getNodePositions (): { [key: string]: { x: number; y: number } } {
     if (this.hasBeenRecentlyDestroyed) return {}
     const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
-    return this.graph.nodes.reduce<{ [key: string]: { x: number; y: number } }>((acc, curr, i) => {
-      let index = this.graph.getSortedIndexById(curr.id)
-      if (index === undefined) {
-        index = i
-      }
+    return this.graph.nodes.reduce<{ [key: string]: { x: number; y: number } }>((acc, curr) => {
+      const index = this.graph.getSortedIndexById(curr.id) as number
       const posX = particlePositionPixels[index * 4 + 0]
       const posY = particlePositionPixels[index * 4 + 1]
       if (posX !== undefined && posY !== undefined) {
@@ -244,11 +241,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
     const positionMap = new Map()
     if (this.hasBeenRecentlyDestroyed) return positionMap
     const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
-    return this.graph.nodes.reduce<Map<string, [number, number]>>((acc, curr, i) => {
-      let index = this.graph.getSortedIndexById(curr.id)
-      if (index === undefined) {
-        index = i
-      }
+    return this.graph.nodes.reduce<Map<string, [number, number]>>((acc, curr) => {
+      const index = this.graph.getSortedIndexById(curr.id) as number
       const posX = particlePositionPixels[index * 4 + 0]
       const posY = particlePositionPixels[index * 4 + 1]
       if (posX !== undefined && posY !== undefined) {
@@ -268,8 +262,9 @@ export class Graph<N extends InputNode, L extends InputLink> {
     const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
     positions.length = this.graph.nodes.length
     for (let i = 0; i < this.graph.nodes.length; i += 1) {
-      const posX = particlePositionPixels[i * 4 + 0]
-      const posY = particlePositionPixels[i * 4 + 1]
+      const index = this.graph.getSortedIndexByInputIndex(i) as number
+      const posX = particlePositionPixels[index * 4 + 0]
+      const posY = particlePositionPixels[index * 4 + 1]
       if (posX !== undefined && posY !== undefined) {
         positions[i] = [posX, posY]
       }
