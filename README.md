@@ -142,13 +142,13 @@ The `left` and `right` values should be from 0 to the width of the canvas in pix
 
 The `top` and `bottom` values should be from 0 to the height of the canvas in pixels.
 
-<a name="select_node_by_id" href="#select_node_by_id">#</a> graph.<b>selectNodeById</b>(<i>id</i>)
+<a name="select_node_by_id" href="#select_node_by_id">#</a> graph.<b>selectNodeById</b>(<i>id</i>, [<i>selectAdjacentNodes</i>])
 
-Select a node by <i>id</i>.
+Select a node by <i>id</i>. If you want the adjacent nodes to get selected too, provide `true` as the second argument.
 
-<a name="select_node_by_index" href="#select_node_by_index">#</a> graph.<b>selectNodeByIndex</b>(<i>index</i>)
+<a name="select_node_by_index" href="#select_node_by_index">#</a> graph.<b>selectNodeByIndex</b>(<i>index</i>, [<i>selectAdjacentNodes</i>])
 
-Select a node by <i>index</i>.
+Select a node by <i>index</i>. If you want the adjacent nodes to get selected too, provide `true` as the second argument.
 
 <a name="select_node_by_ids" href="#select_node_by_ids">#</a> graph.<b>selectNodesByIds</b>(<i>ids</i>)
 
@@ -165,6 +165,10 @@ Unselect all nodes.
 <a name="get_selected_nodes" href="#get_selected_nodes">#</a> graph.<b>getSelectedNodes</b>()
 
 Get an array of currently selected nodes.
+
+<a name="get_adjacent_nodes_to_node_id" href="#get_adjacent_nodes_to_node_id">#</a> graph.<b>getAdjacentNodes</b>(<i>id</i>)
+
+Get nodes that are adjacent to a specific node by its <i>id</i>.
 
 <a name="start" href="#start">#</a> graph.<b>start</b>([<i>alpha</i>])
 

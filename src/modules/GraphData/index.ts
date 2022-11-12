@@ -131,4 +131,13 @@ export class GraphData <N extends InputNode, L extends InputLink> {
   public getSortedIndexById (id: string | undefined): number | undefined {
     return id !== undefined ? this.idToSortedIndexMap.get(id) : undefined
   }
+
+  public getAdjacentNodes (id: string): N[] | undefined {
+    const index = this.getSortedIndexById(id)
+    if (index === undefined) return undefined
+    const outgoingSet = this.groupedSourceToTargetLinks.get(index) ?? []
+    const incomingSet = this.groupedTargetToSourceLinks.get(index) ?? []
+    return [...new Set([...outgoingSet, ...incomingSet])]
+      .map(index => this.getNodeByIndex(this.getInputIndexBySortedIndex(index) as number) as N)
+  }
 }

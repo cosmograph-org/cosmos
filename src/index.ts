@@ -308,19 +308,25 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Select a node by id.
+   * Select a node by id. If you want the adjacent nodes to get selected too, provide `true` as the second argument.
    * @param id Id of the node.
+   * @param selectAdjacentNodes When set to `true`, selects adjacent nodes (`false` by default).
    */
-  public selectNodeById (id: string): void {
-    this.selectNodesByIds([id])
+  public selectNodeById (id: string, selectAdjacentNodes = false): void {
+    if (selectAdjacentNodes) {
+      const adjacentNodes = this.graph.getAdjacentNodes(id) ?? []
+      this.selectNodesByIds([id, ...adjacentNodes.map(d => d.id)])
+    } else this.selectNodesByIds([id])
   }
 
   /**
-   * Select a node by index.
+   * Select a node by index. If you want the adjacent nodes to get selected too, provide `true` as the second argument.
    * @param index The index of the node in the array of nodes.
+   * @param selectAdjacentNodes When set to `true`, selects adjacent nodes (`false` by default).
    */
-  public selectNodeByIndex (index: number): void {
-    this.selectNodesByIndices([this.graph.getSortedIndexByInputIndex(index)])
+  public selectNodeByIndex (index: number, selectAdjacentNodes = false): void {
+    const node = this.graph.getNodeByIndex(index)
+    if (node) this.selectNodeById(node.id, selectAdjacentNodes)
   }
 
   /**
@@ -370,6 +376,16 @@ export class Graph<N extends InputNode, L extends InputLink> {
       }
     }
     return points
+  }
+
+  /**
+   * Get nodes that are adjacent to a specific node by its id.
+   * @param id Id of the node.
+   * @returns Array of adjacent nodes.
+   */
+
+  public getAdjacentNodes (id: string): N[] | undefined {
+    return this.graph.getAdjacentNodes(id)
   }
 
   /**
