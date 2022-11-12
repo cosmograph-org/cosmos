@@ -15,7 +15,7 @@ export class Store {
   public selectedArea = [[0, 0], [0, 0]]
   public isSimulationRunning = false
   public simulationProgress = 0
-  public selectedIndices: Float32Array = new Float32Array()
+  public selectedIndices: Float32Array | null = null
   public maxPointSize = MAX_POINT_SIZE
   private alphaTarget = 0
   private scaleNodeX = scaleLinear()

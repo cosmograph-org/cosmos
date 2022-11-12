@@ -302,46 +302,54 @@ export class Graph<N extends InputNode, L extends InputLink> {
         })
         .filter(d => d !== -1)
     } else {
-      this.store.selectedIndices = new Float32Array()
+      this.store.selectedIndices = null
     }
     this.points.updateGreyoutStatus()
   }
 
   /**
-   * Select a node by id.
+   * Select a node by id. If you want the adjacent nodes to get selected too, provide `true` as the second argument.
    * @param id Id of the node.
+   * @param selectAdjacentNodes When set to `true`, selects adjacent nodes (`false` by default).
    */
-  public selectNodeById (id: string): void {
-    this.selectNodesByIds([id])
+  public selectNodeById (id: string, selectAdjacentNodes = false): void {
+    if (selectAdjacentNodes) {
+      const adjacentNodes = this.graph.getAdjacentNodes(id) ?? []
+      this.selectNodesByIds([id, ...adjacentNodes.map(d => d.id)])
+    } else this.selectNodesByIds([id])
   }
 
   /**
-   * Select a node by index.
+   * Select a node by index. If you want the adjacent nodes to get selected too, provide `true` as the second argument.
    * @param index The index of the node in the array of nodes.
+   * @param selectAdjacentNodes When set to `true`, selects adjacent nodes (`false` by default).
    */
-  public selectNodeByIndex (index: number): void {
-    this.selectNodesByIndices([this.graph.getSortedIndexByInputIndex(index)])
+  public selectNodeByIndex (index: number, selectAdjacentNodes = false): void {
+    const node = this.graph.getNodeByIndex(index)
+    if (node) this.selectNodeById(node.id, selectAdjacentNodes)
   }
 
   /**
    * Select multiples nodes by their ids.
    * @param ids Array of nodes ids.
    */
-  public selectNodesByIds (ids: (string | undefined)[]): void {
-    this.selectNodesByIndices(ids.map(d => this.graph.getSortedIndexById(d)))
+  public selectNodesByIds (ids?: (string | undefined)[] | null): void {
+    this.selectNodesByIndices(ids?.map(d => this.graph.getSortedIndexById(d)))
   }
 
   /**
    * Select multiples nodes by their indices.
    * @param indices Array of nodes indices.
    */
-  public selectNodesByIndices (indices: (number | undefined)[]): void {
-    const filteredIndices = indices.filter(d => d !== undefined) as number[]
-    if (indices.length !== 0) {
-      this.store.selectedIndices = new Float32Array(filteredIndices)
-    } else {
+  public selectNodesByIndices (indices?: (number | undefined)[] | null): void {
+    if (!indices) {
+      this.store.selectedIndices = null
+    } else if (indices.length === 0) {
       this.store.selectedIndices = new Float32Array()
+    } else {
+      this.store.selectedIndices = new Float32Array(indices.filter((d): d is number => d !== undefined))
     }
+
     this.points.updateGreyoutStatus()
   }
 
@@ -349,7 +357,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
    * Unselect all nodes.
    */
   public unselectNodes (): void {
-    this.store.selectedIndices = new Float32Array()
+    this.store.selectedIndices = null
     this.points.updateGreyoutStatus()
   }
 
@@ -357,16 +365,27 @@ export class Graph<N extends InputNode, L extends InputLink> {
    * Get nodes that are currently selected.
    * @returns Array of selected nodes.
    */
-  public getSelectedNodes (): N[] {
-    const points = new Array(this.store.selectedIndices.length)
-    for (let i = 0; i < this.store.selectedIndices.length; i += 1) {
-      const selectedIndex = this.store.selectedIndices[i]
+  public getSelectedNodes (): N[] | null {
+    const { selectedIndices } = this.store
+    if (!selectedIndices) return null
+    const points = new Array(selectedIndices.length)
+    for (const [i, selectedIndex] of selectedIndices.entries()) {
       if (selectedIndex !== undefined) {
         const index = this.graph.getInputIndexBySortedIndex(selectedIndex)
         if (index !== undefined) points[i] = this.graph.nodes[index]
       }
     }
     return points
+  }
+
+  /**
+   * Get nodes that are adjacent to a specific node by its id.
+   * @param id Id of the node.
+   * @returns Array of adjacent nodes.
+   */
+
+  public getAdjacentNodes (id: string): N[] | undefined {
+    return this.graph.getAdjacentNodes(id)
   }
 
   /**
