@@ -1,4 +1,4 @@
-import { zoom, ZoomTransform, zoomIdentity } from 'd3-zoom'
+import { zoom, ZoomTransform, zoomIdentity, D3ZoomEvent } from 'd3-zoom'
 import { extent } from 'd3-array'
 import { mat3 } from 'gl-matrix'
 import { Store } from '@/graph/modules/Store'
@@ -10,12 +10,14 @@ export class Zoom <N extends InputNode, L extends InputLink> {
   public readonly store: Store
   public readonly config: GraphConfigInterface<N, L>
   public eventTransform = zoomIdentity
-  public behavior = zoom<HTMLCanvasElement, unknown>()
-    .on('start', () => {
+  public behavior = zoom<HTMLCanvasElement, undefined>()
+    .on('start', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => {
       this.isRunning = true
+      const userDriven = !!e.sourceEvent
+      this.config?.events?.onZoomStart?.(e, userDriven)
     })
-    .on('zoom', (event) => {
-      this.eventTransform = event.transform
+    .on('zoom', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => {
+      this.eventTransform = e.transform
       const { eventTransform: { x, y, k }, store: { transform, screenSize } } = this
       const w = screenSize[0]
       const h = screenSize[1]
@@ -25,9 +27,15 @@ export class Zoom <N extends InputNode, L extends InputLink> {
       mat3.translate(transform, transform, [w / 2, h / 2])
       mat3.scale(transform, transform, [w / 2, h / 2])
       mat3.scale(transform, transform, [1, -1])
+
+      const userDriven = !!e.sourceEvent
+      this.config?.events?.onZoom?.(e, userDriven)
     })
-    .on('end', () => {
+    .on('end', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => {
       this.isRunning = false
+
+      const userDriven = !!e.sourceEvent
+      this.config?.events?.onZoomEnd?.(e, userDriven)
     })
 
   public isRunning = false

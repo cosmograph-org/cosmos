@@ -1,3 +1,4 @@
+import { D3ZoomEvent } from 'd3-zoom'
 import { InputNode, InputLink } from '@/graph/types'
 import {
   defaultNodeColor,
@@ -25,6 +26,30 @@ export interface Events <N extends InputNode> {
    * Default value: `undefined`
    */
   onClick?: (clickedNode: N | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void;
+  /**
+   * Callback function that will be called when zooming or panning starts.
+   * First argument is a D3 Zoom Event and second indicates whether
+   * the event has been initiated by a user interaction (e.g. a mouse event):
+   * `(event: D3ZoomEvent, userDriven: boolean) => void`.
+   * Default value: `undefined`
+   */
+  onZoomStart?: (e: D3ZoomEvent<HTMLCanvasElement, undefined>, userDriven: boolean) => void;
+  /**
+   * Callback function that will be called continuously during zooming or panning.
+   * First argument is a D3 Zoom Event and second indicates whether
+   * the event has been initiated by a user interaction (e.g. a mouse event):
+   * `(event: D3ZoomEvent, userDriven: boolean) => void`.
+   * Default value: `undefined`
+   */
+  onZoom?: (e: D3ZoomEvent<HTMLCanvasElement, undefined>, userDriven: boolean) => void;
+  /**
+   * Callback function that will be called when zooming or panning ends.
+   * First argument is a D3 Zoom Event and second indicates whether
+   * the event has been initiated by a user interaction (e.g. a mouse event):
+   * `(event: D3ZoomEvent, userDriven: boolean) => void`.
+   * Default value: `undefined`
+   */
+  onZoomEnd?: (e: D3ZoomEvent<HTMLCanvasElement, undefined>, userDriven: boolean) => void;
 }
 
 export interface GraphSimulationSetting {
@@ -267,6 +292,9 @@ export class GraphConfig<N extends InputNode, L extends InputLink> implements Gr
 
   public events: Events<N> = {
     onClick: undefined,
+    onZoomStart: undefined,
+    onZoom: undefined,
+    onZoomEnd: undefined,
   }
 
   public showFPSMonitor = defaultConfigValues.showFPSMonitor

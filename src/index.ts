@@ -1,4 +1,4 @@
-import { select } from 'd3-selection'
+import { select, Selection } from 'd3-selection'
 import 'd3-transition'
 import { easeQuadIn, easeQuadOut, easeQuadInOut } from 'd3-ease'
 import regl from 'regl'
@@ -22,6 +22,7 @@ import { defaultConfigValues } from '@/graph/variables'
 export class Graph<N extends InputNode, L extends InputLink> {
   public config = new GraphConfig<N, L>()
   private canvas: HTMLCanvasElement
+  private canvasD3Selection: Selection<HTMLCanvasElement, undefined, null, undefined>
   private reglInstance: regl.Regl
   private requestAnimationFrameId = 0
   private isRightClickMouse = false
@@ -59,7 +60,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
     }
 
     this.canvas = canvas
-    select(canvas)
+    this.canvasD3Selection = select<HTMLCanvasElement, undefined>(canvas)
+    this.canvasD3Selection
       .call(this.zoomInstance.behavior)
       .on('click', this.onClick.bind(this))
       .on('mousemove', this.onMouseMove.bind(this))
@@ -198,7 +200,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
    * @param duration Duration of the zoom in/out transition.
    */
   public setZoomLevel (value: number, duration = 0): void {
-    select(this.canvas)
+    this.canvasD3Selection
       .transition()
       .duration(duration)
       .call(this.zoomInstance.behavior.scaleTo, value)
@@ -278,7 +280,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
    */
   public fitView (duration = 250): void {
     const transform = this.zoomInstance.getTransform(this.getNodePositionsArray())
-    select(this.canvas)
+    this.canvasD3Selection
       .transition()
       .ease(easeQuadInOut)
       .duration(duration)
@@ -595,7 +597,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
       this.canvas.width = w * this.config.pixelRatio
       this.canvas.height = h * this.config.pixelRatio
       this.reglInstance.poll()
-      select(this.canvas)
+      this.canvasD3Selection
         .call(this.zoomInstance.behavior.transform, this.zoomInstance.eventTransform)
     }
   }
@@ -611,14 +613,14 @@ export class Graph<N extends InputNode, L extends InputLink> {
     const distance = this.zoomInstance.getDistanceToPoint([posX, posY])
     const transform = this.zoomInstance.getTransform([[posX, posY]], 3)
     if (distance < Math.min(screenSize[0], screenSize[1])) {
-      select(this.canvas)
+      this.canvasD3Selection
         .transition()
         .ease(easeQuadInOut)
         .duration(duration)
         .call(this.zoomInstance.behavior.transform, transform)
     } else {
       const middle = this.zoomInstance.getMiddlePointTransform([posX, posY])
-      select(this.canvas)
+      this.canvasD3Selection
         .transition()
         .ease(easeQuadIn)
         .duration(duration / 2)
