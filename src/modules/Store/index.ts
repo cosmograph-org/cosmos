@@ -12,6 +12,7 @@ export class Store {
   public backgroundColor: [number, number, number, number] = [0, 0, 0, 0]
   public screenSize: [number, number] = [0, 0]
   public mousePosition = [0, 0]
+  public screenMousePosition = [0, 0]
   public selectedArea = [[0, 0], [0, 0]]
   public isSimulationRunning = false
   public simulationProgress = 0
