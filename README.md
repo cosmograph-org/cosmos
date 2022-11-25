@@ -136,7 +136,11 @@ Zoom the view in or out to the specified zoom level <i>value</i> with given anim
 
 <a name="fit_view" href="#fit_view">#</a> graph.<b>fitView</b>(<i>duration</i>)
 
-Center and zoom in/out the view to fit all nodes in the scene with given animation <i>duration</i>. The default <i>duration</i> is 500 ms.
+Center and zoom in/out the view to fit all nodes in the scene with given animation <i>duration</i>. The default <i>duration</i> is 250 ms.
+
+<a name="fit_view_by_node_ids" href="#fit_view_by_node_ids">#</a> graph.<b>fitViewByNodeIds</b>(<i>ids</i>, [<i>duration</i>])
+
+Center and zoom in/out the view to fit nodes by their <i>ids</i> in the scene with given animation <i>duration</i>. The default <i>duration</i> is 250 ms.
 
 <a name="select_nodes_in_range" href="#select_nodes_in_range">#</a> graph.<b>selectNodesInRange</b>(<i>selection</i>)
 

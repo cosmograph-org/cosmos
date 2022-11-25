@@ -46,6 +46,7 @@ export class Zoom <N extends InputNode, L extends InputLink> {
   }
 
   public getTransform (positions: [number, number][], scale?: number): ZoomTransform {
+    if (positions.length === 0) return this.eventTransform
     const { store: { screenSize, maxPointSize } } = this
     const width = screenSize[0]
     const height = screenSize[1]

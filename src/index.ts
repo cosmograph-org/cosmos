@@ -276,15 +276,20 @@ export class Graph<N extends InputNode, L extends InputLink> {
 
   /**
    * Center and zoom in/out the view to fit all nodes in the scene.
-   * @param duration Duration of the center and zoom in/out animation in milliseconds (`500` by default).
+   * @param duration Duration of the center and zoom in/out animation in milliseconds (`250` by default).
    */
   public fitView (duration = 250): void {
-    const transform = this.zoomInstance.getTransform(this.getNodePositionsArray())
-    this.canvasD3Selection
-      .transition()
-      .ease(easeQuadInOut)
-      .duration(duration)
-      .call(this.zoomInstance.behavior.transform, transform)
+    this.setZoomTransformByNodePositions(this.getNodePositionsArray(), duration)
+  }
+
+  /**
+   * Center and zoom in/out the view to fit nodes by their ids in the scene.
+   * @param duration Duration of the center and zoom in/out animation in milliseconds (`250` by default).
+   */
+  public fitViewByNodeIds (ids: string[], duration = 250): void {
+    const positionsMap = this.getNodePositionsMap()
+    const positions = ids.map(id => positionsMap.get(id)).filter((d): d is [number, number] => d !== undefined)
+    this.setZoomTransformByNodePositions(positions, duration)
   }
 
   /** Select nodes inside a rectangular area.
@@ -602,6 +607,15 @@ export class Graph<N extends InputNode, L extends InputLink> {
     }
   }
 
+  private setZoomTransformByNodePositions (positions: [number, number][], duration = 250, scale?: number): void {
+    const transform = this.zoomInstance.getTransform(positions, scale)
+    this.canvasD3Selection
+      .transition()
+      .ease(easeQuadInOut)
+      .duration(duration)
+      .call(this.zoomInstance.behavior.transform, transform)
+  }
+
   private zoomToNode (node: N, duration: number): void {
     const { graph, store: { screenSize } } = this
     const positionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
@@ -611,14 +625,10 @@ export class Graph<N extends InputNode, L extends InputLink> {
     const posY = positionPixels[nodeIndex * 4 + 1]
     if (posX === undefined || posY === undefined) return
     const distance = this.zoomInstance.getDistanceToPoint([posX, posY])
-    const transform = this.zoomInstance.getTransform([[posX, posY]], 3)
     if (distance < Math.min(screenSize[0], screenSize[1])) {
-      this.canvasD3Selection
-        .transition()
-        .ease(easeQuadInOut)
-        .duration(duration)
-        .call(this.zoomInstance.behavior.transform, transform)
+      this.setZoomTransformByNodePositions([[posX, posY]], duration, 3)
     } else {
+      const transform = this.zoomInstance.getTransform([[posX, posY]], 3)
       const middle = this.zoomInstance.getMiddlePointTransform([posX, posY])
       this.canvasD3Selection
         .transition()
