@@ -300,7 +300,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     if (selection) {
       const h = this.store.screenSize[1]
       this.store.selectedArea = [[selection[0][0], (h - selection[1][1])], [selection[1][0], (h - selection[0][1])]]
-      this.points.findPoint()
+      this.points.findPointsOnAreaSelection()
       const pixels = readPixels(this.reglInstance, this.points.selectedFbo as regl.Framebuffer2D)
       this.store.selectedIndices = pixels
         .map((pixel, i) => {
@@ -556,9 +556,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   private onClick (event: MouseEvent): void {
-    const h = this.store.screenSize[1]
-    this.store.selectedArea = [[event.offsetX, (h - event.offsetY)], [event.offsetX, (h - event.offsetY)]]
-    this.points.findPoint()
+    this.points.findPointsOnMouseClick()
     const pixels = readPixels(this.reglInstance, this.points.selectedFbo as regl.Framebuffer2D)
     let position: [number, number] | undefined
     const pixelsInSelectedArea = pixels
@@ -584,6 +582,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.store.mousePosition = [invertedX, (h - invertedY)]
     this.store.mousePosition[0] -= (this.store.screenSize[0] - this.config.spaceSize) / 2
     this.store.mousePosition[1] -= (this.store.screenSize[1] - this.config.spaceSize) / 2
+    this.store.screenMousePosition = [mouseX, (this.store.screenSize[1] - mouseY)]
     this.isRightClickMouse = event.which === 3
   }
 

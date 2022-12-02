@@ -3,7 +3,8 @@ import { CoreModule } from '@/graph/modules/core-module'
 import { createColorBuffer, createGreyoutStatusBuffer } from '@/graph/modules/Points/color-buffer'
 import drawPointsFrag from '@/graph/modules/Points/draw-points.frag'
 import drawPointsVert from '@/graph/modules/Points/draw-points.vert'
-import findPointFrag from '@/graph/modules/Points/find-point.frag'
+import findPointOnMouseClickFrag from '@/graph/modules/Points/find-point-on-mouse-click.frag'
+import findPointsOnAreaSelectionFrag from '@/graph/modules/Points/find-points-on-area-selection.frag'
 import { createSizeBuffer } from '@/graph/modules/Points/size-buffer'
 import updatePositionFrag from '@/graph/modules/Points/update-position.frag'
 import { createIndexesBuffer, createQuadBuffer } from '@/graph/modules/Shared/buffer'
@@ -21,7 +22,8 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
   public sizeFbo: regl.Framebuffer2D | undefined
   private drawCommand: regl.DrawCommand | undefined
   private updatePositionCommand: regl.DrawCommand | undefined
-  private findPointCommand: regl.DrawCommand | undefined
+  private findPointOnMouseClickCommand: regl.DrawCommand | undefined
+  private findPointsOnAreaSelectionCommand: regl.DrawCommand | undefined
 
   public create (): void {
     const { reglInstance, config, store, data } = this
@@ -140,8 +142,28 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
         mask: false,
       },
     })
-    this.findPointCommand = reglInstance({
-      frag: findPointFrag,
+    this.findPointOnMouseClickCommand = reglInstance({
+      frag: findPointOnMouseClickFrag,
+      vert: updateVert,
+      framebuffer: () => this.selectedFbo as regl.Framebuffer2D,
+      primitive: 'triangle strip',
+      count: 4,
+      attributes: { quad: createQuadBuffer(reglInstance) },
+      uniforms: {
+        position: () => this.currentPositionFbo,
+        particleSize: () => this.sizeFbo,
+        spaceSize: () => config.spaceSize,
+        screenSize: () => store.screenSize,
+        sizeScale: () => config.nodeSizeScale,
+        transform: () => store.transform,
+        ratio: () => config.pixelRatio,
+        mousePosition: () => store.screenMousePosition,
+        scaleNodesOnZoom: () => config.scaleNodesOnZoom,
+        maxPointSize: () => store.maxPointSize,
+      },
+    })
+    this.findPointsOnAreaSelectionCommand = reglInstance({
+      frag: findPointsOnAreaSelectionFrag,
       vert: updateVert,
       framebuffer: () => this.selectedFbo as regl.Framebuffer2D,
       primitive: 'triangle strip',
@@ -187,8 +209,12 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
     this.swapFbo()
   }
 
-  public findPoint (): void {
-    this.findPointCommand?.()
+  public findPointsOnAreaSelection (): void {
+    this.findPointsOnAreaSelectionCommand?.()
+  }
+
+  public findPointsOnMouseClick (): void {
+    this.findPointOnMouseClickCommand?.()
   }
 
   public destroy (): void {
