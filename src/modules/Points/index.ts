@@ -35,8 +35,10 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
       const sortedIndex = this.data.getSortedIndexByInputIndex(i)
       const node = data.nodes[i]
       if (node && sortedIndex !== undefined) {
-        initialState[sortedIndex * 4 + 0] = node.x ?? (spaceSize ?? defaultConfigValues.spaceSize) * (Math.random() * (0.505 - 0.495) + 0.495)
-        initialState[sortedIndex * 4 + 1] = node.y ?? (spaceSize ?? defaultConfigValues.spaceSize) * (Math.random() * (0.505 - 0.495) + 0.495)
+        initialState[sortedIndex * 4 + 0] = node.x ??
+          (spaceSize ?? defaultConfigValues.spaceSize) * (store.getRandomFloat(0, 1) * (0.505 - 0.495) + 0.495)
+        initialState[sortedIndex * 4 + 1] = node.y ??
+          (spaceSize ?? defaultConfigValues.spaceSize) * (store.getRandomFloat(0, 1) * (0.505 - 0.495) + 0.495)
       }
     }
 

@@ -62,10 +62,6 @@ export function group <ArrayItem, Key> (array: ArrayItem[], accessor: (d: ArrayI
   return groups
 }
 
-export function getRandomValue (min: number, max: number): number {
-  return Math.random() * (max - min) + min
-}
-
 export function clamp (num: number, min: number, max: number): number {
   return Math.min(Math.max(num, min), max)
 }
