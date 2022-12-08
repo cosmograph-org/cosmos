@@ -45,7 +45,7 @@ export class ForceLink<N extends InputNode, L extends InputLink> extends CoreMod
         strength = Math.sqrt(strength)
         linkBiasAndStrengthState[linkIndex * 4 + 0] = bias
         linkBiasAndStrengthState[linkIndex * 4 + 1] = strength
-        linkDistanceState[linkIndex * 4] = Math.random() // link distance random variation
+        linkDistanceState[linkIndex * 4] = this.store.getRandomFloat(0, 1)
 
         linkIndex += 1
       })

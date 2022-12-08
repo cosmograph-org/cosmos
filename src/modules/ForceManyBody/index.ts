@@ -9,7 +9,6 @@ import clearFrag from '@/graph/modules/Shared/clear.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
 import { defaultConfigValues } from '@/graph/variables'
 import { InputNode, InputLink } from '@/graph/types'
-import { getRandomValue } from '@/graph/helper'
 
 export class ForceManyBody<N extends InputNode, L extends InputLink> extends CoreModule<N, L> {
   private randomValuesFbo: regl.Framebuffer2D | undefined
@@ -37,8 +36,8 @@ export class ForceManyBody<N extends InputNode, L extends InputLink> extends Cor
     // Create random number to prevent point to stick together in one coordinate
     const randomValuesState = new Float32Array(store.pointsTextureSize * store.pointsTextureSize * 4)
     for (let i = 0; i < store.pointsTextureSize * store.pointsTextureSize; ++i) {
-      randomValuesState[i * 4] = getRandomValue(-1, 1) * 0.00001
-      randomValuesState[i * 4 + 1] = getRandomValue(-1, 1) * 0.00001
+      randomValuesState[i * 4] = store.getRandomFloat(-1, 1) * 0.00001
+      randomValuesState[i * 4 + 1] = store.getRandomFloat(-1, 1) * 0.00001
     }
 
     this.randomValuesFbo = reglInstance.framebuffer({

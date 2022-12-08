@@ -1,5 +1,6 @@
 import { scaleLinear } from 'd3-scale'
 import { mat3 } from 'gl-matrix'
+import { Random } from 'random'
 
 export const ALPHA_MIN = 0.001
 export const MAX_POINT_SIZE = 64
@@ -21,6 +22,15 @@ export class Store {
   private alphaTarget = 0
   private scaleNodeX = scaleLinear()
   private scaleNodeY = scaleLinear()
+  private random = new Random()
+
+  public addRandomSeed (seed: number | string): void {
+    this.random = this.random.clone(seed)
+  }
+
+  public getRandomFloat (min: number, max: number): number {
+    return this.random.float(min, max)
+  }
 
   public updateScreenSize (width: number, height: number, spaceSize: number): void {
     this.screenSize = [width, height]

@@ -85,6 +85,7 @@ graph.setData(nodes, links)
 | showFPSMonitor | Show WebGL performance monitor | `false`
 | pixelRatio | Canvas pixel ratio | `2`
 | scaleNodesOnZoom | Scale the nodes when zooming in or out | `true`
+| randomSeed | Providing a `randomSeed` value allows you to control the randomness of the layout across different simulation runs. It is useful when you want the graph to always look the same on same datasets. <br /><br /> This property will be applied only on component initialization and it can't be changed using the `setConfig` method. | `undefined`
 
 
 ### <a name="simulation_configuration" href="#simulation_configuration">#</a> Simulation configuration

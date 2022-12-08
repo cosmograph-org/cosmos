@@ -94,6 +94,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.store.backgroundColor = getRgbaColor(this.config.backgroundColor)
 
     if (this.config.showFPSMonitor) this.fpsMonitor = new FPSMonitor(this.canvas)
+
+    if (this.config.randomSeed !== undefined) this.store.addRandomSeed(this.config.randomSeed)
   }
 
   public get progress (): number {

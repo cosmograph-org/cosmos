@@ -251,6 +251,15 @@ export interface GraphConfigInterface<N extends InputNode, L extends InputLink> 
    * Default value: true
    */
   scaleNodesOnZoom?: boolean;
+  /**
+   * Providing a `randomSeed` value allows you to control
+   * the randomness of the layout across different simulation runs.
+   * It is useful when you want the graph to always look the same on same datasets.
+   * This property will be applied only on component initialization and it
+   * can't be changed using the `setConfig` method.
+   * Default value: undefined
+   */
+  randomSeed?: number | string;
 }
 
 export class GraphConfig<N extends InputNode, L extends InputLink> implements GraphConfigInterface<N, L> {
@@ -302,6 +311,8 @@ export class GraphConfig<N extends InputNode, L extends InputLink> implements Gr
   public pixelRatio = defaultConfigValues.pixelRatio
 
   public scaleNodesOnZoom = defaultConfigValues.scaleNodesOnZoom
+
+  public randomSeed = undefined
 
   public init (config: GraphConfigInterface<N, L>): GraphConfigInterface<N, L> {
     const currentConfig = this.getConfig()
