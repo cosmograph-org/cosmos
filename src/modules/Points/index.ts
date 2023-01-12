@@ -5,10 +5,15 @@ import drawPointsFrag from '@/graph/modules/Points/draw-points.frag'
 import drawPointsVert from '@/graph/modules/Points/draw-points.vert'
 import findPointOnMouseClickFrag from '@/graph/modules/Points/find-point-on-mouse-click.frag'
 import findPointsOnAreaSelectionFrag from '@/graph/modules/Points/find-points-on-area-selection.frag'
+import drawHighlightedFrag from '@/graph/modules/Points/draw-highlighted.frag'
+import drawHighlightedVert from '@/graph/modules/Points/draw-highlighted.vert'
+import findHoveredPointFrag from '@/graph/modules/Points/find-hovered-point.frag'
+import findHoveredPointVert from '@/graph/modules/Points/find-hovered-point.vert'
 import { createSizeBuffer } from '@/graph/modules/Points/size-buffer'
 import updatePositionFrag from '@/graph/modules/Points/update-position.frag'
 import { createIndexesBuffer, createQuadBuffer } from '@/graph/modules/Shared/buffer'
 import updateVert from '@/graph/modules/Shared/quad.vert'
+import clearFrag from '@/graph/modules/Shared/clear.frag'
 import { defaultConfigValues } from '@/graph/variables'
 import { InputNode, InputLink } from '@/graph/types'
 
@@ -18,12 +23,16 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
   public velocityFbo: regl.Framebuffer2D | undefined
   public selectedFbo: regl.Framebuffer2D | undefined
   public colorFbo: regl.Framebuffer2D | undefined
+  public hoveredFbo: regl.Framebuffer2D | undefined
   public greyoutStatusFbo: regl.Framebuffer2D | undefined
   public sizeFbo: regl.Framebuffer2D | undefined
   private drawCommand: regl.DrawCommand | undefined
+  private drawHighlightedCommand: regl.DrawCommand | undefined
   private updatePositionCommand: regl.DrawCommand | undefined
   private findPointOnMouseClickCommand: regl.DrawCommand | undefined
   private findPointsOnAreaSelectionCommand: regl.DrawCommand | undefined
+  private findHoveredPointCommand: regl.DrawCommand | undefined
+  private clearHoveredFboCommand: regl.DrawCommand | undefined
 
   public create (): void {
     const { reglInstance, config, store, data } = this
@@ -81,6 +90,13 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
         shape: [pointsTextureSize, pointsTextureSize, 4],
         type: 'float',
       }),
+      depth: false,
+      stencil: false,
+    })
+
+    this.hoveredFbo = reglInstance.framebuffer({
+      shape: [2, 2],
+      colorType: 'float',
       depth: false,
       stencil: false,
     })
@@ -185,6 +201,77 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
         maxPointSize: () => store.maxPointSize,
       },
     })
+    this.clearHoveredFboCommand = reglInstance({
+      frag: clearFrag,
+      vert: updateVert,
+      framebuffer: this.hoveredFbo as regl.Framebuffer2D,
+      primitive: 'triangle strip',
+      count: 4,
+      attributes: { quad: createQuadBuffer(reglInstance) },
+    })
+    this.findHoveredPointCommand = reglInstance({
+      frag: findHoveredPointFrag,
+      vert: findHoveredPointVert,
+      primitive: 'points',
+      count: () => data.nodes.length,
+      framebuffer: () => this.hoveredFbo as regl.Framebuffer2D,
+      attributes: { indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
+      uniforms: {
+        position: () => this.currentPositionFbo,
+        particleSize: () => this.sizeFbo,
+        ratio: () => config.pixelRatio,
+        sizeScale: () => config.nodeSizeScale,
+        pointsTextureSize: () => store.pointsTextureSize,
+        transform: () => store.transform,
+        spaceSize: () => config.spaceSize,
+        screenSize: () => store.screenSize,
+        scaleNodesOnZoom: () => config.scaleNodesOnZoom,
+        mousePosition: () => store.screenMousePosition,
+        maxPointSize: () => store.maxPointSize,
+      },
+      depth: {
+        enable: false,
+        mask: false,
+      },
+    })
+    this.drawHighlightedCommand = reglInstance({
+      frag: drawHighlightedFrag,
+      vert: drawHighlightedVert,
+      attributes: { quad: createQuadBuffer(reglInstance) },
+      primitive: 'triangle strip',
+      count: 4,
+      uniforms: {
+        color: reglInstance.prop<{ color: number[] }, 'color'>('color'),
+        width: reglInstance.prop<{ width: number }, 'width'>('width'),
+        hoveredPointIndices: reglInstance.prop<{ pointPosition: number[] }, 'pointPosition'>('pointPosition'),
+        positions: () => this.currentPositionFbo,
+        particleSize: () => this.sizeFbo,
+        sizeScale: () => config.nodeSizeScale,
+        pointsTextureSize: () => store.pointsTextureSize,
+        transform: () => store.transform,
+        spaceSize: () => config.spaceSize,
+        screenSize: () => store.screenSize,
+        scaleNodesOnZoom: () => config.scaleNodesOnZoom,
+        maxPointSize: () => store.maxPointSize,
+      },
+      blend: {
+        enable: true,
+        func: {
+          dstRGB: 'one minus src alpha',
+          srcRGB: 'src alpha',
+          dstAlpha: 'one minus src alpha',
+          srcAlpha: 'one',
+        },
+        equation: {
+          rgb: 'add',
+          alpha: 'add',
+        },
+      },
+      depth: {
+        enable: false,
+        mask: false,
+      },
+    })
   }
 
   public updateColor (): void {
@@ -204,6 +291,16 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
 
   public draw (): void {
     this.drawCommand?.()
+    this.drawHighlightedCommand?.({
+      width: 0.85,
+      color: this.store.hoveredNodeRingColor,
+      pointPosition: this.store.hoveredNode.indicesFromFbo,
+    })
+    this.drawHighlightedCommand?.({
+      width: 0.75,
+      color: this.store.clickedNodeRingColor,
+      pointPosition: this.store.clickedNode.indicesFromFbo,
+    })
   }
 
   public updatePosition (): void {
@@ -217,6 +314,11 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
 
   public findPointsOnMouseClick (): void {
     this.findPointOnMouseClickCommand?.()
+  }
+
+  public findHoveredPoint (): void {
+    this.clearHoveredFboCommand?.()
+    this.findHoveredPointCommand?.()
   }
 
   public destroy (): void {

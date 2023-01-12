@@ -7,7 +7,7 @@ import { InputNode, InputLink } from '@/graph/types'
 import { clamp } from '@/graph/helper'
 
 export class Zoom <N extends InputNode, L extends InputLink> {
-  public readonly store: Store
+  public readonly store: Store<N>
   public readonly config: GraphConfigInterface<N, L>
   public eventTransform = zoomIdentity
   public behavior = zoom<HTMLCanvasElement, undefined>()
@@ -40,7 +40,7 @@ export class Zoom <N extends InputNode, L extends InputLink> {
 
   public isRunning = false
 
-  public constructor (store: Store, config: GraphConfigInterface<N, L>) {
+  public constructor (store: Store<N>, config: GraphConfigInterface<N, L>) {
     this.store = store
     this.config = config
   }
@@ -97,5 +97,22 @@ export class Zoom <N extends InputNode, L extends InputLink> {
     return zoomIdentity
       .translate(translateX, translateY)
       .scale(scale)
+  }
+
+  public convertSpaceToScreenPosition (spacePosition: [number, number]): [number, number] {
+    const screenPointX = this.eventTransform.applyX(this.store.scaleX(spacePosition[0]))
+    const screenPointY = this.eventTransform.applyY(this.store.scaleY(spacePosition[1]))
+    return [screenPointX, screenPointY]
+  }
+
+  public convertSpaceToScreenRadius (spaceRadius: number): number {
+    const { config: { scaleNodesOnZoom }, store: { maxPointSize }, eventTransform: { k } } = this
+    let size = spaceRadius * 2
+    if (scaleNodesOnZoom) {
+      size *= k
+    } else {
+      size *= Math.min(5.0, Math.max(1.0, k * 0.01))
+    }
+    return Math.min(size, maxPointSize) / 2
   }
 }

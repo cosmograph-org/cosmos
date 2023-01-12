@@ -172,6 +172,12 @@ export interface GraphConfigInterface<N extends InputNode, L extends InputLink> 
   nodeSizeScale?: number;
 
   /**
+   * Highlighted node ring color hex value.
+   * Default value: undefined
+   */
+  highlightedNodeRingColor?: string;
+
+  /**
    * Turns link rendering on / off.
    * Default value: `true`
    */
@@ -269,6 +275,7 @@ export class GraphConfig<N extends InputNode, L extends InputLink> implements Gr
   public nodeGreyoutOpacity = defaultGreyoutNodeOpacity
   public nodeSize = defaultNodeSize
   public nodeSizeScale = defaultConfigValues.nodeSizeScale
+  public highlightedNodeRingColor = undefined
   public linkColor = defaultLinkColor
   public linkGreyoutOpacity = defaultGreyoutLinkOpacity
   public linkWidth = defaultLinkWidth

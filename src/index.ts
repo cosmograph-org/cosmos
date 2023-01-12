@@ -28,7 +28,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   private isRightClickMouse = false
 
   private graph = new GraphData<N, L>()
-  private store = new Store()
+  private store = new Store<N>()
   private points: Points<N, L>
   private lines: Lines<N, L>
   private forceGravity: ForceGravity<N, L>
@@ -92,6 +92,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.forceMouse = new ForceMouse(this.reglInstance, this.config, this.store, this.graph, this.points)
 
     this.store.backgroundColor = getRgbaColor(this.config.backgroundColor)
+    if (this.config.highlightedNodeRingColor) this.store.setHighlightedNodeRingColor(this.config.highlightedNodeRingColor)
 
     if (this.config.showFPSMonitor) this.fpsMonitor = new FPSMonitor(this.canvas)
 
@@ -129,6 +130,9 @@ export class Graph<N extends InputNode, L extends InputLink> {
     if (prevConfig.nodeSize !== this.config.nodeSize) this.points.updateSize()
     if (prevConfig.linkWidth !== this.config.linkWidth) this.lines.updateWidth()
     if (prevConfig.backgroundColor !== this.config.backgroundColor) this.store.backgroundColor = getRgbaColor(this.config.backgroundColor)
+    if (prevConfig.highlightedNodeRingColor !== this.config.highlightedNodeRingColor) {
+      this.store.setHighlightedNodeRingColor(this.config.highlightedNodeRingColor)
+    }
     if (prevConfig.spaceSize !== this.config.spaceSize ||
       prevConfig.simulation.repulsionQuadtreeLevels !== this.config.simulation.repulsionQuadtreeLevels) this.update(this.store.isSimulationRunning)
     if (prevConfig.showFPSMonitor !== this.config.showFPSMonitor) {
@@ -398,6 +402,25 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
+   * Converts x and y coordinates from space to the screen coordinate system.
+   * @param spacePosition Array of x and y coordinates in the space coordinate system.
+   * @returns Array of x and y coordinates in the screen coordinate system.
+   */
+
+  public spaceToScreenPosition (spacePosition: [number, number]): [number, number] {
+    return this.zoomInstance.convertSpaceToScreenPosition(spacePosition)
+  }
+
+  /**
+   * Converts node radius from space to the screen coordinate system.
+   * @param spaceRadius Radius of Node in the space coordinate system.
+   * @returns Radius of Node in the screen coordinate system.
+   */
+  public spaceToScreenRadius (spaceRadius: number): number {
+    return this.zoomInstance.convertSpaceToScreenRadius(spaceRadius)
+  }
+
+  /**
    * Start the simulation.
    * @param alpha Value from 0 to 1. The higher the value, the more initial energy the simulation will get.
    */
@@ -497,6 +520,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.requestAnimationFrameId = window.requestAnimationFrame((now) => {
       this.fpsMonitor?.begin()
       this.resizeCanvas()
+      this.findHoveredPoint()
 
       if (this.isRightClickMouse) {
         if (!isSimulationRunning) this.start(0.1)
@@ -558,6 +582,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   private onClick (event: MouseEvent): void {
+    this.store.setClickedNode()
     this.points.findPointsOnMouseClick()
     const pixels = readPixels(this.reglInstance, this.points.selectedFbo as regl.Framebuffer2D)
     let position: [number, number] | undefined
@@ -640,6 +665,30 @@ export class Graph<N extends InputNode, L extends InputLink> {
         .ease(easeQuadOut)
         .duration(duration / 2)
         .call(this.zoomInstance.behavior.transform, transform)
+    }
+  }
+
+  private findHoveredPoint (): void {
+    this.points.findHoveredPoint()
+    const pixels = readPixels(this.reglInstance, this.points.hoveredFbo as regl.Framebuffer2D)
+    const nodeSize = pixels[1] as number
+    if (nodeSize) {
+      const index = pixels[0] as number
+      const i = index % this.store.pointsTextureSize
+      const j = Math.floor(index / this.store.pointsTextureSize)
+      const inputIndex = this.graph.getInputIndexBySortedIndex(index)
+      const hovered = inputIndex ? this.graph.getNodeByIndex(inputIndex) : undefined
+      this.store.hoveredNode.node = hovered
+      this.store.hoveredNode.indicesFromFbo = [i, j]
+      const pointX = pixels[2] as number
+      const pointY = pixels[3] as number
+      this.store.hoveredNode.position = [pointX, pointY]
+      this.store.hoveredNode.radius = nodeSize / 2
+    } else {
+      this.store.hoveredNode.node = undefined
+      this.store.hoveredNode.indicesFromFbo = [-1, -1]
+      this.store.hoveredNode.position = undefined
+      this.store.hoveredNode.radius = undefined
     }
   }
 }
