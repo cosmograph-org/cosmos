@@ -291,16 +291,18 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
 
   public draw (): void {
     this.drawCommand?.()
-    this.drawHighlightedCommand?.({
-      width: 0.85,
-      color: this.store.hoveredNodeRingColor,
-      pointPosition: this.store.hoveredNode.indicesFromFbo,
-    })
-    this.drawHighlightedCommand?.({
-      width: 0.75,
-      color: this.store.clickedNodeRingColor,
-      pointPosition: this.store.clickedNode.indicesFromFbo,
-    })
+    if (this.config.renderHighlightedNodeRing) {
+      this.drawHighlightedCommand?.({
+        width: 0.85,
+        color: this.store.hoveredNodeRingColor,
+        pointPosition: this.store.hoveredNode.indicesFromFbo,
+      })
+      this.drawHighlightedCommand?.({
+        width: 0.75,
+        color: this.store.clickedNodeRingColor,
+        pointPosition: this.store.clickedNode.indicesFromFbo,
+      })
+    }
   }
 
   public updatePosition (): void {
