@@ -402,7 +402,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Converts x and y coordinates from space to the screen coordinate system.
+   * Converts the X and Y node coordinates from the space coordinate system to the screen coordinate system.
    * @param spacePosition Array of x and y coordinates in the space coordinate system.
    * @returns Array of x and y coordinates in the screen coordinate system.
    */
@@ -412,7 +412,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
-   * Converts node radius from space to the screen coordinate system.
+   * Converts the node radius value from the space coordinate system to the screen coordinate system.
    * @param spaceRadius Radius of Node in the space coordinate system.
    * @returns Radius of Node in the screen coordinate system.
    */

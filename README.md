@@ -217,6 +217,14 @@ Get a `Map` object with node coordinates, where keys are the _ids_ of the nodes 
 
 Get an array of `[number, number]` arrays corresponding to the X and Y coordinates of the nodes.
 
+<a name="space_to_screen_position" href="#space_to_screen_position">#</a> graph.<b>spaceToScreenPosition</b>(<i>coordinates</i>)
+
+Converts the X and Y node <i>coordinates</i> in the `[number, number]` format from the space coordinate system to the screen coordinate system.
+
+<a name="space_to_screen_radius" href="#space_to_screen_radius">#</a> graph.<b>spaceToScreenRadius</b>(<i>radius</i>)
+
+Converts the node <i>radius</i> value from the space coordinate system to the screen coordinate system.
+
 <a name="is_simulation_running" href="#is_simulation_running">#</a> graph.<b>isSimulationRunning</b>
 
 A boolean value showing whether the simulation is active or not.
