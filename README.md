@@ -67,6 +67,8 @@ graph.setData(nodes, links)
 | nodeGreyoutOpacity | Greyed out node opacity value when the selection is active | `0.1`
 | nodeSize | Node size accessor function or value in pixels | `4`
 | nodeSizeScale | Scale factor for the node size | `1`
+| renderHighlightedNodeRing | Turns highlighted node ring rendering on / off | `true`
+| highlightedNodeRingColor | Highlighted node ring color | `undefined`
 | renderLinks | Turns link rendering on / off | `true`
 | linkColor | Link color accessor function or hex value | `#666666`
 | linkGreyoutOpacity | Greyed out link opacity value when the selection is active | `0.1`
