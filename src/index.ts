@@ -65,7 +65,11 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.canvasD3Selection = select<HTMLCanvasElement, undefined>(canvas)
     this.zoomInstance.behavior
       .on('start.detect', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => { this.currentEvent = e })
-      .on('zoom.detect', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => { this.currentEvent = e })
+      .on('zoom.detect', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => {
+        const userDriven = !!e.sourceEvent
+        if (userDriven) this.updateMousePosition(e.sourceEvent)
+        this.currentEvent = e
+      })
       .on('end.detect', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => { this.currentEvent = e })
     this.canvasD3Selection
       .call(this.zoomInstance.behavior)
@@ -602,8 +606,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
     )
   }
 
-  private onMouseMove (event: MouseEvent): void {
-    this.currentEvent = event
+  private updateMousePosition (event: MouseEvent): void {
+    if (!event || event.offsetX === undefined || event.offsetY === undefined) return
     const { x, y, k } = this.zoomInstance.eventTransform
     const h = this.canvas.clientHeight
     const mouseX = event.offsetX
@@ -614,6 +618,11 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.store.mousePosition[0] -= (this.store.screenSize[0] - this.config.spaceSize) / 2
     this.store.mousePosition[1] -= (this.store.screenSize[1] - this.config.spaceSize) / 2
     this.store.screenMousePosition = [mouseX, (this.store.screenSize[1] - mouseY)]
+  }
+
+  private onMouseMove (event: MouseEvent): void {
+    this.currentEvent = event
+    this.updateMousePosition(event)
     this.isRightClickMouse = event.which === 3
     this.config.events.onMouseMove?.(
       this.store.hoveredNode.node as N | undefined,
