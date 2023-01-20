@@ -1,6 +1,7 @@
 import { select, Selection } from 'd3-selection'
 import 'd3-transition'
 import { easeQuadIn, easeQuadOut, easeQuadInOut } from 'd3-ease'
+import { D3ZoomEvent } from 'd3-zoom'
 import regl from 'regl'
 import { GraphConfig, GraphConfigInterface } from '@/graph/config'
 import { getRgbaColor, readPixels } from '@/graph/helper'
@@ -40,6 +41,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   private zoomInstance = new Zoom(this.store, this.config)
   private fpsMonitor: FPSMonitor | undefined
   private hasBeenRecentlyDestroyed = false
+  private currentEvent: D3ZoomEvent<HTMLCanvasElement, undefined> | MouseEvent | undefined
 
   public constructor (canvas: HTMLCanvasElement, config?: GraphConfigInterface<N, L>) {
     if (config) this.config.init(config)
@@ -61,6 +63,10 @@ export class Graph<N extends InputNode, L extends InputLink> {
 
     this.canvas = canvas
     this.canvasD3Selection = select<HTMLCanvasElement, undefined>(canvas)
+    this.zoomInstance.behavior
+      .on('start.detect', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => { this.currentEvent = e })
+      .on('zoom.detect', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => { this.currentEvent = e })
+      .on('end.detect', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => { this.currentEvent = e })
     this.canvasD3Selection
       .call(this.zoomInstance.behavior)
       .on('click', this.onClick.bind(this))
@@ -567,6 +573,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
       this.points.draw()
       this.fpsMonitor?.end(now)
 
+      this.currentEvent = undefined
       this.frame()
     })
   }
@@ -600,6 +607,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   private onMouseMove (event: MouseEvent): void {
+    this.currentEvent = event
     const { x, y, k } = this.zoomInstance.eventTransform
     const h = this.canvas.clientHeight
     const mouseX = event.offsetX
@@ -611,6 +619,16 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.store.mousePosition[1] -= (this.store.screenSize[1] - this.config.spaceSize) / 2
     this.store.screenMousePosition = [mouseX, (this.store.screenSize[1] - mouseY)]
     this.isRightClickMouse = event.which === 3
+    this.config.events.onMouseMove?.(
+      this.store.hoveredNode.node as N | undefined,
+      this.store.hoveredNode.node?.id !== undefined
+        ? this.graph.getInputIndexBySortedIndex(
+        this.graph.getSortedIndexById(this.store.hoveredNode.node.id) as number
+        ) as number
+        : undefined,
+      this.store.hoveredNode.position,
+      this.currentEvent
+    )
   }
 
   private onRightClickMouse (event: MouseEvent): void {
@@ -670,6 +688,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
 
   private findHoveredPoint (): void {
     this.points.findHoveredPoint()
+    let isMouseover = false
+    let isMouseout = false
     const pixels = readPixels(this.reglInstance, this.points.hoveredFbo as regl.Framebuffer2D)
     const nodeSize = pixels[1] as number
     if (nodeSize) {
@@ -678,18 +698,30 @@ export class Graph<N extends InputNode, L extends InputLink> {
       const j = Math.floor(index / this.store.pointsTextureSize)
       const inputIndex = this.graph.getInputIndexBySortedIndex(index)
       const hovered = inputIndex ? this.graph.getNodeByIndex(inputIndex) : undefined
+      if (this.store.hoveredNode.node !== hovered) isMouseover = true
       this.store.hoveredNode.node = hovered
       this.store.hoveredNode.indicesFromFbo = [i, j]
       const pointX = pixels[2] as number
       const pointY = pixels[3] as number
       this.store.hoveredNode.position = [pointX, pointY]
-      this.store.hoveredNode.radius = nodeSize / 2
     } else {
+      if (this.store.hoveredNode.node) isMouseout = true
       this.store.hoveredNode.node = undefined
       this.store.hoveredNode.indicesFromFbo = [-1, -1]
       this.store.hoveredNode.position = undefined
-      this.store.hoveredNode.radius = undefined
     }
+
+    if (isMouseover && this.store.hoveredNode.node) {
+      this.config.events.onNodeMouseOver?.(
+        this.store.hoveredNode.node as N,
+        this.graph.getInputIndexBySortedIndex(
+          this.graph.getSortedIndexById(this.store.hoveredNode.node.id) as number
+        ) as number,
+        this.store.hoveredNode.position,
+        this.currentEvent
+      )
+    }
+    if (isMouseout) this.config.events.onNodeMouseOut?.(this.currentEvent)
   }
 }
 

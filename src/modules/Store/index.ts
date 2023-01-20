@@ -7,11 +7,9 @@ import { hoveredNodeRingOpacity, clickedNodeRingOpacity } from '@/graph/variable
 export const ALPHA_MIN = 0.001
 export const MAX_POINT_SIZE = 64
 
-type HighlightedNode<N> = ({
-  node: N;
-  position: [ number, number ];
-  radius: number;
-} | { node: undefined; position: undefined; radius: undefined }) & { indicesFromFbo: [number, number] }
+type HighlightedNode<N> = N extends undefined ?
+  { node: undefined; position: undefined; indicesFromFbo: [-1, -1] } :
+  { node: N; position: [ number, number ]; indicesFromFbo: [number, number] }
 
 export class Store <N> {
   public pointsTextureSize = 0
@@ -27,17 +25,15 @@ export class Store <N> {
   public simulationProgress = 0
   public selectedIndices: Float32Array | null = null
   public maxPointSize = MAX_POINT_SIZE
-  public hoveredNode: HighlightedNode<N> = {
+  public hoveredNode: HighlightedNode<N | undefined> = {
     node: undefined,
     position: undefined,
-    radius: undefined,
     indicesFromFbo: [-1, -1],
   }
 
-  public clickedNode: HighlightedNode<N> = {
+  public clickedNode: HighlightedNode<N | undefined> = {
     node: undefined,
     position: undefined,
-    radius: undefined,
     indicesFromFbo: [-1, -1],
   }
 
@@ -87,7 +83,6 @@ export class Store <N> {
   public setClickedNode (): void {
     this.clickedNode.node = this.hoveredNode.node
     this.clickedNode.position = this.hoveredNode.position
-    this.clickedNode.radius = this.hoveredNode.radius
     this.clickedNode.indicesFromFbo = this.hoveredNode.indicesFromFbo
   }
 

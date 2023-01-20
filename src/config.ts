@@ -25,7 +25,40 @@ export interface Events <N extends InputNode> {
    * `(node: Node | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void`.
    * Default value: `undefined`
    */
-  onClick?: (clickedNode: N | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void;
+  onClick?: (
+      clickedNode: N | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent
+    ) => void;
+  /**
+   * Callback function that will be called when mouse movement happens.
+   * If the mouse moves over a node, its data will be passed as a first argument,
+   * index as a second argument, position as a third argument
+   * and the corresponding mouse event as a forth argument:
+   * `(node: Node | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void`.
+   * Default value: `undefined`
+   */
+  onMouseMove?: (
+      hoveredNode: N | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent
+    ) => void;
+  /**
+   * Callback function that will be called when a node appears under the mouse
+   * because of mouse move event, zoom/drag event or simulation happens.
+   * The node data will be passed as a first argument,
+   * index as a second argument, position as a third argument
+   * and the corresponding mouse or zoom/drag event as a forth argument:
+   * `(node: Node, index: number, nodePosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined) => void`.
+   * Default value: `undefined`
+   */
+  onNodeMouseOver?: (
+      hoveredNode: N, index: number, nodePosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined
+    ) => void;
+  /**
+   * Callback function that will be called when a node no longer under the mouse
+   * because of mouse move event, zoom/drag event or simulation happens.
+   * The corresponding mouse or zoom/drag event will be passed as a first argument:
+   * `(event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined) => void`.
+   * Default value: `undefined`
+   */
+  onNodeMouseOut?: (event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined) => void;
   /**
    * Callback function that will be called when zooming or panning starts.
    * First argument is a D3 Zoom Event and second indicates whether
@@ -315,6 +348,9 @@ export class GraphConfig<N extends InputNode, L extends InputLink> implements Gr
 
   public events: Events<N> = {
     onClick: undefined,
+    onMouseMove: undefined,
+    onNodeMouseOver: undefined,
+    onNodeMouseOut: undefined,
     onZoomStart: undefined,
     onZoom: undefined,
     onZoomEnd: undefined,
