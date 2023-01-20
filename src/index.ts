@@ -590,20 +590,16 @@ export class Graph<N extends InputNode, L extends InputLink> {
 
   private onClick (event: MouseEvent): void {
     this.store.setClickedNode()
-    this.points.findPointsOnMouseClick()
-    const pixels = readPixels(this.reglInstance, this.points.selectedFbo as regl.Framebuffer2D)
-    let position: [number, number] | undefined
-    const pixelsInSelectedArea = pixels
-      .map((pixel, i) => {
-        if (i % 4 === 0 && pixel !== 0) {
-          position = [pixels[i + 2] as number, this.config.spaceSize - (pixels[i + 3] as number)]
-          return i / 4
-        } else return -1
-      })
-      .filter(d => d !== -1)
-    const clickedIndex = this.graph.getInputIndexBySortedIndex(pixelsInSelectedArea[pixelsInSelectedArea.length - 1] as number)
-    const clickedParticle = (pixelsInSelectedArea.length && clickedIndex !== undefined) ? this.graph.nodes[clickedIndex] : undefined
-    this.config.events.onClick?.(clickedParticle, clickedIndex, position, event)
+    this.config.events.onClick?.(
+      this.store.clickedNode.node as N | undefined,
+      this.store.clickedNode.node?.id !== undefined
+        ? this.graph.getInputIndexBySortedIndex(
+        this.graph.getSortedIndexById(this.store.clickedNode.node.id) as number
+        ) as number
+        : undefined,
+      this.store.clickedNode.position,
+      event
+    )
   }
 
   private onMouseMove (event: MouseEvent): void {
