@@ -183,6 +183,14 @@ Get an array of currently selected nodes.
 
 Get nodes that are adjacent to a specific node by its <i>id</i>.
 
+<a name="get_node_radius_by_index" href="#get_node_radius_by_index">#</a> graph.<b>getNodeRadiusByIndex</b>(<i>index</i>)
+
+Get node radius by its <i>index</i>.
+
+<a name="get_node_radius_by_id" href="#get_node_radius_by_id">#</a> graph.<b>getNodeRadiusById</b>(<i>id</i>)
+
+Get node radius by its <i>id</i>.
+
 <a name="start" href="#start">#</a> graph.<b>start</b>([<i>alpha</i>])
 
 Start the simulation. The <i>alpha</i> value can be from 0 to 1 (1 by default). The higher the value, the more initial energy the simulation will get.

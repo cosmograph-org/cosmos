@@ -431,6 +431,26 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   /**
+   * Get node radius by its index.
+   * @param index Index of the node.
+   * @returns Radius of the node.
+   */
+  public getNodeRadiusByIndex (index: number): number | undefined {
+    const node = this.graph.getNodeByIndex(index)
+    return node && this.points.getNodeRadius(node)
+  }
+
+  /**
+   * Get node radius by its id.
+   * @param id Id of the node.
+   * @returns Radius of the node.
+   */
+  public getNodeRadiusById (id: string): number | undefined {
+    const node = this.graph.getNodeById(id)
+    return node && this.points.getNodeRadius(node)
+  }
+
+  /**
    * Start the simulation.
    * @param alpha Value from 0 to 1. The higher the value, the more initial energy the simulation will get.
    */

@@ -8,7 +8,7 @@ import drawHighlightedFrag from '@/graph/modules/Points/draw-highlighted.frag'
 import drawHighlightedVert from '@/graph/modules/Points/draw-highlighted.vert'
 import findHoveredPointFrag from '@/graph/modules/Points/find-hovered-point.frag'
 import findHoveredPointVert from '@/graph/modules/Points/find-hovered-point.vert'
-import { createSizeBuffer } from '@/graph/modules/Points/size-buffer'
+import { createSizeBuffer, getNodeSize } from '@/graph/modules/Points/size-buffer'
 import updatePositionFrag from '@/graph/modules/Points/update-position.frag'
 import { createIndexesBuffer, createQuadBuffer } from '@/graph/modules/Shared/buffer'
 import updateVert from '@/graph/modules/Shared/quad.vert'
@@ -295,6 +295,11 @@ export class Points<N extends InputNode, L extends InputLink> extends CoreModule
   public findHoveredPoint (): void {
     this.clearHoveredFboCommand?.()
     this.findHoveredPointCommand?.()
+  }
+
+  public getNodeRadius (node: N): number {
+    const { nodeSize } = this.config
+    return getNodeSize(node, nodeSize) / 2
   }
 
   public destroy (): void {
