@@ -19,9 +19,9 @@ export type ColorAccessor<Datum> = ((d: Datum, i?: number, ...rest: unknown[]) =
 export interface Events <N extends InputNode> {
   /**
    * Callback function that will be called on every canvas click.
-   * If clicked on a node, its data will be passed as a first argument,
-   * index as a second argument, position as a third argument
-   * and the corresponding mouse event as a forth argument:
+   * If clicked on a node, its data will be passed as the first argument,
+   * index as the second argument, position as the third argument
+   * and the corresponding mouse event as the forth argument:
    * `(node: Node | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void`.
    * Default value: `undefined`
    */
@@ -30,9 +30,9 @@ export interface Events <N extends InputNode> {
     ) => void;
   /**
    * Callback function that will be called when mouse movement happens.
-   * If the mouse moves over a node, its data will be passed as a first argument,
-   * index as a second argument, position as a third argument
-   * and the corresponding mouse event as a forth argument:
+   * If the mouse moves over a node, its data will be passed as the first argument,
+   * index as the second argument, position as the third argument
+   * and the corresponding mouse event as the forth argument:
    * `(node: Node | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void`.
    * Default value: `undefined`
    */
@@ -41,10 +41,10 @@ export interface Events <N extends InputNode> {
     ) => void;
   /**
    * Callback function that will be called when a node appears under the mouse
-   * because of mouse move event, zoom/drag event or simulation happens.
-   * The node data will be passed as a first argument,
-   * index as a second argument, position as a third argument
-   * and the corresponding mouse or zoom/drag event as a forth argument:
+   * as a result of a mouse event, zooming and panning, or movement of nodes.
+   * The node data will be passed as the first argument,
+   * index as the second argument, position as the third argument
+   * and the corresponding mouse event or D3's zoom event as the forth argument:
    * `(node: Node, index: number, nodePosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined) => void`.
    * Default value: `undefined`
    */
@@ -52,9 +52,9 @@ export interface Events <N extends InputNode> {
       hoveredNode: N, index: number, nodePosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined
     ) => void;
   /**
-   * Callback function that will be called when a node no longer under the mouse
-   * because of mouse move event, zoom/drag event or simulation happens.
-   * The corresponding mouse or zoom/drag event will be passed as a first argument:
+   * Callback function that will be called when a node is no longer underneath
+   * the mouse pointer because of a mouse event, zoom/pan event, or movement of nodes.
+   * The corresponding mouse event or D3's zoom event will be passed as the first argument:
    * `(event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined) => void`.
    * Default value: `undefined`
    */
@@ -205,7 +205,7 @@ export interface GraphConfigInterface<N extends InputNode, L extends InputLink> 
   nodeSizeScale?: number;
 
   /**
-   * Turns highlighted node ring on / off.
+   * Turns the node highlight on hover on / off.
    * Default value: `true`
    */
   renderHighlightedNodeRing?: boolean;
