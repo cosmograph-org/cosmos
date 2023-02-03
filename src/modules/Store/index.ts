@@ -1,11 +1,17 @@
 import { scaleLinear } from 'd3-scale'
 import { mat3 } from 'gl-matrix'
 import { Random } from 'random'
+import { getRgbaColor } from '@/graph/helper'
+import { hoveredNodeRingOpacity, clickedNodeRingOpacity } from '@/graph/variables'
 
 export const ALPHA_MIN = 0.001
 export const MAX_POINT_SIZE = 64
 
-export class Store {
+type HighlightedNode<N> = N extends undefined ?
+  { node: undefined; position: undefined; indicesFromFbo: [-1, -1] } :
+  { node: N; position: [ number, number ]; indicesFromFbo: [number, number] }
+
+export class Store <N> {
   public pointsTextureSize = 0
   public linksTextureSize = 0
   public alpha = 1
@@ -19,6 +25,20 @@ export class Store {
   public simulationProgress = 0
   public selectedIndices: Float32Array | null = null
   public maxPointSize = MAX_POINT_SIZE
+  public hoveredNode: HighlightedNode<N | undefined> = {
+    node: undefined,
+    position: undefined,
+    indicesFromFbo: [-1, -1],
+  }
+
+  public clickedNode: HighlightedNode<N | undefined> = {
+    node: undefined,
+    position: undefined,
+    indicesFromFbo: [-1, -1],
+  }
+
+  public hoveredNodeRingColor = [1, 1, 1, hoveredNodeRingOpacity]
+  public clickedNodeRingColor = [1, 1, 1, clickedNodeRingOpacity]
   private alphaTarget = 0
   private scaleNodeX = scaleLinear()
   private scaleNodeY = scaleLinear()
@@ -48,6 +68,22 @@ export class Store {
 
   public scaleY (y: number): number {
     return this.scaleNodeY(y)
+  }
+
+  public setHighlightedNodeRingColor (color: string): void {
+    const convertedRgba = getRgbaColor(color)
+    this.hoveredNodeRingColor[0] = convertedRgba[0]
+    this.hoveredNodeRingColor[1] = convertedRgba[1]
+    this.hoveredNodeRingColor[2] = convertedRgba[2]
+    this.clickedNodeRingColor[0] = convertedRgba[0]
+    this.clickedNodeRingColor[1] = convertedRgba[1]
+    this.clickedNodeRingColor[2] = convertedRgba[2]
+  }
+
+  public setClickedNode (): void {
+    this.clickedNode.node = this.hoveredNode.node
+    this.clickedNode.position = this.hoveredNode.position
+    this.clickedNode.indicesFromFbo = this.hoveredNode.indicesFromFbo
   }
 
   public addAlpha (decay: number): number {

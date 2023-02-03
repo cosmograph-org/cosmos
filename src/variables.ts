@@ -33,3 +33,6 @@ export const defaultConfigValues = {
   pixelRatio: 2,
   scaleNodesOnZoom: true,
 }
+
+export const hoveredNodeRingOpacity = 0.7
+export const clickedNodeRingOpacity = 0.95

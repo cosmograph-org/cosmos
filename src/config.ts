@@ -19,13 +19,46 @@ export type ColorAccessor<Datum> = ((d: Datum, i?: number, ...rest: unknown[]) =
 export interface Events <N extends InputNode> {
   /**
    * Callback function that will be called on every canvas click.
-   * If clicked on a node, its data will be passed as a first argument,
-   * index as a second argument, position as a third argument
-   * and the corresponding mouse event as a forth argument:
+   * If clicked on a node, its data will be passed as the first argument,
+   * index as the second argument, position as the third argument
+   * and the corresponding mouse event as the forth argument:
    * `(node: Node | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void`.
    * Default value: `undefined`
    */
-  onClick?: (clickedNode: N | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void;
+  onClick?: (
+      clickedNode: N | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent
+    ) => void;
+  /**
+   * Callback function that will be called when mouse movement happens.
+   * If the mouse moves over a node, its data will be passed as the first argument,
+   * index as the second argument, position as the third argument
+   * and the corresponding mouse event as the forth argument:
+   * `(node: Node | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void`.
+   * Default value: `undefined`
+   */
+  onMouseMove?: (
+      hoveredNode: N | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent
+    ) => void;
+  /**
+   * Callback function that will be called when a node appears under the mouse
+   * as a result of a mouse event, zooming and panning, or movement of nodes.
+   * The node data will be passed as the first argument,
+   * index as the second argument, position as the third argument
+   * and the corresponding mouse event or D3's zoom event as the forth argument:
+   * `(node: Node, index: number, nodePosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined) => void`.
+   * Default value: `undefined`
+   */
+  onNodeMouseOver?: (
+      hoveredNode: N, index: number, nodePosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined
+    ) => void;
+  /**
+   * Callback function that will be called when a node is no longer underneath
+   * the mouse pointer because of a mouse event, zoom/pan event, or movement of nodes.
+   * The corresponding mouse event or D3's zoom event will be passed as the first argument:
+   * `(event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined) => void`.
+   * Default value: `undefined`
+   */
+  onNodeMouseOut?: (event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined) => void;
   /**
    * Callback function that will be called when zooming or panning starts.
    * First argument is a D3 Zoom Event and second indicates whether
@@ -172,6 +205,18 @@ export interface GraphConfigInterface<N extends InputNode, L extends InputLink> 
   nodeSizeScale?: number;
 
   /**
+   * Turns the node highlight on hover on / off.
+   * Default value: `true`
+   */
+  renderHighlightedNodeRing?: boolean;
+
+  /**
+   * Highlighted node ring color hex value.
+   * Default value: undefined
+   */
+  highlightedNodeRingColor?: string;
+
+  /**
    * Turns link rendering on / off.
    * Default value: `true`
    */
@@ -269,6 +314,8 @@ export class GraphConfig<N extends InputNode, L extends InputLink> implements Gr
   public nodeGreyoutOpacity = defaultGreyoutNodeOpacity
   public nodeSize = defaultNodeSize
   public nodeSizeScale = defaultConfigValues.nodeSizeScale
+  public renderHighlightedNodeRing = true
+  public highlightedNodeRingColor = undefined
   public linkColor = defaultLinkColor
   public linkGreyoutOpacity = defaultGreyoutLinkOpacity
   public linkWidth = defaultLinkWidth
@@ -301,6 +348,9 @@ export class GraphConfig<N extends InputNode, L extends InputLink> implements Gr
 
   public events: Events<N> = {
     onClick: undefined,
+    onMouseMove: undefined,
+    onNodeMouseOver: undefined,
+    onNodeMouseOut: undefined,
     onZoomStart: undefined,
     onZoom: undefined,
     onZoomEnd: undefined,
