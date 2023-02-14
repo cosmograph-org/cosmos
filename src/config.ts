@@ -16,7 +16,7 @@ export type StringAccessor<Datum> = ((d: Datum, i?: number, ...rest: unknown[]) 
 export type ColorAccessor<Datum> = ((d: Datum, i?: number, ...rest: unknown[]) => string | [number, number, number, number] | null)
   | string | [number, number, number, number] | null | undefined
 
-export interface Events <N extends InputNode> {
+export interface GraphEvents <N extends InputNode> {
   /**
    * Callback function that will be called on every canvas click.
    * If clicked on a node, its data will be passed as the first argument,
@@ -85,7 +85,7 @@ export interface Events <N extends InputNode> {
   onZoomEnd?: (e: D3ZoomEvent<HTMLCanvasElement, undefined>, userDriven: boolean) => void;
 }
 
-export interface GraphSimulationSetting {
+export interface GraphSimulationSettings {
   /**
    * Decay coefficient. Use smaller values if you want the simulation to "cool down" slower.
    * Default value: `1000`
@@ -275,11 +275,11 @@ export interface GraphConfigInterface<N extends InputNode, L extends InputLink> 
    */
   useQuadtree?: boolean;
   /** Simulation parameters and event listeners */
-  simulation?: GraphSimulationSetting;
+  simulation?: GraphSimulationSettings;
   /**
    * Events
    */
-  events?: Events<N>;
+  events?: GraphEvents<N>;
 
   /**
    * Show WebGL performance monitor.
@@ -327,7 +327,7 @@ export class GraphConfig<N extends InputNode, L extends InputLink> implements Gr
   public linkVisibilityMinTransparency = defaultConfigValues.linkVisibilityMinTransparency
   public useQuadtree = defaultConfigValues.useQuadtree
 
-  public simulation: GraphSimulationSetting = {
+  public simulation: GraphSimulationSettings = {
     decay: defaultConfigValues.simulation.decay,
     gravity: defaultConfigValues.simulation.gravity,
     center: defaultConfigValues.simulation.center,
@@ -346,7 +346,7 @@ export class GraphConfig<N extends InputNode, L extends InputLink> implements Gr
     onRestart: undefined,
   }
 
-  public events: Events<N> = {
+  public events: GraphEvents<N> = {
     onClick: undefined,
     onMouseMove: undefined,
     onNodeMouseOver: undefined,
