@@ -191,6 +191,18 @@ Get node radius by its <i>index</i>.
 
 Get node radius by its <i>id</i>.
 
+<a name="track_nodes_by_ids" href="#track_nodes_by_ids">#</a> graph.<b>trackNodesByIds</b>(<i>ids</i>)
+
+Track multiple node positions by their <i>ids</i>.
+
+<a name="track_nodes_by_indices" href="#track_nodes_by_indices">#</a> graph.<b>trackNodesByIndices</b>(<i>indices</i>)
+
+Track multiple node positions by their <i>indices</i>.
+
+<a name="get_tracked_node_positions_map" href="#get_tracked_node_positions_map">#</a> graph.<b>getTrackedNodePositionsMap</b>()
+
+Get a `Map` object with node coordinates, where keys are the _ids_ of the tracked nodes and the values are their X and Y coordinates in the `[number, number]` format.
+
 <a name="start" href="#start">#</a> graph.<b>start</b>([<i>alpha</i>])
 
 Start the simulation. The <i>alpha</i> value can be from 0 to 1 (1 by default). The higher the value, the more initial energy the simulation will get.
