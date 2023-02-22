@@ -135,6 +135,7 @@ export interface GraphSimulationSettings {
   linkDistRandomVariationRange?: number[];
   /**
    * Repulsion coefficient from mouse position.
+   * The repulsion force is activated by pressing the right mouse button.
    * Default value: `2`
    */
   repulsionFromMouse?: number;
