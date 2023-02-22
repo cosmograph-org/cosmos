@@ -111,7 +111,7 @@ It provides several simulation settings to adjust the layout. Each of them can b
 | center | Centering force coefficient | 0.0 – 1.0 | `0.0` |
 | friction | Friction coefficient| 0.8 – 1.0 | `0.85` |
 | decay | Force simulation decay coefficient. <br /><br />Use smaller values if you want the simulation to "cool down" slower.| 100 – 10 000| `1000` |
-| repulsionFromMouse | Repulsion from the mouse pointer force coefficient | 0.0 – 5.0 | `2.0`
+| repulsionFromMouse | Repulsion from the mouse pointer force coefficient. The repulsion force is activated by pressing the right mouse button. | 0.0 – 5.0 | `2.0`
 | simulation.onStart | Callback function that will be called when the simulation starts | | `undefined`
 | simulation.onTick | Callback function that will be called on every simulation tick. <br /><br />The value of the argument `alpha` will decrease over time as the simulation "cools down": `(alpha: number) => void` | | `undefined`
 | simulation.onEnd | Callback function that will be called when the simulation stops | | `undefined`
