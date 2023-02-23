@@ -3,10 +3,10 @@ import { extent } from 'd3-array'
 import { mat3 } from 'gl-matrix'
 import { Store } from '@/graph/modules/Store'
 import { GraphConfigInterface } from '@/graph/config'
-import { InputNode, InputLink } from '@/graph/types'
+import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 import { clamp } from '@/graph/helper'
 
-export class Zoom <N extends InputNode, L extends InputLink> {
+export class Zoom <N extends CosmosInputNode, L extends CosmosInputLink> {
   public readonly store: Store<N>
   public readonly config: GraphConfigInterface<N, L>
   public eventTransform = zoomIdentity

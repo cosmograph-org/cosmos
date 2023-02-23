@@ -14,9 +14,9 @@ import { createIndexesBuffer, createQuadBuffer } from '@/graph/modules/Shared/bu
 import updateVert from '@/graph/modules/Shared/quad.vert'
 import clearFrag from '@/graph/modules/Shared/clear.frag'
 import { defaultConfigValues } from '@/graph/variables'
-import { InputNode, InputLink } from '@/graph/types'
+import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 
-export class Points<N extends InputNode, L extends InputLink> extends CoreModule<N, L> {
+export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extends CoreModule<N, L> {
   public currentPositionFbo: regl.Framebuffer2D | undefined
   public previousPositionFbo: regl.Framebuffer2D | undefined
   public velocityFbo: regl.Framebuffer2D | undefined

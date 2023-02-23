@@ -7,9 +7,9 @@ import { createIndexesBuffer, createQuadBuffer } from '@/graph/modules/Shared/bu
 import clearFrag from '@/graph/modules/Shared/clear.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
 import { defaultConfigValues } from '@/graph/variables'
-import { InputNode, InputLink } from '@/graph/types'
+import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 
-export class ForceManyBodyQuadtree<N extends InputNode, L extends InputLink> extends CoreModule<N, L> {
+export class ForceManyBodyQuadtree<N extends CosmosInputNode, L extends CosmosInputLink> extends CoreModule<N, L> {
   private randomValuesFbo: regl.Framebuffer2D | undefined
   private levelsFbos = new Map<string, regl.Framebuffer2D>()
   private clearLevelsCommand: regl.DrawCommand | undefined

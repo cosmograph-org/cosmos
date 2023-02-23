@@ -1,5 +1,5 @@
 import { D3ZoomEvent } from 'd3-zoom'
-import { InputNode, InputLink } from '@/graph/types'
+import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 import {
   defaultNodeColor,
   defaultGreyoutNodeOpacity,
@@ -16,7 +16,7 @@ export type StringAccessor<Datum> = ((d: Datum, i?: number, ...rest: unknown[]) 
 export type ColorAccessor<Datum> = ((d: Datum, i?: number, ...rest: unknown[]) => string | [number, number, number, number] | null)
   | string | [number, number, number, number] | null | undefined
 
-export interface GraphEvents <N extends InputNode> {
+export interface GraphEvents <N extends CosmosInputNode> {
   /**
    * Callback function that will be called on every canvas click.
    * If clicked on a node, its data will be passed as the first argument,
@@ -171,8 +171,7 @@ export interface GraphSimulationSettings {
    */
   onRestart?: () => void;
 }
-
-export interface GraphConfigInterface<N extends InputNode, L extends InputLink> {
+export interface GraphConfigInterface<N extends CosmosInputNode, L extends CosmosInputLink> {
   /**
    * Canvas background color.
    * Default value: '#222222'
@@ -307,7 +306,7 @@ export interface GraphConfigInterface<N extends InputNode, L extends InputLink> 
   randomSeed?: number | string;
 }
 
-export class GraphConfig<N extends InputNode, L extends InputLink> implements GraphConfigInterface<N, L> {
+export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> implements GraphConfigInterface<N, L> {
   public backgroundColor = defaultBackgroundColor
   public spaceSize = defaultConfigValues.spaceSize
   public nodeColor = defaultNodeColor

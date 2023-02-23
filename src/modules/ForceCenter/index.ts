@@ -6,9 +6,9 @@ import forceFrag from '@/graph/modules/ForceCenter/force-center.frag'
 import { createIndexesBuffer, createQuadBuffer } from '@/graph/modules/Shared/buffer'
 import clearFrag from '@/graph/modules/Shared/clear.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
-import { InputLink, InputNode } from '@/graph/types'
+import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 
-export class ForceCenter<N extends InputNode, L extends InputLink> extends CoreModule<N, L> {
+export class ForceCenter<N extends CosmosInputNode, L extends CosmosInputLink> extends CoreModule<N, L> {
   private centermassFbo: regl.Framebuffer2D | undefined
   private clearCentermassCommand: regl.DrawCommand | undefined
   private calculateCentermassCommand: regl.DrawCommand | undefined

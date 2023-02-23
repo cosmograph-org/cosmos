@@ -17,10 +17,10 @@ import { Lines } from '@/graph/modules/Lines'
 import { Points } from '@/graph/modules/Points'
 import { Store, ALPHA_MIN, MAX_POINT_SIZE } from '@/graph/modules/Store'
 import { Zoom } from '@/graph/modules/Zoom'
-import { InputNode, InputLink } from '@/graph/types'
+import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 import { defaultConfigValues } from '@/graph/variables'
 
-export class Graph<N extends InputNode, L extends InputLink> {
+export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   public config = new GraphConfig<N, L>()
   private canvas: HTMLCanvasElement
   private canvasD3Selection: Selection<HTMLCanvasElement, undefined, null, undefined>
@@ -750,5 +750,5 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 }
 
-export type { InputLink, InputNode } from './types'
+export type { CosmosInputLink, CosmosInputNode } from './types'
 export type { GraphConfigInterface, GraphEvents, GraphSimulationSettings } from './config'
