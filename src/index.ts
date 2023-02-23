@@ -750,5 +750,5 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   }
 }
 
-export type { CosmosInputLink, CosmosInputNode } from './types'
+export type { CosmosInputNode, CosmosInputLink, InputNode, InputLink } from './types'
 export type { GraphConfigInterface, GraphEvents, GraphSimulationSettings } from './config'
