@@ -128,13 +128,13 @@ Set [Cosmos configuration](#cosmos_configuration). The changes will be applied i
 
 Pass data to Cosmos: an array of <i>nodes</i> and an array of <i>links</i>. When <i>runSimulation</i> is set to `false`, the simulation won't be started automatically (`true` by default).
 
-<a name="zoom_to_node_by_id" href="#zoom_to_node_by_id">#</a> graph.<b>zoomToNodeById</b>(<i>id</i>, [<i>duration</i>])
+<a name="zoom_to_node_by_id" href="#zoom_to_node_by_id">#</a> graph.<b>zoomToNodeById</b>(<i>id</i>, [<i>duration</i>], [<i>scale</i>], [<i>canZoomOut</i>])
 
-Center the view on a node and zoom in; by node <i>id</i> with given animation <i>duration</i>. The default <i>duration</i> is 700.
+Center the view on the specified node (by its <i>id</i>) and zoom in with given animation <i>duration</i> and <i>scale</i> value. The default <i>duration</i> is 700 and the default <i>scale</i> is 3. To zoom in closer set a greater scale value. If the <i>scale</i> value is less than the current scale value, the view will be zoomed out. To prevent zooming out from the node, set <i>canZoomOut</i> value to `false`.
 
-<a name="zoom_to_node_by_index" href="#zoom_to_node_by_index">#</a> graph.<b>zoomToNodeByIndex</b>(<i>index</i>, [<i>duration</i>])
+<a name="zoom_to_node_by_index" href="#zoom_to_node_by_index">#</a> graph.<b>zoomToNodeByIndex</b>(<i>index</i>, [<i>duration</i>], [<i>scale</i>], [<i>canZoomOut</i>])
 
-Center the view on a node and zoom in; by node <i>index</i> with given animation <i>duration</i>. The default <i>duration</i> is 700.
+Center the view on the specified node (by its <i>index</i>) and zoom in with given animation <i>duration</i> and <i>scale</i> value. The default <i>duration</i> is 700 and the default <i>scale</i> is 3. To zoom in closer set a greater scale value. If the <i>scale</i> value is less than the current scale value, the view will be zoomed out. To prevent zooming out from the node, set <i>canZoomOut</i> value to `false`.
 
 <a name="set_zoom_level" href="#set_zoom_level">#</a> graph.<b>setZoomLevel</b>(<i>value</i>, [<i>duration</i>])
 
