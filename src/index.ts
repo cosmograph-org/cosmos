@@ -18,7 +18,7 @@ import { Points } from '@/graph/modules/Points'
 import { Store, ALPHA_MIN, MAX_POINT_SIZE } from '@/graph/modules/Store'
 import { Zoom } from '@/graph/modules/Zoom'
 import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
-import { defaultConfigValues } from '@/graph/variables'
+import { defaultConfigValues, defaultScaleToZoom } from '@/graph/variables'
 
 export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   public config = new GraphConfig<N, L>()
@@ -182,22 +182,26 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * Center the view on a node and zoom in, by node id.
    * @param id Id of the node.
    * @param duration Duration of the animation transition in milliseconds (`700` by default).
+   * @param scale Scale value to zoom in or out (`3` by default).
+   * @param canZoomOut Set to `false` to prevent zooming out from the node (`true` by default).
    */
-  public zoomToNodeById (id: string, duration = 700): void {
+  public zoomToNodeById (id: string, duration = 700, scale = defaultScaleToZoom, canZoomOut = true): void {
     const node = this.graph.getNodeById(id)
     if (!node) return
-    this.zoomToNode(node, duration)
+    this.zoomToNode(node, duration, scale, canZoomOut)
   }
 
   /**
    * Center the view on a node and zoom in, by node index.
    * @param index The index of the node in the array of nodes.
    * @param duration Duration of the animation transition in milliseconds (`700` by default).
+   * @param scale Scale value to zoom in or out (`3` by default).
+   * @param canZoomOut Set to `false` to prevent zooming out from the node (`true` by default).
    */
-  public zoomToNodeByIndex (index: number, duration = 700): void {
+  public zoomToNodeByIndex (index: number, duration = 700, scale = defaultScaleToZoom, canZoomOut = true): void {
     const node = this.graph.getNodeByIndex(index)
     if (!node) return
-    this.zoomToNode(node, duration)
+    this.zoomToNode(node, duration, scale, canZoomOut)
   }
 
   /**
@@ -715,7 +719,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       .call(this.zoomInstance.behavior.transform, transform)
   }
 
-  private zoomToNode (node: N, duration: number): void {
+  private zoomToNode (node: N, duration: number, scale: number, canZoomOut: boolean): void {
     const { graph, store: { screenSize } } = this
     const positionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
     const nodeIndex = graph.getSortedIndexById(node.id)
@@ -724,10 +728,11 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     const posY = positionPixels[nodeIndex * 4 + 1]
     if (posX === undefined || posY === undefined) return
     const distance = this.zoomInstance.getDistanceToPoint([posX, posY])
+    const zoomLevel = canZoomOut ? scale : Math.max(this.getZoomLevel(), scale)
     if (distance < Math.min(screenSize[0], screenSize[1])) {
-      this.setZoomTransformByNodePositions([[posX, posY]], duration, 3)
+      this.setZoomTransformByNodePositions([[posX, posY]], duration, zoomLevel)
     } else {
-      const transform = this.zoomInstance.getTransform([[posX, posY]], 3)
+      const transform = this.zoomInstance.getTransform([[posX, posY]], zoomLevel)
       const middle = this.zoomInstance.getMiddlePointTransform([posX, posY])
       this.canvasD3Selection
         .transition()

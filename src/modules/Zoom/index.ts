@@ -11,6 +11,7 @@ export class Zoom <N extends CosmosInputNode, L extends CosmosInputLink> {
   public readonly config: GraphConfigInterface<N, L>
   public eventTransform = zoomIdentity
   public behavior = zoom<HTMLCanvasElement, undefined>()
+    .scaleExtent([0.001, Infinity])
     .on('start', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => {
       this.isRunning = true
       const userDriven = !!e.sourceEvent
