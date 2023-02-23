@@ -253,7 +253,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
 
   /**
    * Get current X and Y coordinates of the nodes.
-   * @returns Map where keys are the ids of the nodes and values are corresponding `[number, number]` with X and Y coordinates of the node.
+   * @returns A Map object where keys are the ids of the nodes and values are their corresponding X and Y coordinates in the [number, number] format.
    */
   public getNodePositionsMap (): Map<string, [number, number]> {
     const positionMap = new Map()
@@ -472,7 +472,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
 
   /**
    * Get current X and Y coordinates of the tracked nodes.
-   * @returns Map where keys are the ids of the nodes and values are corresponding `[number, number]` with X and Y coordinates of the node.
+   * @returns A Map object where keys are the ids of the nodes and values are their corresponding X and Y coordinates in the [number, number] format.
    */
   public getTrackedNodePositionsMap (): Map<string, [number, number]> {
     return this.points.getTrackedPositions()
