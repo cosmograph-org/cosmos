@@ -1,6 +1,7 @@
 import { select, Selection } from 'd3-selection'
 import 'd3-transition'
 import { easeQuadIn, easeQuadOut, easeQuadInOut } from 'd3-ease'
+import { D3ZoomEvent } from 'd3-zoom'
 import regl from 'regl'
 import { GraphConfig, GraphConfigInterface } from '@/graph/config'
 import { getRgbaColor, readPixels } from '@/graph/helper'
@@ -16,10 +17,10 @@ import { Lines } from '@/graph/modules/Lines'
 import { Points } from '@/graph/modules/Points'
 import { Store, ALPHA_MIN, MAX_POINT_SIZE } from '@/graph/modules/Store'
 import { Zoom } from '@/graph/modules/Zoom'
-import { InputNode, InputLink } from '@/graph/types'
-import { defaultConfigValues } from '@/graph/variables'
+import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
+import { defaultConfigValues, defaultScaleToZoom } from '@/graph/variables'
 
-export class Graph<N extends InputNode, L extends InputLink> {
+export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   public config = new GraphConfig<N, L>()
   private canvas: HTMLCanvasElement
   private canvasD3Selection: Selection<HTMLCanvasElement, undefined, null, undefined>
@@ -28,7 +29,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   private isRightClickMouse = false
 
   private graph = new GraphData<N, L>()
-  private store = new Store()
+  private store = new Store<N>()
   private points: Points<N, L>
   private lines: Lines<N, L>
   private forceGravity: ForceGravity<N, L>
@@ -40,6 +41,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
   private zoomInstance = new Zoom(this.store, this.config)
   private fpsMonitor: FPSMonitor | undefined
   private hasBeenRecentlyDestroyed = false
+  private currentEvent: D3ZoomEvent<HTMLCanvasElement, undefined> | MouseEvent | undefined
 
   public constructor (canvas: HTMLCanvasElement, config?: GraphConfigInterface<N, L>) {
     if (config) this.config.init(config)
@@ -61,6 +63,14 @@ export class Graph<N extends InputNode, L extends InputLink> {
 
     this.canvas = canvas
     this.canvasD3Selection = select<HTMLCanvasElement, undefined>(canvas)
+    this.zoomInstance.behavior
+      .on('start.detect', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => { this.currentEvent = e })
+      .on('zoom.detect', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => {
+        const userDriven = !!e.sourceEvent
+        if (userDriven) this.updateMousePosition(e.sourceEvent)
+        this.currentEvent = e
+      })
+      .on('end.detect', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => { this.currentEvent = e })
     this.canvasD3Selection
       .call(this.zoomInstance.behavior)
       .on('click', this.onClick.bind(this))
@@ -92,6 +102,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.forceMouse = new ForceMouse(this.reglInstance, this.config, this.store, this.graph, this.points)
 
     this.store.backgroundColor = getRgbaColor(this.config.backgroundColor)
+    if (this.config.highlightedNodeRingColor) this.store.setHighlightedNodeRingColor(this.config.highlightedNodeRingColor)
 
     if (this.config.showFPSMonitor) this.fpsMonitor = new FPSMonitor(this.canvas)
 
@@ -129,6 +140,9 @@ export class Graph<N extends InputNode, L extends InputLink> {
     if (prevConfig.nodeSize !== this.config.nodeSize) this.points.updateSize()
     if (prevConfig.linkWidth !== this.config.linkWidth) this.lines.updateWidth()
     if (prevConfig.backgroundColor !== this.config.backgroundColor) this.store.backgroundColor = getRgbaColor(this.config.backgroundColor)
+    if (prevConfig.highlightedNodeRingColor !== this.config.highlightedNodeRingColor) {
+      this.store.setHighlightedNodeRingColor(this.config.highlightedNodeRingColor)
+    }
     if (prevConfig.spaceSize !== this.config.spaceSize ||
       prevConfig.simulation.repulsionQuadtreeLevels !== this.config.simulation.repulsionQuadtreeLevels) this.update(this.store.isSimulationRunning)
     if (prevConfig.showFPSMonitor !== this.config.showFPSMonitor) {
@@ -168,22 +182,26 @@ export class Graph<N extends InputNode, L extends InputLink> {
    * Center the view on a node and zoom in, by node id.
    * @param id Id of the node.
    * @param duration Duration of the animation transition in milliseconds (`700` by default).
+   * @param scale Scale value to zoom in or out (`3` by default).
+   * @param canZoomOut Set to `false` to prevent zooming out from the node (`true` by default).
    */
-  public zoomToNodeById (id: string, duration = 700): void {
+  public zoomToNodeById (id: string, duration = 700, scale = defaultScaleToZoom, canZoomOut = true): void {
     const node = this.graph.getNodeById(id)
     if (!node) return
-    this.zoomToNode(node, duration)
+    this.zoomToNode(node, duration, scale, canZoomOut)
   }
 
   /**
    * Center the view on a node and zoom in, by node index.
    * @param index The index of the node in the array of nodes.
    * @param duration Duration of the animation transition in milliseconds (`700` by default).
+   * @param scale Scale value to zoom in or out (`3` by default).
+   * @param canZoomOut Set to `false` to prevent zooming out from the node (`true` by default).
    */
-  public zoomToNodeByIndex (index: number, duration = 700): void {
+  public zoomToNodeByIndex (index: number, duration = 700, scale = defaultScaleToZoom, canZoomOut = true): void {
     const node = this.graph.getNodeByIndex(index)
     if (!node) return
-    this.zoomToNode(node, duration)
+    this.zoomToNode(node, duration, scale, canZoomOut)
   }
 
   /**
@@ -239,7 +257,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
 
   /**
    * Get current X and Y coordinates of the nodes.
-   * @returns Map where keys are the ids of the nodes and values are corresponding `[number, number]` with X and Y coordinates of the node.
+   * @returns A Map object where keys are the ids of the nodes and values are their corresponding X and Y coordinates in the [number, number] format.
    */
   public getNodePositionsMap (): Map<string, [number, number]> {
     const positionMap = new Map()
@@ -313,6 +331,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     } else {
       this.store.selectedIndices = null
     }
+    this.store.setFocusedNode()
     this.points.updateGreyoutStatus()
   }
 
@@ -326,6 +345,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
       const adjacentNodes = this.graph.getAdjacentNodes(id) ?? []
       this.selectNodesByIds([id, ...adjacentNodes.map(d => d.id)])
     } else this.selectNodesByIds([id])
+    this.store.setFocusedNode(this.graph.getNodeById(id), this.graph.getSortedIndexById(id))
   }
 
   /**
@@ -359,6 +379,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
       this.store.selectedIndices = new Float32Array(indices.filter((d): d is number => d !== undefined))
     }
 
+    this.store.setFocusedNode()
     this.points.updateGreyoutStatus()
   }
 
@@ -367,6 +388,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
    */
   public unselectNodes (): void {
     this.store.selectedIndices = null
+    this.store.setFocusedNode()
     this.points.updateGreyoutStatus()
   }
 
@@ -395,6 +417,73 @@ export class Graph<N extends InputNode, L extends InputLink> {
 
   public getAdjacentNodes (id: string): N[] | undefined {
     return this.graph.getAdjacentNodes(id)
+  }
+
+  /**
+   * Converts the X and Y node coordinates from the space coordinate system to the screen coordinate system.
+   * @param spacePosition Array of x and y coordinates in the space coordinate system.
+   * @returns Array of x and y coordinates in the screen coordinate system.
+   */
+
+  public spaceToScreenPosition (spacePosition: [number, number]): [number, number] {
+    return this.zoomInstance.convertSpaceToScreenPosition(spacePosition)
+  }
+
+  /**
+   * Converts the node radius value from the space coordinate system to the screen coordinate system.
+   * @param spaceRadius Radius of Node in the space coordinate system.
+   * @returns Radius of Node in the screen coordinate system.
+   */
+  public spaceToScreenRadius (spaceRadius: number): number {
+    return this.zoomInstance.convertSpaceToScreenRadius(spaceRadius)
+  }
+
+  /**
+   * Get node radius by its index.
+   * @param index Index of the node.
+   * @returns Radius of the node.
+   */
+  public getNodeRadiusByIndex (index: number): number | undefined {
+    const node = this.graph.getNodeByIndex(index)
+    return node && this.points.getNodeRadius(node)
+  }
+
+  /**
+   * Get node radius by its id.
+   * @param id Id of the node.
+   * @returns Radius of the node.
+   */
+  public getNodeRadiusById (id: string): number | undefined {
+    const node = this.graph.getNodeById(id)
+    return node && this.points.getNodeRadius(node)
+  }
+
+  /**
+   * Track multiple node positions by their ids.
+   * @param ids Array of nodes ids.
+   */
+  public trackNodesByIds (ids: string[]): void {
+    this.points.trackNodesByIds(ids)
+  }
+
+  /**
+   * Track multiple node positions by their indices.
+   * @param ids Array of nodes indices.
+   */
+  public trackNodesByIndices (indices: number[]): void {
+    this.points.trackNodesByIds(
+      indices.map(index => this.graph.getNodeByIndex(index))
+        .filter((d): d is N => d !== undefined)
+        .map(d => d.id)
+    )
+  }
+
+  /**
+   * Get current X and Y coordinates of the tracked nodes.
+   * @returns A Map object where keys are the ids of the nodes and values are their corresponding X and Y coordinates in the [number, number] format.
+   */
+  public getTrackedNodePositionsMap (): Map<string, [number, number]> {
+    return this.points.getTrackedPositions()
   }
 
   /**
@@ -497,6 +586,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.requestAnimationFrameId = window.requestAnimationFrame((now) => {
       this.fpsMonitor?.begin()
       this.resizeCanvas()
+      this.findHoveredPoint()
 
       if (this.isRightClickMouse) {
         if (!isSimulationRunning) this.start(0.1)
@@ -529,6 +619,8 @@ export class Graph<N extends InputNode, L extends InputLink> {
         this.config.simulation.onTick?.(this.store.alpha)
       }
 
+      this.points.trackPoints()
+
       // Clear canvas
       this.reglInstance.clear({
         color: this.store.backgroundColor,
@@ -543,6 +635,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
       this.points.draw()
       this.fpsMonitor?.end(now)
 
+      this.currentEvent = undefined
       this.frame()
     })
   }
@@ -558,23 +651,17 @@ export class Graph<N extends InputNode, L extends InputLink> {
   }
 
   private onClick (event: MouseEvent): void {
-    this.points.findPointsOnMouseClick()
-    const pixels = readPixels(this.reglInstance, this.points.selectedFbo as regl.Framebuffer2D)
-    let position: [number, number] | undefined
-    const pixelsInSelectedArea = pixels
-      .map((pixel, i) => {
-        if (i % 4 === 0 && pixel !== 0) {
-          position = [pixels[i + 2] as number, this.config.spaceSize - (pixels[i + 3] as number)]
-          return i / 4
-        } else return -1
-      })
-      .filter(d => d !== -1)
-    const clickedIndex = this.graph.getInputIndexBySortedIndex(pixelsInSelectedArea[pixelsInSelectedArea.length - 1] as number)
-    const clickedParticle = (pixelsInSelectedArea.length && clickedIndex !== undefined) ? this.graph.nodes[clickedIndex] : undefined
-    this.config.events.onClick?.(clickedParticle, clickedIndex, position, event)
+    this.store.setFocusedNode(this.store.hoveredNode?.node, this.store.hoveredNode?.index)
+    this.config.events.onClick?.(
+      this.store.hoveredNode?.node,
+      this.store.hoveredNode ? this.graph.getInputIndexBySortedIndex(this.store.hoveredNode.index) : undefined,
+      this.store.hoveredNode?.position,
+      event
+    )
   }
 
-  private onMouseMove (event: MouseEvent): void {
+  private updateMousePosition (event: MouseEvent): void {
+    if (!event || event.offsetX === undefined || event.offsetY === undefined) return
     const { x, y, k } = this.zoomInstance.eventTransform
     const h = this.canvas.clientHeight
     const mouseX = event.offsetX
@@ -585,7 +672,18 @@ export class Graph<N extends InputNode, L extends InputLink> {
     this.store.mousePosition[0] -= (this.store.screenSize[0] - this.config.spaceSize) / 2
     this.store.mousePosition[1] -= (this.store.screenSize[1] - this.config.spaceSize) / 2
     this.store.screenMousePosition = [mouseX, (this.store.screenSize[1] - mouseY)]
+  }
+
+  private onMouseMove (event: MouseEvent): void {
+    this.currentEvent = event
+    this.updateMousePosition(event)
     this.isRightClickMouse = event.which === 3
+    this.config.events.onMouseMove?.(
+      this.store.hoveredNode?.node,
+      this.store.hoveredNode ? this.graph.getInputIndexBySortedIndex(this.store.hoveredNode.index) : undefined,
+      this.store.hoveredNode?.position,
+      this.currentEvent
+    )
   }
 
   private onRightClickMouse (event: MouseEvent): void {
@@ -617,7 +715,7 @@ export class Graph<N extends InputNode, L extends InputLink> {
       .call(this.zoomInstance.behavior.transform, transform)
   }
 
-  private zoomToNode (node: N, duration: number): void {
+  private zoomToNode (node: N, duration: number, scale: number, canZoomOut: boolean): void {
     const { graph, store: { screenSize } } = this
     const positionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
     const nodeIndex = graph.getSortedIndexById(node.id)
@@ -626,10 +724,11 @@ export class Graph<N extends InputNode, L extends InputLink> {
     const posY = positionPixels[nodeIndex * 4 + 1]
     if (posX === undefined || posY === undefined) return
     const distance = this.zoomInstance.getDistanceToPoint([posX, posY])
+    const zoomLevel = canZoomOut ? scale : Math.max(this.getZoomLevel(), scale)
     if (distance < Math.min(screenSize[0], screenSize[1])) {
-      this.setZoomTransformByNodePositions([[posX, posY]], duration, 3)
+      this.setZoomTransformByNodePositions([[posX, posY]], duration, zoomLevel)
     } else {
-      const transform = this.zoomInstance.getTransform([[posX, posY]], 3)
+      const transform = this.zoomInstance.getTransform([[posX, posY]], zoomLevel)
       const middle = this.zoomInstance.getMiddlePointTransform([posX, posY])
       this.canvasD3Selection
         .transition()
@@ -642,7 +741,43 @@ export class Graph<N extends InputNode, L extends InputLink> {
         .call(this.zoomInstance.behavior.transform, transform)
     }
   }
+
+  private findHoveredPoint (): void {
+    this.points.findHoveredPoint()
+    let isMouseover = false
+    let isMouseout = false
+    const pixels = readPixels(this.reglInstance, this.points.hoveredFbo as regl.Framebuffer2D)
+    const nodeSize = pixels[1] as number
+    if (nodeSize) {
+      const index = pixels[0] as number
+      const inputIndex = this.graph.getInputIndexBySortedIndex(index)
+      const hovered = inputIndex ? this.graph.getNodeByIndex(inputIndex) : undefined
+      if (this.store.hoveredNode?.node !== hovered) isMouseover = true
+      const pointX = pixels[2] as number
+      const pointY = pixels[3] as number
+      this.store.hoveredNode = hovered && {
+        node: hovered,
+        index,
+        position: [pointX, pointY],
+      }
+    } else {
+      if (this.store.hoveredNode) isMouseout = true
+      this.store.hoveredNode = undefined
+    }
+
+    if (isMouseover && this.store.hoveredNode) {
+      this.config.events.onNodeMouseOver?.(
+        this.store.hoveredNode.node as N,
+        this.graph.getInputIndexBySortedIndex(
+          this.graph.getSortedIndexById(this.store.hoveredNode.node.id) as number
+        ) as number,
+        this.store.hoveredNode.position,
+        this.currentEvent
+      )
+    }
+    if (isMouseout) this.config.events.onNodeMouseOut?.(this.currentEvent)
+  }
 }
 
-export type { InputLink, InputNode } from './types'
-export type { GraphConfigInterface } from './config'
+export type { CosmosInputNode, CosmosInputLink, InputNode, InputLink } from './types'
+export type { GraphConfigInterface, GraphEvents, GraphSimulationSettings } from './config'

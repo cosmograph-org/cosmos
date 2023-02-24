@@ -67,6 +67,8 @@ graph.setData(nodes, links)
 | nodeGreyoutOpacity | Greyed out node opacity value when the selection is active | `0.1`
 | nodeSize | Node size accessor function or value in pixels | `4`
 | nodeSizeScale | Scale factor for the node size | `1`
+| renderHighlightedNodeRing | Turns the node highlight on hover on / off | `true`
+| highlightedNodeRingColor | Highlighted node ring color | `undefined`
 | renderLinks | Turns link rendering on / off | `true`
 | linkColor | Link color accessor function or hex value | `#666666`
 | linkGreyoutOpacity | Greyed out link opacity value when the selection is active | `0.1`
@@ -78,7 +80,10 @@ graph.setData(nodes, links)
 | linkVisibilityMinTransparency | The transparency value that the link will have when its length reaches the maximum link distance value from `linkVisibilityDistanceRange`. | `0.25`
 | useQuadtree | Use the classic [quadtree algorithm](https://en.wikipedia.org/wiki/Barnes%E2%80%93Hut_simulation) for the Many-Body force. This property will be applied only on component initialization and it can't be changed using the `setConfig` method. <br /><br /> ⚠ The algorithm might not work on some GPUs (e.g. Nvidia) and on Windows (unless you disable ANGLE in the browser settings). | `false`
 | simulation | Simulation parameters and event listeners | See [Simulation configuration](#simulation_configuration) table for more details
-| events.onClick | Callback function that will be called on every canvas click. If clicked on a node, its data will be passed as a first argument, index as a second argument, position as a third argument and the corresponding mouse event as a forth argument: <code>(node: Node &vert; undefined, index: number &vert; undefined, nodePosition: [number, number] &vert; undefined, event: MouseEvent) => void</code> | `undefined`
+| events.onClick | Callback function that will be called on every canvas click. If clicked on a node, its data will be passed as the first argument, index as the second argument, position as the third argument and the corresponding mouse event as the forth argument: <code>(node: Node &vert; undefined, index: number &vert; undefined, nodePosition: [number, number] &vert; undefined, event: MouseEvent) => void</code> | `undefined`
+| events.onMouseMove | Callback function that will be called when mouse movement happens. If the mouse moves over a node, its data will be passed as the first argument, index as the second argument, position as the third argument and the corresponding mouse event as the forth argument: <code>(node: Node &vert; undefined, index: number &vert; undefined, nodePosition: [number, number] &vert; undefined, event: MouseEvent) => void</code> | `undefined`
+| events.onNodeMouseOver | Callback function that will be called when a node appears under the mouse as a result of a mouse event, zooming and panning, or movement of nodes. The node data will be passed as the first argument, index as the second argument, position as the third argument and the corresponding mouse event or D3's zoom event as the forth argument: <code>(node: Node, index: number, nodePosition: [number, number], event: MouseEvent &vert; D3ZoomEvent &vert; undefined) => void</code> | `undefined`
+| events.onNodeMouseOut | Callback function that will be called when node is no longer underneath the mouse pointer because of a mouse event, zoom/pan event, or movement of nodes. The corresponding mouse event or D3's zoom event will be passed as the first argument: <code>(event: MouseEvent &vert; D3ZoomEvent &vert; undefined) => void</code> | `undefined`
 | events.onZoomStart | Callback function that will be called when zooming or panning starts. First argument is a D3 Zoom Event and second indicates whether the event has been initiated by a user interaction (e.g. a mouse event): <code>(event: D3ZoomEvent, userDriven: boolean) => void</code> | `undefined`
 | events.onZoom | Callback function that will be called continuously during zooming or panning. First argument is a D3 Zoom Event and second indicates whether the event has been initiated by a user interaction (e.g. a mouse event): <code>(event: D3ZoomEvent, userDriven: boolean) => void</code> | `undefined`
 | events.onZoomEnd | Callback function that will be called when zooming or panning ends. First argument is a D3 Zoom Event and second indicates whether the event has been initiated by a user interaction (e.g. a mouse event): <code>(event: D3ZoomEvent, userDriven: boolean) => void</code> | `undefined`
@@ -106,7 +111,7 @@ It provides several simulation settings to adjust the layout. Each of them can b
 | center | Centering force coefficient | 0.0 – 1.0 | `0.0` |
 | friction | Friction coefficient| 0.8 – 1.0 | `0.85` |
 | decay | Force simulation decay coefficient. <br /><br />Use smaller values if you want the simulation to "cool down" slower.| 100 – 10 000| `1000` |
-| repulsionFromMouse | Repulsion from the mouse pointer force coefficient | 0.0 – 5.0 | `2.0`
+| repulsionFromMouse | Repulsion from the mouse pointer force coefficient. The repulsion force is activated by pressing the right mouse button. | 0.0 – 5.0 | `2.0`
 | simulation.onStart | Callback function that will be called when the simulation starts | | `undefined`
 | simulation.onTick | Callback function that will be called on every simulation tick. <br /><br />The value of the argument `alpha` will decrease over time as the simulation "cools down": `(alpha: number) => void` | | `undefined`
 | simulation.onEnd | Callback function that will be called when the simulation stops | | `undefined`
@@ -123,13 +128,13 @@ Set [Cosmos configuration](#cosmos_configuration). The changes will be applied i
 
 Pass data to Cosmos: an array of <i>nodes</i> and an array of <i>links</i>. When <i>runSimulation</i> is set to `false`, the simulation won't be started automatically (`true` by default).
 
-<a name="zoom_to_node_by_id" href="#zoom_to_node_by_id">#</a> graph.<b>zoomToNodeById</b>(<i>id</i>, [<i>duration</i>])
+<a name="zoom_to_node_by_id" href="#zoom_to_node_by_id">#</a> graph.<b>zoomToNodeById</b>(<i>id</i>, [<i>duration</i>], [<i>scale</i>], [<i>canZoomOut</i>])
 
-Center the view on a node and zoom in; by node <i>id</i> with given animation <i>duration</i>. The default <i>duration</i> is 700.
+Center the view on the specified node (by its <i>id</i>) and zoom in with given animation <i>duration</i> and <i>scale</i> value. The default <i>duration</i> is 700 and the default <i>scale</i> is 3. To zoom in closer set a greater scale value. If the <i>scale</i> value is less than the current scale value, the view will be zoomed out. To prevent zooming out from the node, set <i>canZoomOut</i> value to `false`.
 
-<a name="zoom_to_node_by_index" href="#zoom_to_node_by_index">#</a> graph.<b>zoomToNodeByIndex</b>(<i>index</i>, [<i>duration</i>])
+<a name="zoom_to_node_by_index" href="#zoom_to_node_by_index">#</a> graph.<b>zoomToNodeByIndex</b>(<i>index</i>, [<i>duration</i>], [<i>scale</i>], [<i>canZoomOut</i>])
 
-Center the view on a node and zoom in; by node <i>index</i> with given animation <i>duration</i>. The default <i>duration</i> is 700.
+Center the view on the specified node (by its <i>index</i>) and zoom in with given animation <i>duration</i> and <i>scale</i> value. The default <i>duration</i> is 700 and the default <i>scale</i> is 3. To zoom in closer set a greater scale value. If the <i>scale</i> value is less than the current scale value, the view will be zoomed out. To prevent zooming out from the node, set <i>canZoomOut</i> value to `false`.
 
 <a name="set_zoom_level" href="#set_zoom_level">#</a> graph.<b>setZoomLevel</b>(<i>value</i>, [<i>duration</i>])
 
@@ -178,6 +183,26 @@ Get an array of currently selected nodes.
 
 Get nodes that are adjacent to a specific node by its <i>id</i>.
 
+<a name="get_node_radius_by_index" href="#get_node_radius_by_index">#</a> graph.<b>getNodeRadiusByIndex</b>(<i>index</i>)
+
+Get node radius by its <i>index</i>.
+
+<a name="get_node_radius_by_id" href="#get_node_radius_by_id">#</a> graph.<b>getNodeRadiusById</b>(<i>id</i>)
+
+Get node radius by its <i>id</i>.
+
+<a name="track_nodes_by_ids" href="#track_nodes_by_ids">#</a> graph.<b>trackNodesByIds</b>(<i>ids</i>)
+
+Track multiple node positions by their <i>ids</i>.
+
+<a name="track_nodes_by_indices" href="#track_nodes_by_indices">#</a> graph.<b>trackNodesByIndices</b>(<i>indices</i>)
+
+Track multiple node positions by their <i>indices</i>.
+
+<a name="get_tracked_node_positions_map" href="#get_tracked_node_positions_map">#</a> graph.<b>getTrackedNodePositionsMap</b>()
+
+Get a `Map` object with node coordinates, where keys are the _ids_ of the tracked nodes and the values are their X and Y coordinates in the `[number, number]` format.
+
 <a name="start" href="#start">#</a> graph.<b>start</b>([<i>alpha</i>])
 
 Start the simulation. The <i>alpha</i> value can be from 0 to 1 (1 by default). The higher the value, the more initial energy the simulation will get.
@@ -214,6 +239,14 @@ Get a `Map` object with node coordinates, where keys are the _ids_ of the nodes 
 <a name="get_node_positions_array" href="#get_node_positions_array">#</a> graph.<b>getNodePositionsArray</b>()
 
 Get an array of `[number, number]` arrays corresponding to the X and Y coordinates of the nodes.
+
+<a name="space_to_screen_position" href="#space_to_screen_position">#</a> graph.<b>spaceToScreenPosition</b>(<i>coordinates</i>)
+
+Converts the X and Y node <i>coordinates</i> in the `[number, number]` format from the space coordinate system to the screen coordinate system.
+
+<a name="space_to_screen_radius" href="#space_to_screen_radius">#</a> graph.<b>spaceToScreenRadius</b>(<i>radius</i>)
+
+Converts the node <i>radius</i> value from the space coordinate system to the screen coordinate system.
 
 <a name="is_simulation_running" href="#is_simulation_running">#</a> graph.<b>isSimulationRunning</b>
 

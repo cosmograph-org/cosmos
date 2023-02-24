@@ -1,11 +1,11 @@
 import regl from 'regl'
 import { ColorAccessor } from '@/graph/config'
 import { getValue, getRgbaColor } from '@/graph/helper'
-import { InputNode, InputLink } from '@/graph/types'
+import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 import { GraphData } from '@/graph/modules/GraphData'
 import { defaultNodeColor } from '@/graph/variables'
 
-export function createColorBuffer <N extends InputNode, L extends InputLink> (
+export function createColorBuffer <N extends CosmosInputNode, L extends CosmosInputLink> (
   data: GraphData<N, L>,
   reglInstance: regl.Regl,
   textureSize: number,
