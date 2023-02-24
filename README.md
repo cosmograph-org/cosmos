@@ -111,7 +111,7 @@ It provides several simulation settings to adjust the layout. Each of them can b
 | center | Centering force coefficient | 0.0 – 1.0 | `0.0` |
 | friction | Friction coefficient| 0.8 – 1.0 | `0.85` |
 | decay | Force simulation decay coefficient. <br /><br />Use smaller values if you want the simulation to "cool down" slower.| 100 – 10 000| `1000` |
-| repulsionFromMouse | Repulsion from the mouse pointer force coefficient | 0.0 – 5.0 | `2.0`
+| repulsionFromMouse | Repulsion from the mouse pointer force coefficient. The repulsion force is activated by pressing the right mouse button. | 0.0 – 5.0 | `2.0`
 | simulation.onStart | Callback function that will be called when the simulation starts | | `undefined`
 | simulation.onTick | Callback function that will be called on every simulation tick. <br /><br />The value of the argument `alpha` will decrease over time as the simulation "cools down": `(alpha: number) => void` | | `undefined`
 | simulation.onEnd | Callback function that will be called when the simulation stops | | `undefined`
@@ -190,6 +190,18 @@ Get node radius by its <i>index</i>.
 <a name="get_node_radius_by_id" href="#get_node_radius_by_id">#</a> graph.<b>getNodeRadiusById</b>(<i>id</i>)
 
 Get node radius by its <i>id</i>.
+
+<a name="track_nodes_by_ids" href="#track_nodes_by_ids">#</a> graph.<b>trackNodesByIds</b>(<i>ids</i>)
+
+Track multiple node positions by their <i>ids</i>.
+
+<a name="track_nodes_by_indices" href="#track_nodes_by_indices">#</a> graph.<b>trackNodesByIndices</b>(<i>indices</i>)
+
+Track multiple node positions by their <i>indices</i>.
+
+<a name="get_tracked_node_positions_map" href="#get_tracked_node_positions_map">#</a> graph.<b>getTrackedNodePositionsMap</b>()
+
+Get a `Map` object with node coordinates, where keys are the _ids_ of the tracked nodes and the values are their X and Y coordinates in the `[number, number]` format.
 
 <a name="start" href="#start">#</a> graph.<b>start</b>([<i>alpha</i>])
 

@@ -253,7 +253,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
 
   /**
    * Get current X and Y coordinates of the nodes.
-   * @returns Map where keys are the ids of the nodes and values are corresponding `[number, number]` with X and Y coordinates of the node.
+   * @returns A Map object where keys are the ids of the nodes and values are their corresponding X and Y coordinates in the [number, number] format.
    */
   public getNodePositionsMap (): Map<string, [number, number]> {
     const positionMap = new Map()
@@ -451,6 +451,34 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   }
 
   /**
+   * Track multiple node positions by their ids.
+   * @param ids Array of nodes ids.
+   */
+  public trackNodesByIds (ids: string[]): void {
+    this.points.trackNodesByIds(ids)
+  }
+
+  /**
+   * Track multiple node positions by their indices.
+   * @param ids Array of nodes indices.
+   */
+  public trackNodesByIndices (indices: number[]): void {
+    this.points.trackNodesByIds(
+      indices.map(index => this.graph.getNodeByIndex(index))
+        .filter((d): d is N => d !== undefined)
+        .map(d => d.id)
+    )
+  }
+
+  /**
+   * Get current X and Y coordinates of the tracked nodes.
+   * @returns A Map object where keys are the ids of the nodes and values are their corresponding X and Y coordinates in the [number, number] format.
+   */
+  public getTrackedNodePositionsMap (): Map<string, [number, number]> {
+    return this.points.getTrackedPositions()
+  }
+
+  /**
    * Start the simulation.
    * @param alpha Value from 0 to 1. The higher the value, the more initial energy the simulation will get.
    */
@@ -582,6 +610,8 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
         this.store.simulationProgress = Math.sqrt(Math.min(1, ALPHA_MIN / this.store.alpha))
         this.config.simulation.onTick?.(this.store.alpha)
       }
+
+      this.points.trackPoints()
 
       // Clear canvas
       this.reglInstance.clear({

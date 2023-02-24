@@ -11,9 +11,12 @@ import findHoveredPointVert from '@/graph/modules/Points/find-hovered-point.vert
 import { createSizeBuffer, getNodeSize } from '@/graph/modules/Points/size-buffer'
 import updatePositionFrag from '@/graph/modules/Points/update-position.frag'
 import { createIndexesBuffer, createQuadBuffer } from '@/graph/modules/Shared/buffer'
+import { createTrackedIndicesBuffer, createTrackedPositionsBuffer } from '@/graph/modules/Points/tracked-buffer'
+import trackPositionsFrag from '@/graph/modules/Points/track-positions.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
 import clearFrag from '@/graph/modules/Shared/clear.frag'
 import { defaultConfigValues } from '@/graph/variables'
+import { readPixels } from '@/graph/helper'
 import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 
 export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extends CoreModule<N, L> {
@@ -25,12 +28,17 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
   public hoveredFbo: regl.Framebuffer2D | undefined
   public greyoutStatusFbo: regl.Framebuffer2D | undefined
   public sizeFbo: regl.Framebuffer2D | undefined
+  public trackedIndicesFbo: regl.Framebuffer2D | undefined
+  public trackedPositionsFbo: regl.Framebuffer2D | undefined
   private drawCommand: regl.DrawCommand | undefined
   private drawHighlightedCommand: regl.DrawCommand | undefined
   private updatePositionCommand: regl.DrawCommand | undefined
   private findPointsOnAreaSelectionCommand: regl.DrawCommand | undefined
   private findHoveredPointCommand: regl.DrawCommand | undefined
   private clearHoveredFboCommand: regl.DrawCommand | undefined
+  private trackPointsCommand: regl.DrawCommand | undefined
+  private trackedIds: string[] | undefined
+  private trackedPositionsById: Map<string, [number, number]> = new Map()
 
   public create (): void {
     const { reglInstance, config, store, data } = this
@@ -250,6 +258,19 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
         mask: false,
       },
     })
+    this.trackPointsCommand = reglInstance({
+      frag: trackPositionsFrag,
+      vert: updateVert,
+      framebuffer: () => this.trackedPositionsFbo as regl.Framebuffer2D,
+      primitive: 'triangle strip',
+      count: 4,
+      attributes: { quad: createQuadBuffer(reglInstance) },
+      uniforms: {
+        position: () => this.currentPositionFbo,
+        trackedIndices: () => this.trackedIndicesFbo,
+        pointsTextureSize: () => store.pointsTextureSize,
+      },
+    })
   }
 
   public updateColor (): void {
@@ -265,6 +286,11 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
   public updateSize (): void {
     const { reglInstance, config, store, data } = this
     this.sizeFbo = createSizeBuffer(data, reglInstance, store.pointsTextureSize, config.nodeSize)
+  }
+
+  public trackPoints (): void {
+    if (!this.trackedIndicesFbo || !this.trackedPositionsFbo) return
+    this.trackPointsCommand?.()
   }
 
   public draw (): void {
@@ -302,6 +328,36 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
     return getNodeSize(node, nodeSize) / 2
   }
 
+  public trackNodesByIds (ids: string[]): void {
+    this.trackedIds = ids.length ? ids : undefined
+    this.trackedPositionsById.clear()
+    const indices = ids.map(id => this.data.getSortedIndexById(id)).filter((d): d is number => d !== undefined)
+    if (this.trackedIndicesFbo) {
+      this.trackedIndicesFbo.destroy()
+      this.trackedIndicesFbo = undefined
+    }
+    if (this.trackedPositionsFbo) {
+      this.trackedPositionsFbo.destroy()
+      this.trackedPositionsFbo = undefined
+    }
+    if (indices.length) {
+      this.trackedIndicesFbo = createTrackedIndicesBuffer(indices, this.store.pointsTextureSize, this.reglInstance)
+      this.trackedPositionsFbo = createTrackedPositionsBuffer(indices, this.reglInstance)
+    }
+    this.trackPoints()
+  }
+
+  public getTrackedPositions (): Map<string, [number, number]> {
+    if (!this.trackedIds) return this.trackedPositionsById
+    const pixels = readPixels(this.reglInstance, this.trackedPositionsFbo as regl.Framebuffer2D)
+    this.trackedIds.forEach((id, i) => {
+      const x = pixels[i * 4]
+      const y = pixels[i * 4 + 1]
+      if (x !== undefined && y !== undefined) this.trackedPositionsById.set(id, [x, y])
+    })
+    return this.trackedPositionsById
+  }
+
   public destroy (): void {
     this.currentPositionFbo?.destroy()
     this.previousPositionFbo?.destroy()
@@ -311,6 +367,8 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
     this.sizeFbo?.destroy()
     this.greyoutStatusFbo?.destroy()
     this.hoveredFbo?.destroy()
+    this.trackedIndicesFbo?.destroy()
+    this.trackedPositionsFbo?.destroy()
   }
 
   private swapFbo (): void {
