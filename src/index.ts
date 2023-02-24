@@ -331,6 +331,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     } else {
       this.store.selectedIndices = null
     }
+    this.store.setFocusedNode()
     this.points.updateGreyoutStatus()
   }
 
@@ -344,6 +345,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       const adjacentNodes = this.graph.getAdjacentNodes(id) ?? []
       this.selectNodesByIds([id, ...adjacentNodes.map(d => d.id)])
     } else this.selectNodesByIds([id])
+    this.store.setFocusedNode(this.graph.getNodeById(id), this.graph.getSortedIndexById(id))
   }
 
   /**
@@ -377,6 +379,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       this.store.selectedIndices = new Float32Array(indices.filter((d): d is number => d !== undefined))
     }
 
+    this.store.setFocusedNode()
     this.points.updateGreyoutStatus()
   }
 
@@ -385,6 +388,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    */
   public unselectNodes (): void {
     this.store.selectedIndices = null
+    this.store.setFocusedNode()
     this.points.updateGreyoutStatus()
   }
 
@@ -647,15 +651,11 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   }
 
   private onClick (event: MouseEvent): void {
-    this.store.setClickedNode()
+    this.store.setFocusedNode(this.store.hoveredNode?.node, this.store.hoveredNode?.index)
     this.config.events.onClick?.(
-      this.store.clickedNode.node as N | undefined,
-      this.store.clickedNode.node?.id !== undefined
-        ? this.graph.getInputIndexBySortedIndex(
-        this.graph.getSortedIndexById(this.store.clickedNode.node.id) as number
-        ) as number
-        : undefined,
-      this.store.clickedNode.position,
+      this.store.hoveredNode?.node,
+      this.store.hoveredNode ? this.graph.getInputIndexBySortedIndex(this.store.hoveredNode.index) : undefined,
+      this.store.hoveredNode?.position,
       event
     )
   }
@@ -679,13 +679,9 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     this.updateMousePosition(event)
     this.isRightClickMouse = event.which === 3
     this.config.events.onMouseMove?.(
-      this.store.hoveredNode.node as N | undefined,
-      this.store.hoveredNode.node?.id !== undefined
-        ? this.graph.getInputIndexBySortedIndex(
-        this.graph.getSortedIndexById(this.store.hoveredNode.node.id) as number
-        ) as number
-        : undefined,
-      this.store.hoveredNode.position,
+      this.store.hoveredNode?.node,
+      this.store.hoveredNode ? this.graph.getInputIndexBySortedIndex(this.store.hoveredNode.index) : undefined,
+      this.store.hoveredNode?.position,
       this.currentEvent
     )
   }
@@ -754,24 +750,22 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     const nodeSize = pixels[1] as number
     if (nodeSize) {
       const index = pixels[0] as number
-      const i = index % this.store.pointsTextureSize
-      const j = Math.floor(index / this.store.pointsTextureSize)
       const inputIndex = this.graph.getInputIndexBySortedIndex(index)
       const hovered = inputIndex ? this.graph.getNodeByIndex(inputIndex) : undefined
-      if (this.store.hoveredNode.node !== hovered) isMouseover = true
-      this.store.hoveredNode.node = hovered
-      this.store.hoveredNode.indicesFromFbo = [i, j]
+      if (this.store.hoveredNode?.node !== hovered) isMouseover = true
       const pointX = pixels[2] as number
       const pointY = pixels[3] as number
-      this.store.hoveredNode.position = [pointX, pointY]
+      this.store.hoveredNode = hovered && {
+        node: hovered,
+        index,
+        position: [pointX, pointY],
+      }
     } else {
-      if (this.store.hoveredNode.node) isMouseout = true
-      this.store.hoveredNode.node = undefined
-      this.store.hoveredNode.indicesFromFbo = [-1, -1]
-      this.store.hoveredNode.position = undefined
+      if (this.store.hoveredNode) isMouseout = true
+      this.store.hoveredNode = undefined
     }
 
-    if (isMouseover && this.store.hoveredNode.node) {
+    if (isMouseover && this.store.hoveredNode) {
       this.config.events.onNodeMouseOver?.(
         this.store.hoveredNode.node as N,
         this.graph.getInputIndexBySortedIndex(
