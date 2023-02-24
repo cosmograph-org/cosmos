@@ -1,6 +1,6 @@
-import { InputNode, InputLink } from '@/graph/types'
+import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 
-export class GraphData <N extends InputNode, L extends InputLink> {
+export class GraphData <N extends CosmosInputNode, L extends CosmosInputLink> {
   /** Links that have existing source and target nodes  */
   public completeLinks: Set<L> = new Set()
   public degree: number[] = []

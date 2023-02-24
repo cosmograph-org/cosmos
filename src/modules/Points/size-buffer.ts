@@ -2,10 +2,10 @@ import regl from 'regl'
 import { NumericAccessor } from '@/graph/config'
 import { getValue } from '@/graph/helper'
 import { GraphData } from '@/graph/modules/GraphData'
-import { InputNode, InputLink } from '@/graph/types'
+import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 import { defaultNodeSize } from '@/graph/variables'
 
-export function getNodeSize<N extends InputNode> (
+export function getNodeSize<N extends CosmosInputNode> (
   node: N,
   sizeAccessor: NumericAccessor<N>
 ): number {
@@ -13,7 +13,7 @@ export function getNodeSize<N extends InputNode> (
   return size ?? defaultNodeSize
 }
 
-export function createSizeBuffer <N extends InputNode, L extends InputLink> (
+export function createSizeBuffer <N extends CosmosInputNode, L extends CosmosInputLink> (
   data: GraphData<N, L>,
   reglInstance: regl.Regl,
   pointTextureSize: number,
