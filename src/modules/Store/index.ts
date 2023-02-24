@@ -2,14 +2,13 @@ import { scaleLinear } from 'd3-scale'
 import { mat3 } from 'gl-matrix'
 import { Random } from 'random'
 import { getRgbaColor } from '@/graph/helper'
-import { hoveredNodeRingOpacity, clickedNodeRingOpacity } from '@/graph/variables'
+import { hoveredNodeRingOpacity, focusedNodeRingOpacity } from '@/graph/variables'
 
 export const ALPHA_MIN = 0.001
 export const MAX_POINT_SIZE = 64
 
-type HighlightedNode<N> = N extends undefined ?
-  { node: undefined; position: undefined; indicesFromFbo: [-1, -1] } :
-  { node: N; position: [ number, number ]; indicesFromFbo: [number, number] }
+type Hovered<Node> = { node: Node; index: number; position: [ number, number ] }
+type Focused<Node> = { node: Node; index: number }
 
 export class Store <N> {
   public pointsTextureSize = 0
@@ -25,20 +24,11 @@ export class Store <N> {
   public simulationProgress = 0
   public selectedIndices: Float32Array | null = null
   public maxPointSize = MAX_POINT_SIZE
-  public hoveredNode: HighlightedNode<N | undefined> = {
-    node: undefined,
-    position: undefined,
-    indicesFromFbo: [-1, -1],
-  }
-
-  public clickedNode: HighlightedNode<N | undefined> = {
-    node: undefined,
-    position: undefined,
-    indicesFromFbo: [-1, -1],
-  }
+  public hoveredNode: Hovered<N> | undefined = undefined
+  public focusedNode: Focused<N> | undefined = undefined
 
   public hoveredNodeRingColor = [1, 1, 1, hoveredNodeRingOpacity]
-  public clickedNodeRingColor = [1, 1, 1, clickedNodeRingOpacity]
+  public focusedNodeRingColor = [1, 1, 1, focusedNodeRingOpacity]
   private alphaTarget = 0
   private scaleNodeX = scaleLinear()
   private scaleNodeY = scaleLinear()
@@ -75,15 +65,15 @@ export class Store <N> {
     this.hoveredNodeRingColor[0] = convertedRgba[0]
     this.hoveredNodeRingColor[1] = convertedRgba[1]
     this.hoveredNodeRingColor[2] = convertedRgba[2]
-    this.clickedNodeRingColor[0] = convertedRgba[0]
-    this.clickedNodeRingColor[1] = convertedRgba[1]
-    this.clickedNodeRingColor[2] = convertedRgba[2]
+    this.focusedNodeRingColor[0] = convertedRgba[0]
+    this.focusedNodeRingColor[1] = convertedRgba[1]
+    this.focusedNodeRingColor[2] = convertedRgba[2]
   }
 
-  public setClickedNode (): void {
-    this.clickedNode.node = this.hoveredNode.node
-    this.clickedNode.position = this.hoveredNode.position
-    this.clickedNode.indicesFromFbo = this.hoveredNode.indicesFromFbo
+  public setFocusedNode (node?: N, index?: number): void {
+    if (node && index !== undefined) {
+      this.focusedNode = { node, index }
+    } else this.focusedNode = undefined
   }
 
   public addAlpha (decay: number): number {

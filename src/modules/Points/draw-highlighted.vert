@@ -10,11 +10,10 @@ uniform float sizeScale;
 uniform float spaceSize;
 uniform vec2 screenSize;
 uniform bool scaleNodesOnZoom;
-uniform vec2 hoveredPointIndices;
+uniform float pointIndex;
 uniform float maxPointSize;
 uniform vec4 color;
 
-varying float isHighlighted;
 varying vec2 pos;
 
 float pointSize(float size) {
@@ -30,11 +29,11 @@ float pointSize(float size) {
 const float relativeRingRadius = 1.3;
 
 void main () {
-  if (hoveredPointIndices.r < 0.0) isHighlighted = 0.0;
-  else isHighlighted = 1.0;
   pos = quad;
-  vec4 pointPosition = texture2D(positions, (hoveredPointIndices + 0.5) / pointsTextureSize);
-  vec4 pSize = texture2D(particleSize, (hoveredPointIndices + 0.5) / pointsTextureSize);
+
+  vec2 ij = vec2(mod(pointIndex, pointsTextureSize), floor(pointIndex / pointsTextureSize)) + 0.5;
+  vec4 pointPosition = texture2D(positions, ij / pointsTextureSize);
+  vec4 pSize = texture2D(particleSize, ij / pointsTextureSize);
   float size = (pointSize(pSize.r * sizeScale) * relativeRingRadius) / transform[0][0];
   float radius = size * 0.5;
   vec2 a = pointPosition.xy;

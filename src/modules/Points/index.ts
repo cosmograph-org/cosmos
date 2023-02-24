@@ -229,7 +229,7 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
       uniforms: {
         color: reglInstance.prop<{ color: number[] }, 'color'>('color'),
         width: reglInstance.prop<{ width: number }, 'width'>('width'),
-        hoveredPointIndices: reglInstance.prop<{ pointPosition: number[] }, 'pointPosition'>('pointPosition'),
+        pointIndex: reglInstance.prop<{ pointIndex: number }, 'pointIndex'>('pointIndex'),
         positions: () => this.currentPositionFbo,
         particleSize: () => this.sizeFbo,
         sizeScale: () => config.nodeSizeScale,
@@ -296,16 +296,20 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
   public draw (): void {
     this.drawCommand?.()
     if (this.config.renderHighlightedNodeRing) {
-      this.drawHighlightedCommand?.({
-        width: 0.85,
-        color: this.store.hoveredNodeRingColor,
-        pointPosition: this.store.hoveredNode.indicesFromFbo,
-      })
-      this.drawHighlightedCommand?.({
-        width: 0.75,
-        color: this.store.clickedNodeRingColor,
-        pointPosition: this.store.clickedNode.indicesFromFbo,
-      })
+      if (this.store.hoveredNode) {
+        this.drawHighlightedCommand?.({
+          width: 0.85,
+          color: this.store.hoveredNodeRingColor,
+          pointIndex: this.store.hoveredNode.index,
+        })
+      }
+      if (this.store.focusedNode) {
+        this.drawHighlightedCommand?.({
+          width: 0.75,
+          color: this.store.focusedNodeRingColor,
+          pointIndex: this.store.focusedNode.index,
+        })
+      }
     }
   }
 

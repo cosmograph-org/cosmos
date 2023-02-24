@@ -35,5 +35,5 @@ export const defaultConfigValues = {
 }
 
 export const hoveredNodeRingOpacity = 0.7
-export const clickedNodeRingOpacity = 0.95
+export const focusedNodeRingOpacity = 0.95
 export const defaultScaleToZoom = 3
