@@ -751,7 +751,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     if (nodeSize) {
       const index = pixels[0] as number
       const inputIndex = this.graph.getInputIndexBySortedIndex(index)
-      const hovered = inputIndex ? this.graph.getNodeByIndex(inputIndex) : undefined
+      const hovered = inputIndex !== undefined ? this.graph.getNodeByIndex(inputIndex) : undefined
       if (this.store.hoveredNode?.node !== hovered) isMouseover = true
       const pointX = pixels[2] as number
       const pointY = pixels[3] as number

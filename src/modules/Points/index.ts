@@ -50,10 +50,9 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
       const sortedIndex = this.data.getSortedIndexByInputIndex(i)
       const node = data.nodes[i]
       if (node && sortedIndex !== undefined) {
-        initialState[sortedIndex * 4 + 0] = node.x ??
-          (spaceSize ?? defaultConfigValues.spaceSize) * (store.getRandomFloat(0, 1) * (0.505 - 0.495) + 0.495)
-        initialState[sortedIndex * 4 + 1] = node.y ??
-          (spaceSize ?? defaultConfigValues.spaceSize) * (store.getRandomFloat(0, 1) * (0.505 - 0.495) + 0.495)
+        const space = spaceSize ?? defaultConfigValues.spaceSize
+        initialState[sortedIndex * 4 + 0] = node.x ?? space * store.getRandomFloat(0.495, 0.505)
+        initialState[sortedIndex * 4 + 1] = node.y ?? space * store.getRandomFloat(0.495, 0.505)
       }
     }
 
