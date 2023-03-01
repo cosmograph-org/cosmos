@@ -17,6 +17,8 @@ uniform vec2 linkVisibilityDistanceRange;
 uniform float linkVisibilityMinTransparency;
 uniform float greyoutOpacity;
 uniform bool scaleNodesOnZoom;
+uniform float curvedWeight;
+uniform float curvedLinkControlPointDistance;
 
 varying vec4 rgbaColor;
 varying vec2 pos;
@@ -28,14 +30,10 @@ float map(float value, float min1, float max1, float min2, float max2) {
   return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
 }
 
-float pointSize(float size) {
-  float pSize;
-  if (scaleNodesOnZoom) { 
-    pSize = size * ratio * transform[0][0];
-  } else {
-    pSize = size * ratio * min(5.0, max(1.0, transform[0][0] * 0.01));
-  }
-  return pSize;
+vec2 conicParametricCurve(vec2 A, vec2 B, vec2 ControlPoint, float t, float w) {
+  vec2 divident = (1.0 - t) * (1.0 - t) * A + 2.0 * (1.0 - t) * t * w * ControlPoint + t * t * B;
+  float divisor = (1.0 - t) * (1.0 - t) + 2.0 * (1.0 - t) * t * w + t * t;
+  return divident / divisor;
 }
 
 void main() {
@@ -56,6 +54,9 @@ void main() {
 
   // Calculate link distance
   float linkDist = length(xBasis);
+  float h = curvedLinkControlPointDistance;
+  vec2 controlPoint = (a + b) / 2.0 + yBasis * linkDist * h;
+
   float linkDistPx = linkDist * transform[0][0];
   
   float linkWidth = width * widthScale;
@@ -87,8 +88,17 @@ void main() {
 
   rgbaColor = vec4(rgbColor, opacity);
 
-  vec2 point = a + xBasis * position.x + yBasis * linkWidthPx * position.y;
-  vec2 p = 2.0 * point / spaceSize - 1.0;
+  float t = position.x;
+  float w = curvedWeight;
+  float tPrev = t - 0.1;
+  float tNext = t + 0.1;
+  vec2 pointCurr = conicParametricCurve(a, b, controlPoint, t, w);
+  vec2 pointPrev = conicParametricCurve(a, b, controlPoint, tPrev, w);
+  vec2 pointNext = conicParametricCurve(a, b, controlPoint, tNext, w);
+  vec2 xBasisCurved = pointNext - pointPrev;
+  vec2 yBasisCurved = normalize(vec2(-xBasisCurved.y, xBasisCurved.x));
+  pointCurr += yBasisCurved * linkWidthPx * position.y;
+  vec2 p = 2.0 * pointCurr / spaceSize - 1.0;
   p *= spaceSize / screenSize;
   vec3 final =  transform * vec3(p, 1);
   gl_Position = vec4(final.rg, 0, 1);
