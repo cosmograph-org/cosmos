@@ -1,37 +1,31 @@
 import regl from 'regl'
 import { getValue, getRgbaColor } from '@/graph/helper'
 import { CoreModule } from '@/graph/modules/core-module'
-import drawStraightFrag from '@/graph/modules/Lines/draw-straight.frag'
+import drawLineFrag from '@/graph/modules/Lines/draw-straight.frag'
 import drawStraightVert from '@/graph/modules/Lines/draw-straight.vert'
-import { defaultLinkColor, defaultLinkWidth } from '@/graph/variables'
+import drawCurveVert from '@/graph/modules/Lines/draw-curve.vert'
+import { defaultConfigValues, defaultLinkColor, defaultLinkWidth } from '@/graph/variables'
 import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 import { destroyBuffer } from '@/graph/modules/Shared/buffer'
+import { straightLineSegmentGeometry, getCurveLineGeometry } from '@/graph/modules/Lines/geometry'
 
 export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends CoreModule<N, L> {
   private drawStraightCommand: regl.DrawCommand | undefined
+  private drawCurveCommand: regl.DrawCommand | undefined
   private colorBuffer: regl.Buffer | undefined
   private widthBuffer: regl.Buffer | undefined
+  private curveLineGeometry: number[][] | undefined
+  private curveLineBuffer: regl.Buffer | undefined
 
   public create (): void {
     this.updateColor()
     this.updateWidth()
+    this.updateCurveLineGeometry()
   }
 
   public initPrograms (): void {
     const { reglInstance, config, store, data, points } = this
     const { pointsTextureSize } = store
-
-    const geometryLinkBuffer = {
-      buffer: reglInstance.buffer([
-        [0, -0.5],
-        [1, -0.5],
-        [1, 0.5],
-        [0, -0.5],
-        [1, 0.5],
-        [0, 0.5],
-      ]),
-      divisor: 0,
-    }
 
     const instancePoints: number[][] = []
     data.completeLinks.forEach(l => {
@@ -49,10 +43,13 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
 
     this.drawStraightCommand = reglInstance({
       vert: drawStraightVert,
-      frag: drawStraightFrag,
+      frag: drawLineFrag,
 
       attributes: {
-        position: geometryLinkBuffer,
+        position: {
+          buffer: reglInstance.buffer(straightLineSegmentGeometry),
+          divisor: 0,
+        },
         pointA: {
           buffer: () => pointsBuffer,
           divisor: 1,
@@ -80,7 +77,6 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
       },
       uniforms: {
         positions: () => points?.currentPositionFbo,
-        particleSize: () => points?.sizeFbo,
         particleGreyoutStatus: () => points?.greyoutStatusFbo,
         transform: () => store.transform,
         pointsTextureSize: () => store.pointsTextureSize,
@@ -117,14 +113,96 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
         enable: false,
         mask: false,
       },
-      count: 6, // segmentInstanceGeometry length
+      count: straightLineSegmentGeometry.length,
       instances: () => data.linksNumber,
+      primitive: 'triangle strip',
+    })
+
+    this.drawCurveCommand = reglInstance({
+      vert: drawCurveVert,
+      frag: drawLineFrag,
+
+      attributes: {
+        position: {
+          buffer: () => this.curveLineBuffer,
+          divisor: 0,
+        },
+        pointA: {
+          buffer: () => pointsBuffer,
+          divisor: 1,
+          offset: Float32Array.BYTES_PER_ELEMENT * 0,
+          stride: Float32Array.BYTES_PER_ELEMENT * 4,
+        },
+        pointB: {
+          buffer: () => pointsBuffer,
+          divisor: 1,
+          offset: Float32Array.BYTES_PER_ELEMENT * 2,
+          stride: Float32Array.BYTES_PER_ELEMENT * 4,
+        },
+        color: {
+          buffer: () => this.colorBuffer,
+          divisor: 1,
+          offset: Float32Array.BYTES_PER_ELEMENT * 0,
+          stride: Float32Array.BYTES_PER_ELEMENT * 4,
+        },
+        width: {
+          buffer: () => this.widthBuffer,
+          divisor: 1,
+          offset: Float32Array.BYTES_PER_ELEMENT * 0,
+          stride: Float32Array.BYTES_PER_ELEMENT * 1,
+        },
+      },
+      uniforms: {
+        positions: () => points?.currentPositionFbo,
+        particleGreyoutStatus: () => points?.greyoutStatusFbo,
+        transform: () => store.transform,
+        pointsTextureSize: () => store.pointsTextureSize,
+        nodeSizeScale: () => config.nodeSizeScale,
+        widthScale: () => config.linkWidthScale,
+        useArrow: () => config.linkArrows,
+        arrowSizeScale: () => config.linkArrowsSizeScale,
+        spaceSize: () => config.spaceSize,
+        screenSize: () => store.screenSize,
+        ratio: () => config.pixelRatio,
+        linkVisibilityDistanceRange: () => config.linkVisibilityDistanceRange,
+        linkVisibilityMinTransparency: () => config.linkVisibilityMinTransparency,
+        greyoutOpacity: () => config.linkGreyoutOpacity,
+        scaleNodesOnZoom: () => config.scaleNodesOnZoom,
+        curvedWeight: () => config.curvedLinkWeight,
+        curvedLinkControlPointDistance: () => config.curvedLinkControlPointDistance,
+      },
+      cull: {
+        enable: true,
+        face: 'back',
+      },
+      blend: {
+        enable: true,
+        func: {
+          dstRGB: 'one minus src alpha',
+          srcRGB: 'src alpha',
+          dstAlpha: 'one minus src alpha',
+          srcAlpha: 'one',
+        },
+        equation: {
+          rgb: 'add',
+          alpha: 'add',
+        },
+      },
+      depth: {
+        enable: false,
+        mask: false,
+      },
+      count: () => this.curveLineGeometry?.length ?? 0,
+      instances: () => data.linksNumber,
+      primitive: 'triangle strip',
     })
   }
 
   public draw (): void {
     if (!this.colorBuffer || !this.widthBuffer) return
-    this.drawStraightCommand?.()
+    if (this.config.isLinkCurved) {
+      if (this.curveLineBuffer) this.drawCurveCommand?.()
+    } else this.drawStraightCommand?.()
   }
 
   public updateColor (): void {
@@ -146,6 +224,12 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
       instancePoints.push([linkWidth ?? defaultLinkWidth])
     })
     this.widthBuffer = reglInstance.buffer(instancePoints)
+  }
+
+  public updateCurveLineGeometry (): void {
+    const { reglInstance, config } = this
+    this.curveLineGeometry = getCurveLineGeometry(config.curvedLinkSegments ?? defaultConfigValues.curvedLinkSegments)
+    this.curveLineBuffer = reglInstance.buffer(this.curveLineGeometry)
   }
 
   public destroy (): void {

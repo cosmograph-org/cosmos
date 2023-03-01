@@ -164,6 +164,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     if (prevConfig.nodeColor !== this.config.nodeColor) this.points.updateColor()
     if (prevConfig.nodeSize !== this.config.nodeSize) this.points.updateSize()
     if (prevConfig.linkWidth !== this.config.linkWidth) this.lines.updateWidth()
+    if (prevConfig.curvedLinkSegments !== this.config.curvedLinkSegments) this.lines.updateCurveLineGeometry()
     if (prevConfig.backgroundColor !== this.config.backgroundColor) this.store.backgroundColor = getRgbaColor(this.config.backgroundColor)
     if (prevConfig.highlightedNodeRingColor !== this.config.highlightedNodeRingColor) {
       this.store.setHoveredNodeRingColor(this.config.highlightedNodeRingColor)

@@ -269,6 +269,28 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    */
   linkWidthScale?: number;
   /**
+   * If set to true, links are rendered as curved lines.
+   * Otherwise as straight lines.
+   * Default value: `true`
+   */
+  isLinkCurved?: boolean;
+  /**
+   * Number of segments in a curved line.
+   * Default value: `19`.
+   */
+  curvedLinkSegments?: number;
+  /**
+   * Weight affects the shape of the curve.
+   * Default value: `0.8`.
+   */
+  curvedLinkWeight?: number;
+  /**
+   * Defines the position of the control point of the curve on the normal from the centre of the line.
+   * If set to 1 then the control point is at a distance equal to the length of the line.
+   * Default value: `0.5`
+   */
+  curvedLinkControlPointDistance?: number;
+  /**
    * Turns link arrow rendering on / off.
    * Default value: `true`
    */
@@ -361,6 +383,10 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
   public linkWidth = defaultLinkWidth
   public linkWidthScale = defaultConfigValues.linkWidthScale
   public renderLinks = defaultConfigValues.renderLinks
+  public isLinkCurved = defaultConfigValues.isLinkCurved
+  public curvedLinkSegments = defaultConfigValues.curvedLinkSegments
+  public curvedLinkWeight = defaultConfigValues.curvedLinkWeight
+  public curvedLinkControlPointDistance = defaultConfigValues.curvedLinkControlPointDistance
   public linkArrows = defaultConfigValues.arrowLinks
   public linkArrowsSizeScale = defaultConfigValues.arrowSizeScale
   public linkVisibilityDistanceRange = defaultConfigValues.linkVisibilityDistanceRange
