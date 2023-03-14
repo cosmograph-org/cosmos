@@ -10,6 +10,7 @@ import {
   defaultBackgroundColor,
   defaultConfigValues,
 } from '@/graph/variables'
+import { isPlainObject } from '@/graph/helper'
 
 export type NumericAccessor<Datum> = ((d: Datum, i?: number, ...rest: unknown[]) => number | null) | number | null | undefined
 export type StringAccessor<Datum> = ((d: Datum, i?: number, ...rest: unknown[]) => string | null) | string | null | undefined
@@ -364,22 +365,21 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
 
   public randomSeed = undefined
 
-  public init (config: GraphConfigInterface<N, L>): GraphConfigInterface<N, L> {
-    const currentConfig = this.getConfig()
-    const keys = Object.keys(config).map(key => key as keyof GraphConfigInterface<N, L>)
-    keys.forEach(key => {
-      if (typeof currentConfig[key] === 'object') {
-        (currentConfig[key] as Record<string, unknown>) = {
-          ...currentConfig[key] as Record<string, unknown>,
-          ...config[key] as Record<string, unknown>,
-        } as Record<string, unknown>
-      } else {
-        (currentConfig[key] as keyof GraphConfigInterface<N, L>) =
-          config[key] as keyof GraphConfigInterface<N, L>
-      }
-    })
+  public init (config: GraphConfigInterface<N, L>): void {
+    (Object.keys(config) as (keyof GraphConfigInterface<N, L>)[])
+      .forEach(configParameter => {
+        this.deepMergeConfig(this.getConfig(), config, configParameter)
+      })
+  }
 
-    return currentConfig
+  public deepMergeConfig <T> (current: T, next: T, key: keyof T): void {
+    if (isPlainObject(current[key]) && isPlainObject(next[key])) {
+      // eslint-disable-next-line @typescript-eslint/ban-types
+      (Object.keys(next[key] as Object) as (keyof T[keyof T])[])
+        .forEach(configParameter => {
+          this.deepMergeConfig(current[key], next[key], configParameter)
+        })
+    } else current[key] = next[key]
   }
 
   private getConfig (): GraphConfigInterface<N, L> {
