@@ -2,9 +2,16 @@ import { color as d3Color } from 'd3-color'
 import regl from 'regl'
 import { ColorAccessor, NumericAccessor, StringAccessor } from './config'
 
-function isFunction (value: unknown): boolean {
-  return typeof value === 'function'
+export const isFunction = <T>(a: T): boolean => typeof a === 'function'
+export const isArray = <T>(a: unknown | T[]): a is T[] => Array.isArray(a)
+export const isObject = <T>(a: T): boolean => (a instanceof Object)
+export const isAClassInstance = <T>(a: T): boolean => {
+  if (a instanceof Object) {
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    return (a as T & Object).constructor.name !== 'Function' && (a as T & Object).constructor.name !== 'Object'
+  } else return false
 }
+export const isPlainObject = <T>(a: T): boolean => isObject(a) && !isArray(a) && !isFunction(a) && !isAClassInstance(a)
 
 export function getValue<T, ReturnType> (
   d: T,
@@ -26,7 +33,7 @@ export function getNumber<T> (d: T, accessor: NumericAccessor<T>, i?: number): n
 
 export function getRgbaColor (value: string | [number, number, number, number]): [number, number, number, number] {
   let rgba: [number, number, number, number]
-  if (Array.isArray(value)) {
+  if (isArray(value)) {
     rgba = value
   } else {
     const color = d3Color(value)
