@@ -459,18 +459,18 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   }
 
   /**
-   * Track multiple node positions by their ids.
+   * Track multiple node positions by their ids on each Cosmos tick.
    * @param ids Array of nodes ids.
    */
-  public trackNodesByIds (ids: string[]): void {
+  public trackNodePositionsByIds (ids: string[]): void {
     this.points.trackNodesByIds(ids)
   }
 
   /**
-   * Track multiple node positions by their indices.
+   * Track multiple node positions by their indices on each Cosmos tick.
    * @param ids Array of nodes indices.
    */
-  public trackNodesByIndices (indices: number[]): void {
+  public trackNodePositionsByIndices (indices: number[]): void {
     this.points.trackNodesByIds(
       indices.map(index => this.graph.getNodeByIndex(index))
         .filter((d): d is N => d !== undefined)
