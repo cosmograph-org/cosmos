@@ -191,17 +191,16 @@ Get node radius by its <i>index</i>.
 
 Get node radius by its <i>id</i>.
 
-<a name="track_nodes_by_ids" href="#track_nodes_by_ids">#</a> graph.<b>trackNodesByIds</b>(<i>ids</i>)
+<a name="track_node_positions_by_ids" href="#track_node_positions_by_ids">#</a> graph.<b>trackNodePositionsByIds</b>(<i>ids</i>)
 
-Track multiple node positions by their <i>ids</i>.
+Track multiple node positions by their _ids_ on each Cosmos tick. Use the [**getTrackedNodePositionsMap**](#get_tracked_node_positions_map) method to get a `Map` object with node coordinates.
 
-<a name="track_nodes_by_indices" href="#track_nodes_by_indices">#</a> graph.<b>trackNodesByIndices</b>(<i>indices</i>)
-
-Track multiple node positions by their <i>indices</i>.
+<a name="track_node_positions_by_indices" href="#track_node_positions_by_indices">#</a> graph.<b>trackNodePositionsByIndices</b>(<i>indices</i>)
+Track multiple node positions by their _indices_ on each Cosmos tick. Use the [**getTrackedNodePositionsMap**](#get_tracked_node_positions_map) method to get a `Map` object with node coordinates.
 
 <a name="get_tracked_node_positions_map" href="#get_tracked_node_positions_map">#</a> graph.<b>getTrackedNodePositionsMap</b>()
 
-Get a `Map` object with node coordinates, where keys are the _ids_ of the tracked nodes and the values are their X and Y coordinates in the `[number, number]` format.
+If node positions are tracked, get a `Map` object with node coordinates. The keys of the `Map` are the _ids_ of the nodes being tracked and the values are their X and Y coordinates in the `[number, number]` format. Works in pairs with the [**trackNodePositionsByIds**](#track_node_positions_by_ids) or [**trackNodePositionsByIndices**](#track_node_positions_by_indices) method.
 
 <a name="start" href="#start">#</a> graph.<b>start</b>([<i>alpha</i>])
 
