@@ -5,6 +5,7 @@ import drawStraightFrag from '@/graph/modules/Lines/draw-straight.frag'
 import drawStraightVert from '@/graph/modules/Lines/draw-straight.vert'
 import { defaultLinkColor, defaultLinkWidth } from '@/graph/variables'
 import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
+import { destroyBuffer } from '@/graph/modules/Shared/buffer'
 
 export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends CoreModule<N, L> {
   private drawStraightCommand: regl.DrawCommand | undefined
@@ -148,7 +149,7 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
   }
 
   public destroy (): void {
-    this.colorBuffer?.destroy()
-    this.widthBuffer?.destroy()
+    destroyBuffer(this.colorBuffer)
+    destroyBuffer(this.widthBuffer)
   }
 }

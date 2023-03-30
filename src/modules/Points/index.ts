@@ -10,7 +10,7 @@ import findHoveredPointFrag from '@/graph/modules/Points/find-hovered-point.frag
 import findHoveredPointVert from '@/graph/modules/Points/find-hovered-point.vert'
 import { createSizeBuffer, getNodeSize } from '@/graph/modules/Points/size-buffer'
 import updatePositionFrag from '@/graph/modules/Points/update-position.frag'
-import { createIndexesBuffer, createQuadBuffer } from '@/graph/modules/Shared/buffer'
+import { createIndexesBuffer, createQuadBuffer, destroyFramebuffer } from '@/graph/modules/Shared/buffer'
 import { createTrackedIndicesBuffer, createTrackedPositionsBuffer } from '@/graph/modules/Points/tracked-buffer'
 import trackPositionsFrag from '@/graph/modules/Points/track-positions.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
@@ -335,14 +335,10 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
     this.trackedIds = ids.length ? ids : undefined
     this.trackedPositionsById.clear()
     const indices = ids.map(id => this.data.getSortedIndexById(id)).filter((d): d is number => d !== undefined)
-    if (this.trackedIndicesFbo) {
-      this.trackedIndicesFbo.destroy()
-      this.trackedIndicesFbo = undefined
-    }
-    if (this.trackedPositionsFbo) {
-      this.trackedPositionsFbo.destroy()
-      this.trackedPositionsFbo = undefined
-    }
+    destroyFramebuffer(this.trackedIndicesFbo)
+    this.trackedIndicesFbo = undefined
+    destroyFramebuffer(this.trackedPositionsFbo)
+    this.trackedPositionsFbo = undefined
     if (indices.length) {
       this.trackedIndicesFbo = createTrackedIndicesBuffer(indices, this.store.pointsTextureSize, this.reglInstance)
       this.trackedPositionsFbo = createTrackedPositionsBuffer(indices, this.reglInstance)
@@ -362,16 +358,16 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
   }
 
   public destroy (): void {
-    this.currentPositionFbo?.destroy()
-    this.previousPositionFbo?.destroy()
-    this.velocityFbo?.destroy()
-    this.selectedFbo?.destroy()
-    this.colorFbo?.destroy()
-    this.sizeFbo?.destroy()
-    this.greyoutStatusFbo?.destroy()
-    this.hoveredFbo?.destroy()
-    this.trackedIndicesFbo?.destroy()
-    this.trackedPositionsFbo?.destroy()
+    destroyFramebuffer(this.currentPositionFbo)
+    destroyFramebuffer(this.previousPositionFbo)
+    destroyFramebuffer(this.velocityFbo)
+    destroyFramebuffer(this.selectedFbo)
+    destroyFramebuffer(this.colorFbo)
+    destroyFramebuffer(this.sizeFbo)
+    destroyFramebuffer(this.greyoutStatusFbo)
+    destroyFramebuffer(this.hoveredFbo)
+    destroyFramebuffer(this.trackedIndicesFbo)
+    destroyFramebuffer(this.trackedPositionsFbo)
   }
 
   private swapFbo (): void {

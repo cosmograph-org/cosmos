@@ -3,7 +3,7 @@ import { CoreModule } from '@/graph/modules/core-module'
 import calculateCentermassFrag from '@/graph/modules/ForceCenter/calculate-centermass.frag'
 import calculateCentermassVert from '@/graph/modules/ForceCenter/calculate-centermass.vert'
 import forceFrag from '@/graph/modules/ForceCenter/force-center.frag'
-import { createIndexesBuffer, createQuadBuffer } from '@/graph/modules/Shared/buffer'
+import { createIndexesBuffer, createQuadBuffer, destroyFramebuffer } from '@/graph/modules/Shared/buffer'
 import clearFrag from '@/graph/modules/Shared/clear.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
 import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
@@ -85,6 +85,6 @@ export class ForceCenter<N extends CosmosInputNode, L extends CosmosInputLink> e
   }
 
   public destroy (): void {
-    this.centermassFbo?.destroy()
+    destroyFramebuffer(this.centermassFbo)
   }
 }
