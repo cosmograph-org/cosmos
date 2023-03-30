@@ -616,7 +616,12 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
         this.store.alpha += this.store.addAlpha(this.config.simulation.decay ?? defaultConfigValues.simulation.decay)
         if (this.isRightClickMouse) this.store.alpha = Math.max(this.store.alpha, 0.1)
         this.store.simulationProgress = Math.sqrt(Math.min(1, ALPHA_MIN / this.store.alpha))
-        this.config.simulation.onTick?.(this.store.alpha)
+        this.config.simulation.onTick?.(
+          this.store.alpha,
+          this.store.hoveredNode?.node,
+          this.store.hoveredNode ? this.graph.getInputIndexBySortedIndex(this.store.hoveredNode.index) : undefined,
+          this.store.hoveredNode?.position
+        )
       }
 
       this.points.trackPoints()
