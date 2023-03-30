@@ -86,7 +86,7 @@ export interface GraphEvents <N extends CosmosInputNode> {
   onZoomEnd?: (e: D3ZoomEvent<HTMLCanvasElement, undefined>, userDriven: boolean) => void;
 }
 
-export interface GraphSimulationSettings {
+export interface GraphSimulationSettings<N> {
   /**
    * Decay coefficient. Use smaller values if you want the simulation to "cool down" slower.
    * Default value: `1000`
@@ -152,11 +152,15 @@ export interface GraphSimulationSettings {
   onStart?: () => void;
   /**
    * Callback function that will be called on every simulation tick.
-   * The value of the argument `alpha` will decrease over time as the simulation "cools down":
-   * `(alpha: number) => void`.
+   * The value of the first argument `alpha` will decrease over time as the simulation "cools down".
+   * If there's a node under the mouse pointer, its datum will be passed as the second argument,
+   * index as the third argument and position as the forth argument:
+   * `(alpha: number, node: Node | undefined, index: number | undefined, nodePosition: [number, number] | undefined) => void`.
    * Default value: `undefined`
    */
-  onTick?: (alpha?: number) => void;
+  onTick?: (
+    alpha: number, hoveredNode?: N, index?: number, nodePosition?: [number, number]
+    ) => void;
   /**
    * Callback function that will be called when the simulation stops.
    * Default value: `undefined`
@@ -276,7 +280,7 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    */
   useQuadtree?: boolean;
   /** Simulation parameters and event listeners */
-  simulation?: GraphSimulationSettings;
+  simulation?: GraphSimulationSettings<N>;
   /**
    * Events
    */
@@ -328,7 +332,7 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
   public linkVisibilityMinTransparency = defaultConfigValues.linkVisibilityMinTransparency
   public useQuadtree = defaultConfigValues.useQuadtree
 
-  public simulation: GraphSimulationSettings = {
+  public simulation: GraphSimulationSettings<N> = {
     decay: defaultConfigValues.simulation.decay,
     gravity: defaultConfigValues.simulation.gravity,
     center: defaultConfigValues.simulation.center,
