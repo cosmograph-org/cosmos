@@ -3,7 +3,7 @@ import { CoreModule } from '@/graph/modules/core-module'
 import calculateLevelFrag from '@/graph/modules/ForceManyBody/calculate-level.frag'
 import calculateLevelVert from '@/graph/modules/ForceManyBody/calculate-level.vert'
 import { forceFrag } from '@/graph/modules/ForceManyBody/quadtree-frag-shader'
-import { createIndexesBuffer, createQuadBuffer } from '@/graph/modules/Shared/buffer'
+import { createIndexesBuffer, createQuadBuffer, destroyFramebuffer } from '@/graph/modules/Shared/buffer'
 import clearFrag from '@/graph/modules/Shared/clear.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
 import { defaultConfigValues } from '@/graph/variables'
@@ -124,12 +124,9 @@ export class ForceManyBodyQuadtree<N extends CosmosInputNode, L extends CosmosIn
   }
 
   public destroy (): void {
-    this.randomValuesFbo?.destroy()
+    destroyFramebuffer(this.randomValuesFbo)
     this.levelsFbos.forEach(fbo => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((fbo as any)?._framebuffer.framebuffer) {
-        fbo.destroy()
-      }
+      destroyFramebuffer(fbo)
     })
     this.levelsFbos.clear()
   }

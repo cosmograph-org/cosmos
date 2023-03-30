@@ -23,3 +23,19 @@ export function createIndexesBuffer (reglInstance: regl.Regl, textureSize: numbe
     size: 2,
   }
 }
+
+export function destroyFramebuffer (fbo?: regl.Framebuffer2D): void {
+  if (!fbo) return
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((fbo as any)?._framebuffer?.framebuffer) {
+    fbo.destroy()
+  }
+}
+
+export function destroyBuffer (fbo?: regl.Buffer): void {
+  if (!fbo) return
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((fbo as any)?._buffer?.buffer) {
+    fbo.destroy()
+  }
+}

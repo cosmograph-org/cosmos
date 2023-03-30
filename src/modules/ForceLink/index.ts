@@ -1,7 +1,7 @@
 import regl from 'regl'
 import { CoreModule } from '@/graph/modules/core-module'
 import { forceFrag } from '@/graph/modules/ForceLink/force-spring'
-import { createQuadBuffer } from '@/graph/modules/Shared/buffer'
+import { createQuadBuffer, destroyFramebuffer } from '@/graph/modules/Shared/buffer'
 import updateVert from '@/graph/modules/Shared/quad.vert'
 import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 
@@ -121,9 +121,9 @@ export class ForceLink<N extends CosmosInputNode, L extends CosmosInputLink> ext
   }
 
   public destroy (): void {
-    this.linkFirstIndicesAndAmountFbo?.destroy()
-    this.indicesFbo?.destroy()
-    this.biasAndStrengthFbo?.destroy()
-    this.randomDistanceFbo?.destroy()
+    destroyFramebuffer(this.linkFirstIndicesAndAmountFbo)
+    destroyFramebuffer(this.indicesFbo)
+    destroyFramebuffer(this.biasAndStrengthFbo)
+    destroyFramebuffer(this.randomDistanceFbo)
   }
 }
