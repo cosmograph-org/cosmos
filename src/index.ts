@@ -362,15 +362,15 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * Select multiples nodes by their ids.
    * @param ids Array of nodes ids.
    */
-  public selectNodesByIds (ids?: (string | undefined)[] | null): void {
-    this.selectNodesByIndices(ids?.map(d => this.graph.getSortedIndexById(d)))
+  public selectNodesByIds (ids?: (string | undefined)[] | null, focusedNodeId?: string): void {
+    this.selectNodesByIndices(ids?.map(d => this.graph.getSortedIndexById(d)), this.graph.getSortedIndexById(focusedNodeId))
   }
 
   /**
    * Select multiples nodes by their indices.
    * @param indices Array of nodes indices.
    */
-  public selectNodesByIndices (indices?: (number | undefined)[] | null): void {
+  public selectNodesByIndices (indices?: (number | undefined)[] | null, focusedNodeIndex?: number): void {
     if (!indices) {
       this.store.selectedIndices = null
     } else if (indices.length === 0) {
@@ -381,6 +381,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
 
     this.store.setFocusedNode()
     this.points.updateGreyoutStatus()
+    if (focusedNodeIndex !== undefined) this.store.setFocusedNode(this.graph.getNodeByIndex(focusedNodeIndex), focusedNodeIndex)
   }
 
   /**
