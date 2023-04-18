@@ -230,6 +230,7 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
         width: reglInstance.prop<{ width: number }, 'width'>('width'),
         pointIndex: reglInstance.prop<{ pointIndex: number }, 'pointIndex'>('pointIndex'),
         positions: () => this.currentPositionFbo,
+        particleColor: () => this.colorFbo,
         particleSize: () => this.sizeFbo,
         sizeScale: () => config.nodeSizeScale,
         pointsTextureSize: () => store.pointsTextureSize,
@@ -238,6 +239,8 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
         screenSize: () => store.screenSize,
         scaleNodesOnZoom: () => config.scaleNodesOnZoom,
         maxPointSize: () => store.maxPointSize,
+        particleGreyoutStatus: () => this.greyoutStatusFbo,
+        greyoutOpacity: () => config.nodeGreyoutOpacity,
       },
       blend: {
         enable: true,
