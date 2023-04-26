@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: Rokotyan
+  given-names: Nikita
+  email: nikita@rokotyan.com
+- family-names: Stukova
+  given-names: Olga
+- family-names: Ovsyannikov
+  given-names: Denis
+title: "Cosmograph: GPU-accelerated Force Graph Layout and Rendering"
+version: 1.3.0
+date-released: 2022-06-10
+url: "https://cosmograph.app"
+repository-code: 'https://github.com/cosmograph-org/cosmos'
+repository-artifact: 'https://www.npmjs.com/package/@cosmograph/cosmos'
+keywords:
+  - Force Graph
+  - GPU
+  - WebGL
+  - Visualization
+license: CC-BY-NC-4.0
