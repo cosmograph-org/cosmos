@@ -22,6 +22,7 @@ export class ForceLink<N extends CosmosInputNode, L extends CosmosInputLink> ext
 
   public create (direction: LinkDirection): void {
     const { reglInstance, store: { pointsTextureSize, linksTextureSize }, data } = this
+    if (!pointsTextureSize || !linksTextureSize) return
     this.linkFirstIndicesAndAmount = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
     this.indices = new Float32Array(linksTextureSize * linksTextureSize * 4)
     const linkBiasAndStrengthState = new Float32Array(linksTextureSize * linksTextureSize * 4)

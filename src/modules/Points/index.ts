@@ -44,6 +44,7 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
     const { reglInstance, config, store, data } = this
     const { spaceSize } = config
     const { pointsTextureSize } = store
+    if (!pointsTextureSize) return
     const numParticles = data.nodes.length
     const initialState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
     for (let i = 0; i < numParticles; ++i) {
@@ -276,8 +277,9 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
   }
 
   public updateColor (): void {
-    const { reglInstance, config, store, data } = this
-    this.colorFbo = createColorBuffer(data, reglInstance, store.pointsTextureSize, config.nodeColor)
+    const { reglInstance, config, store: { pointsTextureSize }, data } = this
+    if (!pointsTextureSize) return
+    this.colorFbo = createColorBuffer(data, reglInstance, pointsTextureSize, config.nodeColor)
   }
 
   public updateGreyoutStatus (): void {
@@ -286,8 +288,9 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
   }
 
   public updateSize (): void {
-    const { reglInstance, config, store, data } = this
-    this.sizeFbo = createSizeBuffer(data, reglInstance, store.pointsTextureSize, config.nodeSize)
+    const { reglInstance, config, store: { pointsTextureSize }, data } = this
+    if (!pointsTextureSize) return
+    this.sizeFbo = createSizeBuffer(data, reglInstance, pointsTextureSize, config.nodeSize)
   }
 
   public trackPoints (): void {

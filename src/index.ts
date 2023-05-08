@@ -583,6 +583,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   private frame (): void {
     const { config: { simulation, renderLinks }, store: { alpha, isSimulationRunning } } = this
     if (alpha < ALPHA_MIN && isSimulationRunning) this.end()
+    if (!this.store.pointsTextureSize || !this.store.linksTextureSize) return
 
     this.requestAnimationFrameId = window.requestAnimationFrame((now) => {
       this.fpsMonitor?.begin()

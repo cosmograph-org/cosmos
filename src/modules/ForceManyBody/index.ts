@@ -22,6 +22,7 @@ export class ForceManyBody<N extends CosmosInputNode, L extends CosmosInputLink>
 
   public create (): void {
     const { reglInstance, config, store } = this
+    if (!store.pointsTextureSize) return
     this.quadtreeLevels = Math.log2(config.spaceSize ?? defaultConfigValues.spaceSize)
     for (let i = 0; i < this.quadtreeLevels; i += 1) {
       const levelTextureSize = Math.pow(2, i + 1)
