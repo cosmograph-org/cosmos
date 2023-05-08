@@ -369,6 +369,13 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
 
   public randomSeed = undefined
 
+  public limitSpaceSize (webglMaxTextureSize: number): void {
+    if (this.spaceSize >= webglMaxTextureSize) {
+      this.spaceSize = webglMaxTextureSize / 2
+      console.warn(`The \`spaceSize\` has been reduced to ${this.spaceSize} due to WebGL limits`)
+    }
+  }
+
   public init (config: GraphConfigInterface<N, L>): void {
     (Object.keys(config) as (keyof GraphConfigInterface<N, L>)[])
       .forEach(configParameter => {
