@@ -48,6 +48,9 @@ graph.setData(nodes, links)
 > **Note**
 > If your canvas element has no width and height styles (either CSS or inline) Cosmos will automatically set them to 100%.
 
+> **Warning**
+> If you're going to create a new graph within the same HTML canvas element that already has a graph, **destroy** the previous graph using `graph.destroy()` to prevent unexpected glitches.
+
 Check out the [Wiki](https://github.com/cosmograph-org/cosmos/wiki) for more information on 🛠 [Configuration](https://github.com/cosmograph-org/cosmos/wiki/Cosmos-configuration) and ⚙️ [API Reference](https://github.com/cosmograph-org/cosmos/wiki/API-Reference).
 
 ### Examples
