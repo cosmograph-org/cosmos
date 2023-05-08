@@ -89,6 +89,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     })
 
     this.store.maxPointSize = (this.reglInstance.limits.pointSizeDims[1] ?? MAX_POINT_SIZE) / this.config.pixelRatio
+    this.config.limitSpaceSize(this.reglInstance.limits.maxTextureSize)
 
     this.points = new Points(this.reglInstance, this.config, this.store, this.graph)
     this.lines = new Lines(this.reglInstance, this.config, this.store, this.graph, this.points)
@@ -145,6 +146,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     }
     if (prevConfig.spaceSize !== this.config.spaceSize ||
       prevConfig.simulation.repulsionQuadtreeLevels !== this.config.simulation.repulsionQuadtreeLevels) {
+      this.config.limitSpaceSize(this.reglInstance.limits.maxTextureSize)
       this.resizeCanvas(true)
       this.update(this.store.isSimulationRunning)
     }
