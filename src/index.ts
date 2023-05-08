@@ -144,7 +144,10 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       this.store.setHighlightedNodeRingColor(this.config.highlightedNodeRingColor)
     }
     if (prevConfig.spaceSize !== this.config.spaceSize ||
-      prevConfig.simulation.repulsionQuadtreeLevels !== this.config.simulation.repulsionQuadtreeLevels) this.update(this.store.isSimulationRunning)
+      prevConfig.simulation.repulsionQuadtreeLevels !== this.config.simulation.repulsionQuadtreeLevels) {
+      this.resizeCanvas(true)
+      this.update(this.store.isSimulationRunning)
+    }
     if (prevConfig.showFPSMonitor !== this.config.showFPSMonitor) {
       if (this.config.showFPSMonitor) {
         this.fpsMonitor = new FPSMonitor(this.canvas)
@@ -697,13 +700,13 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     event.preventDefault()
   }
 
-  private resizeCanvas (): void {
+  private resizeCanvas (forceResize = false): void {
     const prevWidth = this.canvas.width
     const prevHeight = this.canvas.height
     const w = this.canvas.clientWidth
     const h = this.canvas.clientHeight
 
-    if (prevWidth !== w * this.config.pixelRatio || prevHeight !== h * this.config.pixelRatio) {
+    if (forceResize || prevWidth !== w * this.config.pixelRatio || prevHeight !== h * this.config.pixelRatio) {
       this.store.updateScreenSize(w, h, this.config.spaceSize)
       this.canvas.width = w * this.config.pixelRatio
       this.canvas.height = h * this.config.pixelRatio
@@ -714,6 +717,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   }
 
   private setZoomTransformByNodePositions (positions: [number, number][], duration = 250, scale?: number): void {
+    this.resizeCanvas()
     const transform = this.zoomInstance.getTransform(positions, scale)
     this.canvasD3Selection
       .transition()
