@@ -604,6 +604,8 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     this.destroy()
     this.create()
     this.initPrograms()
+    this.setFocusedNodeById()
+    this.store.hoveredNode = undefined
     if (runSimulation) {
       this.start()
     } else {
