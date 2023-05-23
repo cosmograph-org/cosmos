@@ -103,7 +103,16 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     this.forceMouse = new ForceMouse(this.reglInstance, this.config, this.store, this.graph, this.points)
 
     this.store.backgroundColor = getRgbaColor(this.config.backgroundColor)
-    if (this.config.highlightedNodeRingColor) this.store.setHighlightedNodeRingColor(this.config.highlightedNodeRingColor)
+    if (this.config.highlightedNodeRingColor) {
+      this.store.setHoveredNodeRingColor(this.config.highlightedNodeRingColor)
+      this.store.setFocusedNodeRingColor(this.config.highlightedNodeRingColor)
+    }
+    if (this.config.hoveredNodeRingColor) {
+      this.store.setHoveredNodeRingColor(this.config.hoveredNodeRingColor)
+    }
+    if (this.config.focusedNodeRingColor) {
+      this.store.setFocusedNodeRingColor(this.config.focusedNodeRingColor)
+    }
 
     if (this.config.showFPSMonitor) this.fpsMonitor = new FPSMonitor(this.canvas)
 
@@ -142,7 +151,14 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     if (prevConfig.linkWidth !== this.config.linkWidth) this.lines.updateWidth()
     if (prevConfig.backgroundColor !== this.config.backgroundColor) this.store.backgroundColor = getRgbaColor(this.config.backgroundColor)
     if (prevConfig.highlightedNodeRingColor !== this.config.highlightedNodeRingColor) {
-      this.store.setHighlightedNodeRingColor(this.config.highlightedNodeRingColor)
+      this.store.setHoveredNodeRingColor(this.config.highlightedNodeRingColor)
+      this.store.setFocusedNodeRingColor(this.config.highlightedNodeRingColor)
+    }
+    if (prevConfig.hoveredNodeRingColor !== this.config.hoveredNodeRingColor) {
+      this.store.setHoveredNodeRingColor(this.config.hoveredNodeRingColor)
+    }
+    if (prevConfig.focusedNodeRingColor !== this.config.focusedNodeRingColor) {
+      this.store.setFocusedNodeRingColor(this.config.focusedNodeRingColor)
     }
     if (prevConfig.spaceSize !== this.config.spaceSize ||
       prevConfig.simulation.repulsionQuadtreeLevels !== this.config.simulation.repulsionQuadtreeLevels) {

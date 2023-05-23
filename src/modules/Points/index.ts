@@ -299,22 +299,21 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
   }
 
   public draw (): void {
+    const { config: { renderHoveredNodeRing, renderHighlightedNodeRing }, store } = this
     this.drawCommand?.()
-    if (this.config.renderHighlightedNodeRing) {
-      if (this.store.hoveredNode) {
-        this.drawHighlightedCommand?.({
-          width: 0.85,
-          color: this.store.hoveredNodeRingColor,
-          pointIndex: this.store.hoveredNode.index,
-        })
-      }
-      if (this.store.focusedNode) {
-        this.drawHighlightedCommand?.({
-          width: 0.75,
-          color: this.store.focusedNodeRingColor,
-          pointIndex: this.store.focusedNode.index,
-        })
-      }
+    if ((renderHoveredNodeRing ?? renderHighlightedNodeRing) && store.hoveredNode) {
+      this.drawHighlightedCommand?.({
+        width: 0.85,
+        color: store.hoveredNodeRingColor,
+        pointIndex: store.hoveredNode.index,
+      })
+    }
+    if (store.focusedNode) {
+      this.drawHighlightedCommand?.({
+        width: 0.75,
+        color: store.focusedNodeRingColor,
+        pointIndex: store.focusedNode.index,
+      })
     }
   }
 

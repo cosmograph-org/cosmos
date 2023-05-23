@@ -211,15 +211,37 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
 
   /**
    * Turns the node highlight on hover on / off.
+   * @deprecated Will be removed from version 2.0. Use property `renderHoveredNodeRing` instead.
+   * @todo Remove deprecated type `InputNode` in version 2.0.
    * Default value: `true`
    */
   renderHighlightedNodeRing?: boolean;
 
   /**
+   * Turns ring rendering around a node on hover on / off
+   * Default value: `true`
+   */
+  renderHoveredNodeRing?: boolean;
+
+  /**
    * Highlighted node ring color hex value.
+   * @deprecated Will be removed from version 2.0. Use property `hoveredNodeRingColor` or `focusedNodeRingColor` instead.
+   * @todo Remove deprecated type `InputNode` in version 2.0.
    * Default value: undefined
    */
   highlightedNodeRingColor?: string;
+
+  /**
+   * Hovered node ring color hex value.
+   * Default value: undefined
+   */
+  hoveredNodeRingColor?: string;
+
+  /**
+   * Focused node ring color hex value.
+   * Default value: undefined
+   */
+  focusedNodeRingColor?: string;
 
   /**
    * Turns link rendering on / off.
@@ -321,6 +343,9 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
   public nodeSizeScale = defaultConfigValues.nodeSizeScale
   public renderHighlightedNodeRing = true
   public highlightedNodeRingColor = undefined
+  public renderHoveredNodeRing = true
+  public hoveredNodeRingColor = undefined
+  public focusedNodeRingColor = undefined
   public linkColor = defaultLinkColor
   public linkGreyoutOpacity = defaultGreyoutLinkOpacity
   public linkWidth = defaultLinkWidth
