@@ -60,11 +60,15 @@ export class Store <N> {
     return this.scaleNodeY(y)
   }
 
-  public setHighlightedNodeRingColor (color: string): void {
+  public setHoveredNodeRingColor (color: string): void {
     const convertedRgba = getRgbaColor(color)
     this.hoveredNodeRingColor[0] = convertedRgba[0]
     this.hoveredNodeRingColor[1] = convertedRgba[1]
     this.hoveredNodeRingColor[2] = convertedRgba[2]
+  }
+
+  public setFocusedNodeRingColor (color: string): void {
+    const convertedRgba = getRgbaColor(color)
     this.focusedNodeRingColor[0] = convertedRgba[0]
     this.focusedNodeRingColor[1] = convertedRgba[1]
     this.focusedNodeRingColor[2] = convertedRgba[2]
