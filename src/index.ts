@@ -336,7 +336,6 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     } else {
       this.store.selectedIndices = null
     }
-    this.store.setFocusedNode()
     this.points.updateGreyoutStatus()
   }
 
@@ -350,7 +349,6 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       const adjacentNodes = this.graph.getAdjacentNodes(id) ?? []
       this.selectNodesByIds([id, ...adjacentNodes.map(d => d.id)])
     } else this.selectNodesByIds([id])
-    this.store.setFocusedNode(this.graph.getNodeById(id), this.graph.getSortedIndexById(id))
   }
 
   /**
@@ -367,15 +365,15 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * Select multiples nodes by their ids.
    * @param ids Array of nodes ids.
    */
-  public selectNodesByIds (ids?: (string | undefined)[] | null, focusedNodeId?: string): void {
-    this.selectNodesByIndices(ids?.map(d => this.graph.getSortedIndexById(d)), this.graph.getSortedIndexById(focusedNodeId))
+  public selectNodesByIds (ids?: (string | undefined)[] | null): void {
+    this.selectNodesByIndices(ids?.map(d => this.graph.getSortedIndexById(d)))
   }
 
   /**
    * Select multiples nodes by their indices.
    * @param indices Array of nodes indices.
    */
-  public selectNodesByIndices (indices?: (number | undefined)[] | null, focusedNodeIndex?: number): void {
+  public selectNodesByIndices (indices?: (number | undefined)[] | null): void {
     if (!indices) {
       this.store.selectedIndices = null
     } else if (indices.length === 0) {
@@ -384,9 +382,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       this.store.selectedIndices = new Float32Array(indices.filter((d): d is number => d !== undefined))
     }
 
-    this.store.setFocusedNode()
     this.points.updateGreyoutStatus()
-    if (focusedNodeIndex !== undefined) this.store.setFocusedNode(this.graph.getNodeByIndex(focusedNodeIndex), focusedNodeIndex)
   }
 
   /**
@@ -394,7 +390,6 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    */
   public unselectNodes (): void {
     this.store.selectedIndices = null
-    this.store.setFocusedNode()
     this.points.updateGreyoutStatus()
   }
 
@@ -423,6 +418,32 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
 
   public getAdjacentNodes (id: string): N[] | undefined {
     return this.graph.getAdjacentNodes(id)
+  }
+
+  /**
+   * Set focus on a node by id. A ring will be highlighted around the focused node.
+   * If no id is specified, the focus will be reset.
+   * @param id Id of the node.
+   */
+  public setFocusedNodeById (id?: string): void {
+    if (id === undefined) {
+      this.store.setFocusedNode()
+    } else {
+      this.store.setFocusedNode(this.graph.getNodeById(id), this.graph.getSortedIndexById(id))
+    }
+  }
+
+  /**
+   * Set focus on a node by index. A ring will be highlighted around the focused node.
+   * If no index is specified, the focus will be reset.
+   * @param index The index of the node in the array of nodes.
+   */
+  public setFocusedNodeByIndex (index?: number): void {
+    if (index === undefined) {
+      this.store.setFocusedNode()
+    } else {
+      this.store.setFocusedNode(this.graph.getNodeByIndex(index), index)
+    }
   }
 
   /**
@@ -663,7 +684,6 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   }
 
   private onClick (event: MouseEvent): void {
-    this.store.setFocusedNode(this.store.hoveredNode?.node, this.store.hoveredNode?.index)
     this.config.events.onClick?.(
       this.store.hoveredNode?.node,
       this.store.hoveredNode ? this.graph.getInputIndexBySortedIndex(this.store.hoveredNode.index) : undefined,
