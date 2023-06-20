@@ -627,7 +627,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   private frame (): void {
     const { config: { simulation, renderLinks }, store: { alpha, isSimulationRunning } } = this
     if (alpha < ALPHA_MIN && isSimulationRunning) this.end()
-    if (!this.store.pointsTextureSize || !this.store.linksTextureSize) return
+    if (!this.store.pointsTextureSize) return
 
     this.requestAnimationFrameId = window.requestAnimationFrame((now) => {
       this.fpsMonitor?.begin()
@@ -654,10 +654,12 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
         this.forceManyBody?.run()
         this.points.updatePosition()
 
-        this.forceLinkIncoming.run()
-        this.points.updatePosition()
-        this.forceLinkOutgoing.run()
-        this.points.updatePosition()
+        if (this.store.linksTextureSize) {
+          this.forceLinkIncoming.run()
+          this.points.updatePosition()
+          this.forceLinkOutgoing.run()
+          this.points.updatePosition()
+        }
 
         this.store.alpha += this.store.addAlpha(this.config.simulation.decay ?? defaultConfigValues.simulation.decay)
         if (this.isRightClickMouse) this.store.alpha = Math.max(this.store.alpha, 0.1)
@@ -679,7 +681,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
         stencil: 0,
       })
 
-      if (renderLinks) {
+      if (renderLinks && this.store.linksTextureSize) {
         this.lines.draw()
       }
 
