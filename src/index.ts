@@ -22,13 +22,13 @@ import { defaultConfigValues, defaultScaleToZoom } from '@/graph/variables'
 
 export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   public config = new GraphConfig<N, L>()
+  public graph = new GraphData<N, L>()
   private canvas: HTMLCanvasElement
   private canvasD3Selection: Selection<HTMLCanvasElement, undefined, null, undefined>
   private reglInstance: regl.Regl
   private requestAnimationFrameId = 0
   private isRightClickMouse = false
 
-  private graph = new GraphData<N, L>()
   private store = new Store<N>()
   private points: Points<N, L>
   private lines: Lines<N, L>
