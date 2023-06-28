@@ -76,6 +76,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       .on('click', this.onClick.bind(this))
       .on('mousemove', this.onMouseMove.bind(this))
       .on('contextmenu', this.onRightClickMouse.bind(this))
+    this.setZoomLevel(this.config.initialZoomLevel)
 
     this.reglInstance = regl({
       canvas: this.canvas,

@@ -32,6 +32,7 @@ export const defaultConfigValues = {
   showFPSMonitor: false,
   pixelRatio: 2,
   scaleNodesOnZoom: true,
+  initialZoomLevel: 1,
 }
 
 export const hoveredNodeRingOpacity = 0.7
