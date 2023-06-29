@@ -18,7 +18,8 @@ export function createSizeBuffer <N extends CosmosInputNode, L extends CosmosInp
   reglInstance: regl.Regl,
   pointTextureSize: number,
   sizeAccessor: NumericAccessor<N>
-): regl.Framebuffer2D {
+): regl.Framebuffer2D | undefined {
+  if (pointTextureSize === 0) return undefined
   const numParticles = data.nodes.length
   const initialState = new Float32Array(pointTextureSize * pointTextureSize * 4)
 

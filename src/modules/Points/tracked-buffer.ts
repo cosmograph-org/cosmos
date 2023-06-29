@@ -18,8 +18,9 @@ export function createTrackedIndicesBuffer (
   indices: number[],
   pointsTextureSize: number,
   reglInstance: regl.Regl
-): regl.Framebuffer2D {
+): regl.Framebuffer2D | undefined {
   const size = Math.ceil(Math.sqrt(indices.length))
+  if (size === 0) return undefined
   const initialState = new Float32Array(size * size * 4).fill(-1)
 
   for (const [i, sortedIndex] of indices.entries()) {
