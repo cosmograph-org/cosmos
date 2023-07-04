@@ -15,6 +15,8 @@ export const defaultConfigValues = {
   arrowLinks: true,
   linkVisibilityDistanceRange: [50, 150],
   linkVisibilityMinTransparency: 0.25,
+  hoveredNodeRingColor: 'white',
+  focusedNodeRingColor: 'white',
   useQuadtree: false,
   simulation: {
     decay: 1000,

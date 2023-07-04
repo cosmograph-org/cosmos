@@ -233,13 +233,13 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
 
   /**
    * Hovered node ring color hex value.
-   * Default value: undefined
+   * Default value: `white`
    */
   hoveredNodeRingColor?: string;
 
   /**
    * Focused node ring color hex value.
-   * Default value: undefined
+   * Default value: `white`
    */
   focusedNodeRingColor?: string;
 
@@ -349,8 +349,8 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
   public renderHighlightedNodeRing = true
   public highlightedNodeRingColor = undefined
   public renderHoveredNodeRing = true
-  public hoveredNodeRingColor = undefined
-  public focusedNodeRingColor = undefined
+  public hoveredNodeRingColor = defaultConfigValues.hoveredNodeRingColor
+  public focusedNodeRingColor = defaultConfigValues.focusedNodeRingColor
   public linkColor = defaultLinkColor
   public linkGreyoutOpacity = defaultGreyoutLinkOpacity
   public linkWidth = defaultLinkWidth
