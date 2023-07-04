@@ -76,6 +76,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       .on('click', this.onClick.bind(this))
       .on('mousemove', this.onMouseMove.bind(this))
       .on('contextmenu', this.onRightClickMouse.bind(this))
+    if (this.config.disableZoom) this.disableZoom()
     this.setZoomLevel(this.config.initialZoomLevel)
 
     this.reglInstance = regl({
@@ -178,6 +179,11 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     }
     if (prevConfig.pixelRatio !== this.config.pixelRatio) {
       this.store.maxPointSize = (this.reglInstance.limits.pointSizeDims[1] ?? MAX_POINT_SIZE) / this.config.pixelRatio
+    }
+
+    if (prevConfig.disableZoom !== this.config.disableZoom) {
+      if (this.config.disableZoom) this.disableZoom()
+      else this.enableZoom()
     }
   }
 
@@ -795,6 +801,16 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
         .duration(duration / 2)
         .call(this.zoomInstance.behavior.transform, transform)
     }
+  }
+
+  private disableZoom (): void {
+    this.canvasD3Selection
+      .call(this.zoomInstance.behavior)
+      .on('wheel.zoom', null)
+  }
+
+  private enableZoom (): void {
+    this.canvasD3Selection.call(this.zoomInstance.behavior)
   }
 
   private findHoveredPoint (): void {

@@ -329,6 +329,11 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    */
   initialZoomLevel?: number;
   /**
+   * Disables zooming in and out.
+   * Default: `false`
+   */
+  disableZoom?: boolean;
+  /**
    * Providing a `randomSeed` value allows you to control
    * the randomness of the layout across different simulation runs.
    * It is useful when you want the graph to always look the same on same datasets.
@@ -397,6 +402,7 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
 
   public scaleNodesOnZoom = defaultConfigValues.scaleNodesOnZoom
   public initialZoomLevel = defaultConfigValues.initialZoomLevel
+  public disableZoom = defaultConfigValues.disableZoom
 
   public randomSeed = undefined
 
