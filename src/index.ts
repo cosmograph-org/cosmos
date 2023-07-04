@@ -107,12 +107,13 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     if (this.config.highlightedNodeRingColor) {
       this.store.setHoveredNodeRingColor(this.config.highlightedNodeRingColor)
       this.store.setFocusedNodeRingColor(this.config.highlightedNodeRingColor)
-    }
-    if (this.config.hoveredNodeRingColor) {
-      this.store.setHoveredNodeRingColor(this.config.hoveredNodeRingColor)
-    }
-    if (this.config.focusedNodeRingColor) {
-      this.store.setFocusedNodeRingColor(this.config.focusedNodeRingColor)
+    } else {
+      if (this.config.hoveredNodeRingColor) {
+        this.store.setHoveredNodeRingColor(this.config.hoveredNodeRingColor)
+      }
+      if (this.config.focusedNodeRingColor) {
+        this.store.setFocusedNodeRingColor(this.config.focusedNodeRingColor)
+      }
     }
 
     if (this.config.showFPSMonitor) this.fpsMonitor = new FPSMonitor(this.canvas)
