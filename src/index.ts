@@ -496,7 +496,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    */
   public getNodeRadiusByIndex (index: number): number | undefined {
     const node = this.graph.getNodeByIndex(index)
-    return node && this.points.getNodeRadius(node)
+    return node && this.points.getNodeRadius(node, index)
   }
 
   /**
@@ -506,7 +506,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    */
   public getNodeRadiusById (id: string): number | undefined {
     const node = this.graph.getNodeById(id)
-    return node && this.points.getNodeRadius(node)
+    return node && this.points.getNodeRadius(node, this.graph.getInputIndexById(id))
   }
 
   /**

@@ -331,9 +331,9 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
     this.findHoveredPointCommand?.()
   }
 
-  public getNodeRadius (node: N): number {
+  public getNodeRadius (node: N, index?: number): number {
     const { nodeSize } = this.config
-    return getNodeSize(node, nodeSize) / 2
+    return getNodeSize(node, nodeSize, index) / 2
   }
 
   public trackNodesByIds (ids: string[]): void {

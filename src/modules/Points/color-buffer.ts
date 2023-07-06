@@ -18,7 +18,7 @@ export function createColorBuffer <N extends CosmosInputNode, L extends CosmosIn
     const sortedIndex = data.getSortedIndexByInputIndex(i)
     const node = data.nodes[i]
     if (node && sortedIndex !== undefined) {
-      const c = getValue<N, string | [number, number, number, number]>(node, colorAccessor) ?? defaultNodeColor
+      const c = getValue<N, string | [number, number, number, number]>(node, colorAccessor, i) ?? defaultNodeColor
       const rgba = getRgbaColor(c)
       initialState[sortedIndex * 4 + 0] = rgba[0]
       initialState[sortedIndex * 4 + 1] = rgba[1]
