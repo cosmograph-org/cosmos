@@ -132,6 +132,13 @@ export class GraphData <N extends CosmosInputNode, L extends CosmosInputLink> {
     return id !== undefined ? this.idToSortedIndexMap.get(id) : undefined
   }
 
+  public getInputIndexById (id: string | undefined): number | undefined {
+    if (id === undefined) return undefined
+    const sortedIndex = this.getSortedIndexById(id)
+    if (sortedIndex === undefined) return undefined
+    return this.getInputIndexBySortedIndex(sortedIndex)
+  }
+
   public getAdjacentNodes (id: string): N[] | undefined {
     const index = this.getSortedIndexById(id)
     if (index === undefined) return undefined

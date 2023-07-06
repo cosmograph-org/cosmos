@@ -7,9 +7,10 @@ import { defaultNodeSize } from '@/graph/variables'
 
 export function getNodeSize<N extends CosmosInputNode> (
   node: N,
-  sizeAccessor: NumericAccessor<N>
+  sizeAccessor: NumericAccessor<N>,
+  index?: number
 ): number {
-  const size = getValue<N, number>(node, sizeAccessor)
+  const size = getValue<N, number>(node, sizeAccessor, index)
   return size ?? defaultNodeSize
 }
 
@@ -27,7 +28,7 @@ export function createSizeBuffer <N extends CosmosInputNode, L extends CosmosInp
     const sortedIndex = data.getSortedIndexByInputIndex(i)
     const node = data.nodes[i]
     if (node && sortedIndex !== undefined) {
-      initialState[sortedIndex * 4] = getNodeSize(node, sizeAccessor)
+      initialState[sortedIndex * 4] = getNodeSize(node, sizeAccessor, i)
     }
   }
 
