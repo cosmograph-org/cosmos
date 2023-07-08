@@ -273,7 +273,7 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    * Otherwise as straight lines.
    * Default value: `true`
    */
-  isLinkCurved?: boolean;
+  curvedLinks?: boolean;
   /**
    * Number of segments in a curved line.
    * Default value: `19`.
@@ -383,7 +383,7 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
   public linkWidth = defaultLinkWidth
   public linkWidthScale = defaultConfigValues.linkWidthScale
   public renderLinks = defaultConfigValues.renderLinks
-  public isLinkCurved = defaultConfigValues.isLinkCurved
+  public curvedLinks = defaultConfigValues.curvedLinks
   public curvedLinkSegments = defaultConfigValues.curvedLinkSegments
   public curvedLinkWeight = defaultConfigValues.curvedLinkWeight
   public curvedLinkControlPointDistance = defaultConfigValues.curvedLinkControlPointDistance
