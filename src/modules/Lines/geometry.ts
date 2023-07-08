@@ -1,13 +1,6 @@
 import { scalePow } from 'd3-scale'
 import { range } from 'd3-array'
 
-export const straightLineSegmentGeometry = [
-  [0, 0.5],
-  [0, -0.5],
-  [1, 0.5],
-  [1, -0.5],
-]
-
 export const getCurveLineGeometry = (segments: number): number[][] => {
   const scale = scalePow()
     .exponent(2)
