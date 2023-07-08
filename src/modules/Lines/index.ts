@@ -91,7 +91,7 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
         scaleNodesOnZoom: () => config.scaleNodesOnZoom,
         curvedWeight: () => config.curvedLinkWeight,
         curvedLinkControlPointDistance: () => config.curvedLinkControlPointDistance,
-        curvedLinkSegments: () => config.isLinkCurved ? config.curvedLinkSegments ?? defaultConfigValues.curvedLinkSegments : 1,
+        curvedLinkSegments: () => config.curvedLinks ? config.curvedLinkSegments ?? defaultConfigValues.curvedLinkSegments : 1,
       },
       cull: {
         enable: true,
@@ -147,8 +147,8 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
   }
 
   public updateCurveLineGeometry (): void {
-    const { reglInstance, config: { isLinkCurved, curvedLinkSegments } } = this
-    this.curveLineGeometry = getCurveLineGeometry(isLinkCurved ? curvedLinkSegments ?? defaultConfigValues.curvedLinkSegments : 1)
+    const { reglInstance, config: { curvedLinks, curvedLinkSegments } } = this
+    this.curveLineGeometry = getCurveLineGeometry(curvedLinks ? curvedLinkSegments ?? defaultConfigValues.curvedLinkSegments : 1)
     this.curveLineBuffer = reglInstance.buffer(this.curveLineGeometry)
   }
 
