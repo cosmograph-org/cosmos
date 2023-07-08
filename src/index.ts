@@ -42,6 +42,15 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   private fpsMonitor: FPSMonitor | undefined
   private hasBeenRecentlyDestroyed = false
   private currentEvent: D3ZoomEvent<HTMLCanvasElement, undefined> | MouseEvent | undefined
+  /**
+   * The value of `_findHoveredPointExecutionCount` is incremented by 1 on each animation frame.
+   * When the counter reaches 2 (or more), it is reset to 0 and the `findHoveredPoint` method is executed.
+   */
+  private _findHoveredPointExecutionCount = 0
+  /**
+   * If the mouse is not on the Canvas, the `findHoveredPoint` method will not be executed.
+   */
+  private _isMouseOnCanvas = false
 
   public constructor (canvas: HTMLCanvasElement, config?: GraphConfigInterface<N, L>) {
     if (config) this.config.init(config)
@@ -63,6 +72,9 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
 
     this.canvas = canvas
     this.canvasD3Selection = select<HTMLCanvasElement, undefined>(canvas)
+    this.canvasD3Selection
+      .on('mouseenter.cosmos', () => { this._isMouseOnCanvas = true })
+      .on('mouseleave.cosmos', () => { this._isMouseOnCanvas = false })
     this.zoomInstance.behavior
       .on('start.detect', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => { this.currentEvent = e })
       .on('zoom.detect', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => {
@@ -814,6 +826,12 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   }
 
   private findHoveredPoint (): void {
+    if (!this._isMouseOnCanvas) return
+    if (this._findHoveredPointExecutionCount < 2) {
+      this._findHoveredPointExecutionCount += 1
+      return
+    }
+    this._findHoveredPointExecutionCount = 0
     this.points.findHoveredPoint()
     let isMouseover = false
     let isMouseout = false
