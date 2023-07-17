@@ -271,7 +271,7 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
   /**
    * If set to true, links are rendered as curved lines.
    * Otherwise as straight lines.
-   * Default value: `true`
+   * Default value: `false`
    */
   curvedLinks?: boolean;
   /**

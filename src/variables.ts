@@ -12,7 +12,7 @@ export const defaultConfigValues = {
   linkWidthScale: 1,
   arrowSizeScale: 1,
   renderLinks: true,
-  curvedLinks: true,
+  curvedLinks: false,
   curvedLinkSegments: 19,
   curvedLinkWeight: 0.8,
   curvedLinkControlPointDistance: 0.5,
