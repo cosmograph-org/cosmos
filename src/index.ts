@@ -57,7 +57,6 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
 
     const w = canvas.clientWidth
     const h = canvas.clientHeight
-    this.store.updateScreenSize(w, h, this.config.spaceSize)
 
     canvas.width = w * this.config.pixelRatio
     canvas.height = h * this.config.pixelRatio
@@ -103,7 +102,8 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     })
 
     this.store.maxPointSize = (this.reglInstance.limits.pointSizeDims[1] ?? MAX_POINT_SIZE) / this.config.pixelRatio
-    this.config.limitSpaceSize(this.reglInstance.limits.maxTextureSize)
+    this.store.adjustSpaceSize(this.config.spaceSize, this.reglInstance.limits.maxTextureSize)
+    this.store.updateScreenSize(w, h)
 
     this.points = new Points(this.reglInstance, this.config, this.store, this.graph)
     this.lines = new Lines(this.reglInstance, this.config, this.store, this.graph, this.points)
@@ -177,7 +177,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     }
     if (prevConfig.spaceSize !== this.config.spaceSize ||
       prevConfig.simulation.repulsionQuadtreeLevels !== this.config.simulation.repulsionQuadtreeLevels) {
-      this.config.limitSpaceSize(this.reglInstance.limits.maxTextureSize)
+      this.store.adjustSpaceSize(this.config.spaceSize, this.reglInstance.limits.maxTextureSize)
       this.resizeCanvas(true)
       this.update(this.store.isSimulationRunning)
     }
@@ -741,8 +741,8 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     const invertedX = (mouseX - x) / k
     const invertedY = (mouseY - y) / k
     this.store.mousePosition = [invertedX, (h - invertedY)]
-    this.store.mousePosition[0] -= (this.store.screenSize[0] - this.config.spaceSize) / 2
-    this.store.mousePosition[1] -= (this.store.screenSize[1] - this.config.spaceSize) / 2
+    this.store.mousePosition[0] -= (this.store.screenSize[0] - this.store.adjustedSpaceSize) / 2
+    this.store.mousePosition[1] -= (this.store.screenSize[1] - this.store.adjustedSpaceSize) / 2
     this.store.screenMousePosition = [mouseX, (this.store.screenSize[1] - mouseY)]
   }
 
@@ -769,7 +769,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     const h = this.canvas.clientHeight
 
     if (forceResize || prevWidth !== w * this.config.pixelRatio || prevHeight !== h * this.config.pixelRatio) {
-      this.store.updateScreenSize(w, h, this.config.spaceSize)
+      this.store.updateScreenSize(w, h)
       this.canvas.width = w * this.config.pixelRatio
       this.canvas.height = h * this.config.pixelRatio
       this.reglInstance.poll()

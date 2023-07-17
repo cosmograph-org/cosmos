@@ -88,7 +88,7 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
         widthScale: () => config.linkWidthScale,
         useArrow: () => config.linkArrows,
         arrowSizeScale: () => config.linkArrowsSizeScale,
-        spaceSize: () => config.spaceSize,
+        spaceSize: () => store.adjustedSpaceSize,
         screenSize: () => store.screenSize,
         ratio: () => config.pixelRatio,
         linkVisibilityDistanceRange: () => config.linkVisibilityDistanceRange,

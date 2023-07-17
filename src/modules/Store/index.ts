@@ -2,7 +2,7 @@ import { scaleLinear } from 'd3-scale'
 import { mat3 } from 'gl-matrix'
 import { Random } from 'random'
 import { getRgbaColor } from '@/graph/helper'
-import { hoveredNodeRingOpacity, focusedNodeRingOpacity } from '@/graph/variables'
+import { hoveredNodeRingOpacity, focusedNodeRingOpacity, defaultConfigValues } from '@/graph/variables'
 
 export const ALPHA_MIN = 0.001
 export const MAX_POINT_SIZE = 64
@@ -26,6 +26,7 @@ export class Store <N> {
   public maxPointSize = MAX_POINT_SIZE
   public hoveredNode: Hovered<N> | undefined = undefined
   public focusedNode: Focused<N> | undefined = undefined
+  public adjustedSpaceSize = defaultConfigValues.spaceSize
 
   public hoveredNodeRingColor = [1, 1, 1, hoveredNodeRingOpacity]
   public focusedNodeRingColor = [1, 1, 1, focusedNodeRingOpacity]
@@ -42,14 +43,26 @@ export class Store <N> {
     return this.random.float(min, max)
   }
 
-  public updateScreenSize (width: number, height: number, spaceSize: number): void {
+  /**
+   * If the config parameter `spaceSize` exceeds the limits of WebGL,
+   * it reduces the space size without changing the config parameter.
+   */
+  public adjustSpaceSize (configSpaceSize: number, webglMaxTextureSize: number): void {
+    if (configSpaceSize >= webglMaxTextureSize) {
+      this.adjustedSpaceSize = webglMaxTextureSize / 2
+      console.warn(`The \`spaceSize\` has been reduced to ${this.adjustedSpaceSize} due to WebGL limits`)
+    } else this.adjustedSpaceSize = configSpaceSize
+  }
+
+  public updateScreenSize (width: number, height: number): void {
+    const { adjustedSpaceSize } = this
     this.screenSize = [width, height]
     this.scaleNodeX
-      .domain([0, spaceSize])
-      .range([(width - spaceSize) / 2, (width + spaceSize) / 2])
+      .domain([0, adjustedSpaceSize])
+      .range([(width - adjustedSpaceSize) / 2, (width + adjustedSpaceSize) / 2])
     this.scaleNodeY
-      .domain([spaceSize, 0])
-      .range([(height - spaceSize) / 2, (height + spaceSize) / 2])
+      .domain([adjustedSpaceSize, 0])
+      .range([(height - adjustedSpaceSize) / 2, (height + adjustedSpaceSize) / 2])
   }
 
   public scaleX (x: number): number {
