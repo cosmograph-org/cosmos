@@ -7,7 +7,6 @@ import forceCenterFrag from '@/graph/modules/ForceManyBody/force-centermass.frag
 import { createIndexesBuffer, createQuadBuffer, destroyFramebuffer } from '@/graph/modules/Shared/buffer'
 import clearFrag from '@/graph/modules/Shared/clear.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
-import { defaultConfigValues } from '@/graph/variables'
 import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 
 export class ForceManyBody<N extends CosmosInputNode, L extends CosmosInputLink> extends CoreModule<N, L> {
@@ -21,9 +20,9 @@ export class ForceManyBody<N extends CosmosInputNode, L extends CosmosInputLink>
   private quadtreeLevels = 0
 
   public create (): void {
-    const { reglInstance, config, store } = this
+    const { reglInstance, store } = this
     if (!store.pointsTextureSize) return
-    this.quadtreeLevels = Math.log2(config.spaceSize ?? defaultConfigValues.spaceSize)
+    this.quadtreeLevels = Math.log2(store.adjustedSpaceSize)
     for (let i = 0; i < this.quadtreeLevels; i += 1) {
       const levelTextureSize = Math.pow(2, i + 1)
       this.levelsFbos.set(`level[${i}]`, reglInstance.framebuffer({
@@ -105,7 +104,7 @@ export class ForceManyBody<N extends CosmosInputNode, L extends CosmosInputLink>
         levelTextureSize: (_, props) => props.levelTextureSize,
         alpha: () => store.alpha,
         repulsion: () => config.simulation?.repulsion,
-        spaceSize: () => config.spaceSize,
+        spaceSize: () => store.adjustedSpaceSize,
         theta: () => config.simulation?.repulsionTheta,
       },
       blend: {
@@ -136,7 +135,7 @@ export class ForceManyBody<N extends CosmosInputNode, L extends CosmosInputLink>
         levelTextureSize: (_, props) => props.levelTextureSize,
         alpha: () => store.alpha,
         repulsion: () => config.simulation?.repulsion,
-        spaceSize: () => config.spaceSize,
+        spaceSize: () => store.adjustedSpaceSize,
       },
       blend: {
         enable: true,
@@ -163,11 +162,11 @@ export class ForceManyBody<N extends CosmosInputNode, L extends CosmosInputLink>
   }
 
   public run (): void {
-    const { config } = this
+    const { store } = this
     for (let i = 0; i < this.quadtreeLevels; i += 1) {
       this.clearLevelsCommand?.({ levelFbo: this.levelsFbos.get(`level[${i}]`) })
       const levelTextureSize = Math.pow(2, i + 1)
-      const cellSize = (config.spaceSize ?? defaultConfigValues.spaceSize) / levelTextureSize
+      const cellSize = store.adjustedSpaceSize / levelTextureSize
       this.calculateLevelsCommand?.({
         levelFbo: this.levelsFbos.get(`level[${i}]`),
         levelTextureSize,

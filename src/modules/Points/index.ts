@@ -15,7 +15,6 @@ import { createTrackedIndicesBuffer, createTrackedPositionsBuffer } from '@/grap
 import trackPositionsFrag from '@/graph/modules/Points/track-positions.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
 import clearFrag from '@/graph/modules/Shared/clear.frag'
-import { defaultConfigValues } from '@/graph/variables'
 import { readPixels } from '@/graph/helper'
 import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 
@@ -41,9 +40,8 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
   private trackedPositionsById: Map<string, [number, number]> = new Map()
 
   public create (): void {
-    const { reglInstance, config, store, data } = this
-    const { spaceSize } = config
-    const { pointsTextureSize } = store
+    const { reglInstance, store, data } = this
+    const { pointsTextureSize, adjustedSpaceSize } = store
     if (!pointsTextureSize) return
     const numParticles = data.nodes.length
     const initialState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
@@ -51,9 +49,8 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
       const sortedIndex = this.data.getSortedIndexByInputIndex(i)
       const node = data.nodes[i]
       if (node && sortedIndex !== undefined) {
-        const space = spaceSize ?? defaultConfigValues.spaceSize
-        initialState[sortedIndex * 4 + 0] = node.x ?? space * store.getRandomFloat(0.495, 0.505)
-        initialState[sortedIndex * 4 + 1] = node.y ?? space * store.getRandomFloat(0.495, 0.505)
+        initialState[sortedIndex * 4 + 0] = node.x ?? adjustedSpaceSize * store.getRandomFloat(0.495, 0.505)
+        initialState[sortedIndex * 4 + 1] = node.y ?? adjustedSpaceSize * store.getRandomFloat(0.495, 0.505)
       }
     }
 
@@ -125,7 +122,7 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
         position: () => this.previousPositionFbo,
         velocity: () => this.velocityFbo,
         friction: () => config.simulation?.friction,
-        spaceSize: () => config.spaceSize,
+        spaceSize: () => store.adjustedSpaceSize,
       },
     })
     this.drawCommand = reglInstance({
@@ -143,7 +140,7 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
         sizeScale: () => config.nodeSizeScale,
         pointsTextureSize: () => store.pointsTextureSize,
         transform: () => store.transform,
-        spaceSize: () => config.spaceSize,
+        spaceSize: () => store.adjustedSpaceSize,
         screenSize: () => store.screenSize,
         greyoutOpacity: () => config.nodeGreyoutOpacity,
         scaleNodesOnZoom: () => config.scaleNodesOnZoom,
@@ -176,7 +173,7 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
       uniforms: {
         position: () => this.currentPositionFbo,
         particleSize: () => this.sizeFbo,
-        spaceSize: () => config.spaceSize,
+        spaceSize: () => store.adjustedSpaceSize,
         screenSize: () => store.screenSize,
         sizeScale: () => config.nodeSizeScale,
         transform: () => store.transform,
@@ -209,7 +206,7 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
         sizeScale: () => config.nodeSizeScale,
         pointsTextureSize: () => store.pointsTextureSize,
         transform: () => store.transform,
-        spaceSize: () => config.spaceSize,
+        spaceSize: () => store.adjustedSpaceSize,
         screenSize: () => store.screenSize,
         scaleNodesOnZoom: () => config.scaleNodesOnZoom,
         mousePosition: () => store.screenMousePosition,
@@ -236,7 +233,7 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
         sizeScale: () => config.nodeSizeScale,
         pointsTextureSize: () => store.pointsTextureSize,
         transform: () => store.transform,
-        spaceSize: () => config.spaceSize,
+        spaceSize: () => store.adjustedSpaceSize,
         screenSize: () => store.screenSize,
         scaleNodesOnZoom: () => config.scaleNodesOnZoom,
         maxPointSize: () => store.maxPointSize,

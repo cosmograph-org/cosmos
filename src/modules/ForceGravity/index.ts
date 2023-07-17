@@ -20,7 +20,7 @@ export class ForceGravity<N extends CosmosInputNode, L extends CosmosInputLink> 
       uniforms: {
         position: () => points?.previousPositionFbo,
         gravity: () => config.simulation?.gravity,
-        spaceSize: () => config.spaceSize,
+        spaceSize: () => store.adjustedSpaceSize,
         alpha: () => store.alpha,
       },
     })
