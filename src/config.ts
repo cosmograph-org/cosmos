@@ -12,9 +12,8 @@ import {
 } from '@/graph/variables'
 import { isPlainObject } from '@/graph/helper'
 
-export type NumericAccessor<Datum> = ((d: Datum, i?: number, ...rest: unknown[]) => number | null) | number | null | undefined
-export type StringAccessor<Datum> = ((d: Datum, i?: number, ...rest: unknown[]) => string | null) | string | null | undefined
-export type ColorAccessor<Datum> = ((d: Datum, i?: number, ...rest: unknown[]) => string | [number, number, number, number] | null)
+export type NumericAccessor<Datum> = ((d: Datum, i: number, ...rest: unknown[]) => number | null) | number | null | undefined
+export type ColorAccessor<Datum> = ((d: Datum, i: number, ...rest: unknown[]) => string | [number, number, number, number] | null)
   | string | [number, number, number, number] | null | undefined
 
 export interface GraphEvents <N extends CosmosInputNode> {

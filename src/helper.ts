@@ -1,6 +1,6 @@
 import { color as d3Color } from 'd3-color'
 import regl from 'regl'
-import { ColorAccessor, NumericAccessor, StringAccessor } from './config'
+import { ColorAccessor, NumericAccessor } from './config'
 
 export const isFunction = <T>(a: T): boolean => typeof a === 'function'
 export const isArray = <T>(a: unknown | T[]): a is T[] => Array.isArray(a)
@@ -15,16 +15,12 @@ export const isPlainObject = <T>(a: T): boolean => isObject(a) && !isArray(a) &&
 
 export function getValue<T, ReturnType> (
   d: T,
-  accessor: NumericAccessor<T> | StringAccessor<T> | ColorAccessor<T>,
+  accessor: NumericAccessor<T> | ColorAccessor<T>,
   index?: number
 ): ReturnType | null | undefined {
   // eslint-disable-next-line @typescript-eslint/ban-types
   if (isFunction(accessor)) return (accessor as Function)(d, index) as (ReturnType | null | undefined)
   else return accessor as unknown as (ReturnType | null | undefined)
-}
-
-export function getString<T> (d: T, accessor: StringAccessor<T>, i?: number): string | null | undefined {
-  return getValue<T, string>(d, accessor, i)
 }
 
 export function getNumber<T> (d: T, accessor: NumericAccessor<T>, i?: number): number | null | undefined {
