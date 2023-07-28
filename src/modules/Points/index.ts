@@ -65,26 +65,28 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
       stencil: false,
     })
 
-    this.previousPositionFbo = reglInstance.framebuffer({
-      color: reglInstance.texture({
-        data: initialState,
-        shape: [pointsTextureSize, pointsTextureSize, 4],
-        type: 'float',
-      }),
-      depth: false,
-      stencil: false,
-    })
+    if (!this.config.disableSimulation) {
+      this.previousPositionFbo = reglInstance.framebuffer({
+        color: reglInstance.texture({
+          data: initialState,
+          shape: [pointsTextureSize, pointsTextureSize, 4],
+          type: 'float',
+        }),
+        depth: false,
+        stencil: false,
+      })
 
-    // Create velocity buffer
-    this.velocityFbo = reglInstance.framebuffer({
-      color: reglInstance.texture({
-        data: new Float32Array(pointsTextureSize * pointsTextureSize * 4).fill(0),
-        shape: [pointsTextureSize, pointsTextureSize, 4],
-        type: 'float',
-      }),
-      depth: false,
-      stencil: false,
-    })
+      // Create velocity buffer
+      this.velocityFbo = reglInstance.framebuffer({
+        color: reglInstance.texture({
+          data: new Float32Array(pointsTextureSize * pointsTextureSize * 4).fill(0),
+          shape: [pointsTextureSize, pointsTextureSize, 4],
+          type: 'float',
+        }),
+        depth: false,
+        stencil: false,
+      })
+    }
 
     // Create selected points buffer
     this.selectedFbo = reglInstance.framebuffer({
@@ -111,20 +113,23 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
 
   public initPrograms (): void {
     const { reglInstance, config, store, data } = this
-    this.updatePositionCommand = reglInstance({
-      frag: updatePositionFrag,
-      vert: updateVert,
-      framebuffer: () => this.currentPositionFbo as regl.Framebuffer2D,
-      primitive: 'triangle strip',
-      count: 4,
-      attributes: { quad: createQuadBuffer(reglInstance) },
-      uniforms: {
-        position: () => this.previousPositionFbo,
-        velocity: () => this.velocityFbo,
-        friction: () => config.simulation?.friction,
-        spaceSize: () => store.adjustedSpaceSize,
-      },
-    })
+    if (!config.disableSimulation) {
+      this.updatePositionCommand = reglInstance({
+        frag: updatePositionFrag,
+        vert: updateVert,
+        framebuffer: () => this.currentPositionFbo as regl.Framebuffer2D,
+        primitive: 'triangle strip',
+        count: 4,
+        attributes: { quad: createQuadBuffer(reglInstance) },
+        uniforms: {
+          position: () => this.previousPositionFbo,
+          velocity: () => this.velocityFbo,
+          friction: () => config.simulation?.friction,
+          spaceSize: () => store.adjustedSpaceSize,
+        },
+      })
+    }
+
     this.drawCommand = reglInstance({
       frag: drawPointsFrag,
       vert: drawPointsVert,

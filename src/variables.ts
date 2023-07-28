@@ -7,6 +7,7 @@ export const defaultLinkWidth = 1
 export const defaultBackgroundColor = '#222222'
 
 export const defaultConfigValues = {
+  disableSimulation: false,
   spaceSize: 4096,
   nodeSizeScale: 1,
   linkWidthScale: 1,

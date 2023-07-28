@@ -178,6 +178,15 @@ export interface GraphSimulationSettings<N> {
 }
 export interface GraphConfigInterface<N extends CosmosInputNode, L extends CosmosInputLink> {
   /**
+   * Do not run the simulation, just render the graph.
+   * Cosmos uses the x and y values of the nodes’ data to determine their position in the graph.
+   * If x and y values are not specified, the position of the nodes will be assigned randomly.
+   * This property will be applied only on component initialization and it
+   * can't be changed using the `setConfig` method.
+   * Default value: `false`
+   */
+  disableSimulation?: boolean;
+  /**
    * Canvas background color.
    * Default value: '#222222'
    */
@@ -366,6 +375,7 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
 }
 
 export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> implements GraphConfigInterface<N, L> {
+  public disableSimulation = defaultConfigValues.disableSimulation
   public backgroundColor = defaultBackgroundColor
   public spaceSize = defaultConfigValues.spaceSize
   public nodeColor = defaultNodeColor
