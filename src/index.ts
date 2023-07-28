@@ -32,12 +32,12 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   private store = new Store<N>()
   private points: Points<N, L>
   private lines: Lines<N, L>
-  private forceGravity: ForceGravity<N, L>
-  private forceCenter: ForceCenter<N, L>
+  private forceGravity: ForceGravity<N, L> | undefined
+  private forceCenter: ForceCenter<N, L> | undefined
   private forceManyBody: ForceManyBody<N, L> | ForceManyBodyQuadtree<N, L> | undefined
-  private forceLinkIncoming: ForceLink<N, L>
-  private forceLinkOutgoing: ForceLink<N, L>
-  private forceMouse: ForceMouse<N, L>
+  private forceLinkIncoming: ForceLink<N, L> | undefined
+  private forceLinkOutgoing: ForceLink<N, L> | undefined
+  private forceMouse: ForceMouse<N, L> | undefined
   private zoomInstance = new Zoom(this.store, this.config)
   private fpsMonitor: FPSMonitor | undefined
   private hasBeenRecentlyDestroyed = false
@@ -107,14 +107,16 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
 
     this.points = new Points(this.reglInstance, this.config, this.store, this.graph)
     this.lines = new Lines(this.reglInstance, this.config, this.store, this.graph, this.points)
-    this.forceGravity = new ForceGravity(this.reglInstance, this.config, this.store, this.graph, this.points)
-    this.forceCenter = new ForceCenter(this.reglInstance, this.config, this.store, this.graph, this.points)
-    this.forceManyBody = this.config.useQuadtree
-      ? new ForceManyBodyQuadtree(this.reglInstance, this.config, this.store, this.graph, this.points)
-      : new ForceManyBody(this.reglInstance, this.config, this.store, this.graph, this.points)
-    this.forceLinkIncoming = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
-    this.forceLinkOutgoing = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
-    this.forceMouse = new ForceMouse(this.reglInstance, this.config, this.store, this.graph, this.points)
+    if (!this.config.disableSimulation) {
+      this.forceGravity = new ForceGravity(this.reglInstance, this.config, this.store, this.graph, this.points)
+      this.forceCenter = new ForceCenter(this.reglInstance, this.config, this.store, this.graph, this.points)
+      this.forceManyBody = this.config.useQuadtree
+        ? new ForceManyBodyQuadtree(this.reglInstance, this.config, this.store, this.graph, this.points)
+        : new ForceManyBody(this.reglInstance, this.config, this.store, this.graph, this.points)
+      this.forceLinkIncoming = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
+      this.forceLinkOutgoing = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
+      this.forceMouse = new ForceMouse(this.reglInstance, this.config, this.store, this.graph, this.points)
+    }
 
     this.store.backgroundColor = getRgbaColor(this.config.backgroundColor)
     if (this.config.highlightedNodeRingColor) {
@@ -597,9 +599,9 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     if (this.hasBeenRecentlyDestroyed) return
     this.points.destroy()
     this.lines.destroy()
-    this.forceCenter.destroy()
-    this.forceLinkIncoming.destroy()
-    this.forceLinkOutgoing.destroy()
+    this.forceCenter?.destroy()
+    this.forceLinkIncoming?.destroy()
+    this.forceLinkOutgoing?.destroy()
     this.forceManyBody?.destroy()
     this.reglInstance.destroy()
     this.hasBeenRecentlyDestroyed = true
@@ -612,9 +614,9 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     this.points.create()
     this.lines.create()
     this.forceManyBody?.create()
-    this.forceLinkIncoming.create(LinkDirection.INCOMING)
-    this.forceLinkOutgoing.create(LinkDirection.OUTGOING)
-    this.forceCenter.create()
+    this.forceLinkIncoming?.create(LinkDirection.INCOMING)
+    this.forceLinkOutgoing?.create(LinkDirection.OUTGOING)
+    this.forceCenter?.create()
     this.hasBeenRecentlyDestroyed = false
   }
 
@@ -637,16 +639,16 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   private initPrograms (): void {
     this.points.initPrograms()
     this.lines.initPrograms()
-    this.forceGravity.initPrograms()
-    this.forceLinkIncoming.initPrograms()
-    this.forceLinkOutgoing.initPrograms()
-    this.forceMouse.initPrograms()
+    this.forceGravity?.initPrograms()
+    this.forceLinkIncoming?.initPrograms()
+    this.forceLinkOutgoing?.initPrograms()
+    this.forceMouse?.initPrograms()
     this.forceManyBody?.initPrograms()
-    this.forceCenter.initPrograms()
+    this.forceCenter?.initPrograms()
   }
 
   private frame (): void {
-    const { config: { simulation, renderLinks }, store: { alpha, isSimulationRunning } } = this
+    const { config: { simulation, renderLinks, disableSimulation }, store: { alpha, isSimulationRunning } } = this
     if (alpha < ALPHA_MIN && isSimulationRunning) this.end()
     if (!this.store.pointsTextureSize) return
 
@@ -655,45 +657,47 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       this.resizeCanvas()
       this.findHoveredPoint()
 
-      if (this.isRightClickMouse) {
-        if (!isSimulationRunning) this.start(0.1)
-        this.forceMouse.run()
-        this.points.updatePosition()
+      if (!disableSimulation) {
+        if (this.isRightClickMouse) {
+          if (!isSimulationRunning) this.start(0.1)
+          this.forceMouse?.run()
+          this.points.updatePosition()
+        }
+
+        if ((isSimulationRunning && !this.zoomInstance.isRunning)) {
+          if (simulation.gravity) {
+            this.forceGravity?.run()
+            this.points.updatePosition()
+          }
+
+          if (simulation.center) {
+            this.forceCenter?.run()
+            this.points.updatePosition()
+          }
+
+          this.forceManyBody?.run()
+          this.points.updatePosition()
+
+          if (this.store.linksTextureSize) {
+            this.forceLinkIncoming?.run()
+            this.points.updatePosition()
+            this.forceLinkOutgoing?.run()
+            this.points.updatePosition()
+          }
+
+          this.store.alpha += this.store.addAlpha(this.config.simulation.decay ?? defaultConfigValues.simulation.decay)
+          if (this.isRightClickMouse) this.store.alpha = Math.max(this.store.alpha, 0.1)
+          this.store.simulationProgress = Math.sqrt(Math.min(1, ALPHA_MIN / this.store.alpha))
+          this.config.simulation.onTick?.(
+            this.store.alpha,
+            this.store.hoveredNode?.node,
+            this.store.hoveredNode ? this.graph.getInputIndexBySortedIndex(this.store.hoveredNode.index) : undefined,
+            this.store.hoveredNode?.position
+          )
+        }
+
+        this.points.trackPoints()
       }
-
-      if ((isSimulationRunning && !this.zoomInstance.isRunning)) {
-        if (simulation.gravity) {
-          this.forceGravity.run()
-          this.points.updatePosition()
-        }
-
-        if (simulation.center) {
-          this.forceCenter.run()
-          this.points.updatePosition()
-        }
-
-        this.forceManyBody?.run()
-        this.points.updatePosition()
-
-        if (this.store.linksTextureSize) {
-          this.forceLinkIncoming.run()
-          this.points.updatePosition()
-          this.forceLinkOutgoing.run()
-          this.points.updatePosition()
-        }
-
-        this.store.alpha += this.store.addAlpha(this.config.simulation.decay ?? defaultConfigValues.simulation.decay)
-        if (this.isRightClickMouse) this.store.alpha = Math.max(this.store.alpha, 0.1)
-        this.store.simulationProgress = Math.sqrt(Math.min(1, ALPHA_MIN / this.store.alpha))
-        this.config.simulation.onTick?.(
-          this.store.alpha,
-          this.store.hoveredNode?.node,
-          this.store.hoveredNode ? this.graph.getInputIndexBySortedIndex(this.store.hoveredNode.index) : undefined,
-          this.store.hoveredNode?.position
-        )
-      }
-
-      this.points.trackPoints()
 
       // Clear canvas
       this.reglInstance.clear({
