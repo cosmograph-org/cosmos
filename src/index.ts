@@ -40,7 +40,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   private forceMouse: ForceMouse<N, L> | undefined
   private zoomInstance = new Zoom(this.store, this.config)
   private fpsMonitor: FPSMonitor | undefined
-  private hasBeenRecentlyDestroyed = false
+  private hasParticleSystemDestroyed = false
   private currentEvent: D3ZoomEvent<HTMLCanvasElement, undefined> | MouseEvent | undefined
   /**
    * The value of `_findHoveredPointExecutionCount` is incremented by 1 on each animation frame.
@@ -210,7 +210,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    */
   public setData (nodes: N[], links: L[], runSimulation = true): void {
     if (!nodes.length && !links.length) {
-      this.destroy()
+      this.destroyParticleSystem()
       this.reglInstance.clear({
         color: this.store.backgroundColor,
         depth: 1,
@@ -283,7 +283,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * @returns Object where keys are the ids of the nodes and values are corresponding `{ x: number; y: number }` objects.
    */
   public getNodePositions (): { [key: string]: { x: number; y: number } } {
-    if (this.hasBeenRecentlyDestroyed) return {}
+    if (this.hasParticleSystemDestroyed) return {}
     const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
     return this.graph.nodes.reduce<{ [key: string]: { x: number; y: number } }>((acc, curr) => {
       const index = this.graph.getSortedIndexById(curr.id) as number
@@ -305,7 +305,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    */
   public getNodePositionsMap (): Map<string, [number, number]> {
     const positionMap = new Map()
-    if (this.hasBeenRecentlyDestroyed) return positionMap
+    if (this.hasParticleSystemDestroyed) return positionMap
     const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
     return this.graph.nodes.reduce<Map<string, [number, number]>>((acc, curr) => {
       const index = this.graph.getSortedIndexById(curr.id) as number
@@ -324,7 +324,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    */
   public getNodePositionsArray (): [number, number][] {
     const positions: [number, number][] = []
-    if (this.hasBeenRecentlyDestroyed) return []
+    if (this.hasParticleSystemDestroyed) return []
     const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
     positions.length = this.graph.nodes.length
     for (let i = 0; i < this.graph.nodes.length; i += 1) {
@@ -596,15 +596,9 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    */
   public destroy (): void {
     this.stopFrames()
-    if (this.hasBeenRecentlyDestroyed) return
-    this.points.destroy()
-    this.lines.destroy()
-    this.forceCenter?.destroy()
-    this.forceLinkIncoming?.destroy()
-    this.forceLinkOutgoing?.destroy()
-    this.forceManyBody?.destroy()
-    this.reglInstance.destroy()
-    this.hasBeenRecentlyDestroyed = true
+    this.destroyParticleSystem()
+    this.fpsMonitor?.destroy()
+    document.getElementById('gl-bench-style')?.remove()
   }
 
   /**
@@ -617,14 +611,26 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     this.forceLinkIncoming?.create(LinkDirection.INCOMING)
     this.forceLinkOutgoing?.create(LinkDirection.OUTGOING)
     this.forceCenter?.create()
-    this.hasBeenRecentlyDestroyed = false
+    this.hasParticleSystemDestroyed = false
+  }
+
+  private destroyParticleSystem (): void {
+    if (this.hasParticleSystemDestroyed) return
+    this.points.destroy()
+    this.lines.destroy()
+    this.forceCenter?.destroy()
+    this.forceLinkIncoming?.destroy()
+    this.forceLinkOutgoing?.destroy()
+    this.forceManyBody?.destroy()
+    this.reglInstance.destroy()
+    this.hasParticleSystemDestroyed = true
   }
 
   private update (runSimulation: boolean): void {
     const { graph } = this
     this.store.pointsTextureSize = Math.ceil(Math.sqrt(graph.nodes.length))
     this.store.linksTextureSize = Math.ceil(Math.sqrt(graph.linksNumber * 2))
-    this.destroy()
+    this.destroyParticleSystem()
     this.create()
     this.initPrograms()
     this.setFocusedNodeById()
