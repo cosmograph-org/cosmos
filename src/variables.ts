@@ -41,6 +41,7 @@ export const defaultConfigValues = {
   scaleNodesOnZoom: true,
   initialZoomLevel: 1,
   disableZoom: false,
+  nodeSamplingDistance: 150,
 }
 
 export const hoveredNodeRingOpacity = 0.7
