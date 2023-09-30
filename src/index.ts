@@ -556,6 +556,16 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   }
 
   /**
+   * For the nodes that are currently visible on the screen, get a sample of node ids with their coordinates.
+   * The resulting number of nodes will depend on the `nodeSamplingDistance` configuration property,
+   * and the sampled nodes will be evenly distributed.
+   * @returns A Map object where keys are the ids of the nodes and values are their corresponding X and Y coordinates in the [number, number] format.
+   */
+  public getSampledNodePositionsMap (): Map<string, [number, number]> {
+    return this.points.getSampledNodePositionsMap()
+  }
+
+  /**
    * Start the simulation.
    * @param alpha Value from 0 to 1. The higher the value, the more initial energy the simulation will get.
    */
@@ -789,6 +799,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       this.reglInstance.poll()
       this.canvasD3Selection
         .call(this.zoomInstance.behavior.transform, this.zoomInstance.eventTransform)
+      this.points.updateSampledNodesGrid()
     }
   }
 

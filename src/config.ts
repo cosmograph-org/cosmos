@@ -372,6 +372,12 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    * Default value: undefined
    */
   randomSeed?: number | string;
+  /**
+   * Node sampling distance in pixels between neighboring nodes when calling the `getSampledNodePositionsMap` method.
+   * This parameter determines how many nodes will be included in the sample.
+   * Default value: `150`
+  */
+  nodeSamplingDistance?: number;
 }
 
 export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> implements GraphConfigInterface<N, L> {
@@ -440,6 +446,7 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
   public disableZoom = defaultConfigValues.disableZoom
 
   public randomSeed = undefined
+  public nodeSamplingDistance = defaultConfigValues.nodeSamplingDistance
 
   public init (config: GraphConfigInterface<N, L>): void {
     (Object.keys(config) as (keyof GraphConfigInterface<N, L>)[])
