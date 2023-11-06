@@ -3,11 +3,12 @@ import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 export class GraphData <N extends CosmosInputNode, L extends CosmosInputLink> {
   /** Links that have existing source and target nodes  */
   public completeLinks: Set<L> = new Set()
+  public completeArrowLinks: Set<L> = new Set()
   public degree: number[] = []
   /** Mapping the source node index to a `Set` of target node indices connected to that node */
-  public groupedSourceToTargetLinks: Map<number, Set<number>> = new Map()
+  public groupedSourceToTargetLinks: Map<number, Set<[number,number,number]>> = new Map()
   /** Mapping the target node index to a `Set` of source node indices connected to that node */
-  public groupedTargetToSourceLinks: Map<number, Set<number>> = new Map()
+  public groupedTargetToSourceLinks: Map<number, Set<[number,number,number]>> = new Map()
   private _nodes: N[] = []
   private _links: L[] = []
   /** Mapping the original id to the original node */
@@ -44,67 +45,92 @@ export class GraphData <N extends CosmosInputNode, L extends CosmosInputLink> {
     return this.completeLinks.size
   }
 
-  public setData (inputNodes: N[], inputLinks: L[]): void {
-    this.idToNodeMap.clear()
-    this.idToSortedIndexMap.clear()
-    this.inputIndexToIdMap.clear()
-    this.idToIndegreeMap.clear()
-    this.idToOutdegreeMap.clear()
+  public get linksArrowNumber (): number {
+    return this.completeArrowLinks.size
+  }
 
-    inputNodes.forEach((n, i) => {
-      this.idToNodeMap.set(n.id, n)
-      this.inputIndexToIdMap.set(i, n.id)
-      this.idToIndegreeMap.set(n.id, 0)
-      this.idToOutdegreeMap.set(n.id, 0)
-    })
+  public setData (inputNodes: N[], inputLinks: L[], isFirst: boolean = true): void {
+    if (isFirst == true)  {   
+      this.idToNodeMap.clear()
+      this.idToSortedIndexMap.clear()
+      this.inputIndexToIdMap.clear()
+      this.idToIndegreeMap.clear()
+      this.idToOutdegreeMap.clear()
 
-    // Calculate node outdegree/indegree values
-    // And filter links if source/target node does not exist
-    this.completeLinks.clear()
-    inputLinks.forEach(l => {
-      const sourceNode = this.idToNodeMap.get(l.source)
-      const targetNode = this.idToNodeMap.get(l.target)
-      if (sourceNode !== undefined && targetNode !== undefined) {
-        this.completeLinks.add(l)
-        const outdegree = this.idToOutdegreeMap.get(sourceNode.id)
-        if (outdegree !== undefined) this.idToOutdegreeMap.set(sourceNode.id, outdegree + 1)
-        const indegree = this.idToIndegreeMap.get(targetNode.id)
-        if (indegree !== undefined) this.idToIndegreeMap.set(targetNode.id, indegree + 1)
-      }
-    })
+      inputNodes.forEach((n, i) => {
+        this.idToNodeMap.set(n.id, n)
+        this.inputIndexToIdMap.set(i, n.id)
+        this.idToIndegreeMap.set(n.id, 0)
+        this.idToOutdegreeMap.set(n.id, 0)
+      })
 
-    // Calculate node degree value
-    this.degree = new Array<number>(inputNodes.length)
-    inputNodes.forEach((n, i) => {
-      const outdegree = this.idToOutdegreeMap.get(n.id)
-      const indegree = this.idToIndegreeMap.get(n.id)
-      this.degree[i] = (outdegree ?? 0) + (indegree ?? 0)
-    })
+      // Calculate node outdegree/indegree values
+      // And filter links if source/target node does not exist
+      this.completeLinks.clear()
+      inputLinks.forEach(l => {
+        if (l.Is_directed === 0) {
+          const sourceNode = this.idToNodeMap.get(l.source)
+          const targetNode = this.idToNodeMap.get(l.target)
+          if (sourceNode !== undefined && targetNode !== undefined) {
+            this.completeLinks.add(l)
+            const outdegree = this.idToOutdegreeMap.get(sourceNode.id)
+            if (outdegree !== undefined) this.idToOutdegreeMap.set(sourceNode.id, outdegree + 1)
+            const indegree = this.idToIndegreeMap.get(targetNode.id)
+            if (indegree !== undefined) this.idToIndegreeMap.set(targetNode.id, indegree + 1)
+          }
+        }
+      })
 
-    // Sort nodes by degree value
-    this.sortedIndexToInputIndexMap.clear()
-    this.inputIndexToSortedIndexMap.clear()
-    const sortedDegrees = Object.entries(this.degree).sort((a, b) => a[1] - b[1])
-    sortedDegrees.forEach(([inputStringedIndex], sortedIndex) => {
-      const inputIndex = +inputStringedIndex
-      this.sortedIndexToInputIndexMap.set(sortedIndex, inputIndex)
-      this.inputIndexToSortedIndexMap.set(inputIndex, sortedIndex)
-      this.idToSortedIndexMap.set(this.inputIndexToIdMap.get(inputIndex) as string, sortedIndex)
-    })
+      this.completeArrowLinks.clear()
+      inputLinks.forEach(l => {
+        if (l.Is_directed === 1) {
+          const sourceNode = this.idToNodeMap.get(l.source)
+          const targetNode = this.idToNodeMap.get(l.target)
+          if (sourceNode !== undefined && targetNode !== undefined) {
+            this.completeArrowLinks.add(l)
+            const outdegree = this.idToOutdegreeMap.get(sourceNode.id)
+            if (outdegree !== undefined) this.idToOutdegreeMap.set(sourceNode.id, outdegree + 1)
+            const indegree = this.idToIndegreeMap.get(targetNode.id)
+            if (indegree !== undefined) this.idToIndegreeMap.set(targetNode.id, indegree + 1)
+          }
+        }
+      })
 
+      // Calculate node degree value
+      this.degree = new Array<number>(inputNodes.length)
+      inputNodes.forEach((n, i) => {
+        const outdegree = this.idToOutdegreeMap.get(n.id)
+        const indegree = this.idToIndegreeMap.get(n.id)
+        this.degree[i] = (outdegree ?? 0) + (indegree ?? 0)
+      })
+
+      // Sort nodes by degree value
+      this.sortedIndexToInputIndexMap.clear()
+      this.inputIndexToSortedIndexMap.clear()
+      const sortedDegrees = Object.entries(this.degree).sort((a, b) => a[1] - b[1])
+      sortedDegrees.forEach(([inputStringedIndex], sortedIndex) => {
+        const inputIndex = +inputStringedIndex
+        this.sortedIndexToInputIndexMap.set(sortedIndex, inputIndex)
+        this.inputIndexToSortedIndexMap.set(inputIndex, sortedIndex)
+        this.idToSortedIndexMap.set(this.inputIndexToIdMap.get(inputIndex) as string, sortedIndex)
+      })
+    }
+    
     this.groupedSourceToTargetLinks.clear()
     this.groupedTargetToSourceLinks.clear()
     inputLinks.forEach((l) => {
       const sourceIndex = this.idToSortedIndexMap.get(l.source)
       const targetIndex = this.idToSortedIndexMap.get(l.target)
+      const hasForce = l.hasForce ?? 0
+      const linkWeight = l.Weight ?? 1
       if (sourceIndex !== undefined && targetIndex !== undefined) {
         if (this.groupedSourceToTargetLinks.get(sourceIndex) === undefined) this.groupedSourceToTargetLinks.set(sourceIndex, new Set())
         const targets = this.groupedSourceToTargetLinks.get(sourceIndex)
-        targets?.add(targetIndex)
+        targets?.add([targetIndex,hasForce,linkWeight])
 
         if (this.groupedTargetToSourceLinks.get(targetIndex) === undefined) this.groupedTargetToSourceLinks.set(targetIndex, new Set())
         const sources = this.groupedTargetToSourceLinks.get(targetIndex)
-        sources?.add(sourceIndex)
+        sources?.add([sourceIndex,hasForce,linkWeight])
       }
     })
 
@@ -140,11 +166,11 @@ export class GraphData <N extends CosmosInputNode, L extends CosmosInputLink> {
   }
 
   public getAdjacentNodes (id: string): N[] | undefined {
-    const index = this.getSortedIndexById(id)
+    let index = this.getSortedIndexById(id)
     if (index === undefined) return undefined
     const outgoingSet = this.groupedSourceToTargetLinks.get(index) ?? []
     const incomingSet = this.groupedTargetToSourceLinks.get(index) ?? []
     return [...new Set([...outgoingSet, ...incomingSet])]
-      .map(index => this.getNodeByIndex(this.getInputIndexBySortedIndex(index) as number) as N)
+      .map(index => this.getNodeByIndex(this.getInputIndexBySortedIndex(index[0]) as number) as N)
   }
 }

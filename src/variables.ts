@@ -31,7 +31,8 @@ export const defaultConfigValues = {
     repulsionTheta: 1.7,
     repulsionQuadtreeLevels: 12,
     linkSpring: 1,
-    linkDistance: 2,
+    linkDistance: 300,
+    initLinkDistance: 300,
     linkDistRandomVariationRange: [1, 1.2],
     repulsionFromMouse: 2,
     friction: 0.85,
@@ -41,7 +42,6 @@ export const defaultConfigValues = {
   scaleNodesOnZoom: true,
   initialZoomLevel: 1,
   disableZoom: false,
-  nodeSamplingDistance: 150,
 }
 
 export const hoveredNodeRingOpacity = 0.7

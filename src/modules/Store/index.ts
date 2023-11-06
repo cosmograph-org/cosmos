@@ -22,6 +22,7 @@ export class Store <N> {
   public selectedArea = [[0, 0], [0, 0]]
   public isSimulationRunning = false
   public simulationProgress = 0
+  public simulationClock = 0
   public selectedIndices: Float32Array | null = null
   public maxPointSize = MAX_POINT_SIZE
   public hoveredNode: Hovered<N> | undefined = undefined

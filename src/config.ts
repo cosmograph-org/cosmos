@@ -125,9 +125,14 @@ export interface GraphSimulationSettings<N> {
   linkSpring?: number;
   /**
    * Minimum link distance.
-   * Default value: `2`
+   * Default value: `100`
    */
   linkDistance?: number;
+  /**
+   * Strong link distance for initial sepration of nodes.
+   * Default value: `300`
+   */
+  initLinkDistance?: number;
   /**
    * Range of random link distance values.
    * Default value: `[1, 1.2]`
@@ -325,6 +330,11 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    */
   linkVisibilityMinTransparency?: number;
   /**
+   * Scale the spring force for link intra network
+   * Default value: `0.001`
+   */
+  linkIntraNetScale?: number;
+  /**
    * Use the classic quadtree algorithm for the Many-Body force.
    * This property will be applied only on component initialization and it
    * can't be changed using the `setConfig` method.
@@ -372,12 +382,6 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    * Default value: undefined
    */
   randomSeed?: number | string;
-  /**
-   * Node sampling distance in pixels between neighboring nodes when calling the `getSampledNodePositionsMap` method.
-   * This parameter determines how many nodes will be included in the sample.
-   * Default value: `150`
-  */
-  nodeSamplingDistance?: number;
 }
 
 export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> implements GraphConfigInterface<N, L> {
@@ -417,6 +421,7 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
     repulsionQuadtreeLevels: defaultConfigValues.simulation.repulsionQuadtreeLevels,
     linkSpring: defaultConfigValues.simulation.linkSpring,
     linkDistance: defaultConfigValues.simulation.linkDistance,
+    initLinkDistance: defaultConfigValues.simulation.initLinkDistance,
     linkDistRandomVariationRange: defaultConfigValues.simulation.linkDistRandomVariationRange,
     repulsionFromMouse: defaultConfigValues.simulation.repulsionFromMouse,
     friction: defaultConfigValues.simulation.friction,
@@ -446,7 +451,6 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
   public disableZoom = defaultConfigValues.disableZoom
 
   public randomSeed = undefined
-  public nodeSamplingDistance = defaultConfigValues.nodeSamplingDistance
 
   public init (config: GraphConfigInterface<N, L>): void {
     (Object.keys(config) as (keyof GraphConfigInterface<N, L>)[])

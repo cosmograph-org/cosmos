@@ -163,9 +163,11 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     const prevConfig = { ...this.config }
     this.config.init(config)
     if (prevConfig.linkColor !== this.config.linkColor) this.lines.updateColor()
+    if (prevConfig.linkColor !== this.config.linkColor) this.lines.updateArrowColor()
     if (prevConfig.nodeColor !== this.config.nodeColor) this.points.updateColor()
     if (prevConfig.nodeSize !== this.config.nodeSize) this.points.updateSize()
     if (prevConfig.linkWidth !== this.config.linkWidth) this.lines.updateWidth()
+    if (prevConfig.linkWidth !== this.config.linkWidth) this.lines.updateArrowWidth()
     if (prevConfig.curvedLinkSegments !== this.config.curvedLinkSegments ||
       prevConfig.curvedLinks !== this.config.curvedLinks) {
       this.lines.updateCurveLineGeometry()
@@ -556,16 +558,6 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   }
 
   /**
-   * For the nodes that are currently visible on the screen, get a sample of node ids with their coordinates.
-   * The resulting number of nodes will depend on the `nodeSamplingDistance` configuration property,
-   * and the sampled nodes will be evenly distributed.
-   * @returns A Map object where keys are the ids of the nodes and values are their corresponding X and Y coordinates in the [number, number] format.
-   */
-  public getSampledNodePositionsMap (): Map<string, [number, number]> {
-    return this.points.getSampledNodePositionsMap()
-  }
-
-  /**
    * Start the simulation.
    * @param alpha Value from 0 to 1. The higher the value, the more initial energy the simulation will get.
    */
@@ -639,7 +631,21 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     this.hasParticleSystemDestroyed = true
   }
 
-  private update (runSimulation: boolean): void {
+  public updateForceLink (nodes: N[], links: L[]): void {
+    const { graph } = this
+
+    this.forceLinkIncoming?.destroy()
+    this.forceLinkOutgoing?.destroy()
+    this.graph.setData(nodes, links, false)
+    this.forceLinkIncoming?.create(LinkDirection.INCOMING)
+    this.forceLinkOutgoing?.create(LinkDirection.OUTGOING)
+    this.forceLinkIncoming?.initPrograms()
+    this.forceLinkOutgoing?.initPrograms()
+    this.step()
+    this.end()
+  }
+
+  public update (runSimulation: boolean): void {
     const { graph } = this
     this.store.pointsTextureSize = Math.ceil(Math.sqrt(graph.nodes.length))
     this.store.linksTextureSize = Math.ceil(Math.sqrt(graph.linksNumber * 2))
@@ -667,8 +673,14 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   }
 
   private frame (): void {
-    const { config: { simulation, renderLinks, disableSimulation }, store: { alpha, isSimulationRunning } } = this
+    const { config: { simulation, renderLinks, disableSimulation }, store: { alpha, isSimulationRunning, simulationClock } } = this
+    if (isSimulationRunning && simulationClock < 45) this.store.simulationClock += 1
     if (alpha < ALPHA_MIN && isSimulationRunning) this.end()
+    if (simulationClock === 20 && isSimulationRunning) {
+      this.config.simulation.linkDistance = this.config.simulation.linkDistance!*0.2;
+     } else if (simulationClock === 40 && isSimulationRunning) {
+      this.config.simulation.linkDistance = this.config.simulation.initLinkDistance;
+     }
     if (!this.store.pointsTextureSize) return
 
     this.requestAnimationFrameId = window.requestAnimationFrame((now) => {
@@ -678,7 +690,10 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
 
       if (!disableSimulation) {
         if (this.isRightClickMouse) {
-          if (!isSimulationRunning) this.start(0.1)
+          if (!isSimulationRunning) {
+            this.config.simulation.decay = 10;
+            this.start(0.1)
+          }
           this.forceMouse?.run()
           this.points.updatePosition()
         }
@@ -744,6 +759,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   private end (): void {
     this.store.isSimulationRunning = false
     this.store.simulationProgress = 1
+    this.store.simulationClock = 0
     this.config.simulation.onEnd?.()
   }
 
@@ -799,7 +815,6 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       this.reglInstance.poll()
       this.canvasD3Selection
         .call(this.zoomInstance.behavior.transform, this.zoomInstance.eventTransform)
-      this.points.updateSampledNodesGrid()
     }
   }
 

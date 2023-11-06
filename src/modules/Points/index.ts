@@ -8,8 +8,6 @@ import drawHighlightedFrag from '@/graph/modules/Points/draw-highlighted.frag'
 import drawHighlightedVert from '@/graph/modules/Points/draw-highlighted.vert'
 import findHoveredPointFrag from '@/graph/modules/Points/find-hovered-point.frag'
 import findHoveredPointVert from '@/graph/modules/Points/find-hovered-point.vert'
-import fillGridWithSampledNodesFrag from '@/graph/modules/Points/fill-sampled-nodes.frag'
-import fillGridWithSampledNodesVert from '@/graph/modules/Points/fill-sampled-nodes.vert'
 import { createSizeBuffer, getNodeSize } from '@/graph/modules/Points/size-buffer'
 import updatePositionFrag from '@/graph/modules/Points/update-position.frag'
 import { createIndexesBuffer, createQuadBuffer, destroyFramebuffer } from '@/graph/modules/Shared/buffer'
@@ -31,15 +29,12 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
   public sizeFbo: regl.Framebuffer2D | undefined
   public trackedIndicesFbo: regl.Framebuffer2D | undefined
   public trackedPositionsFbo: regl.Framebuffer2D | undefined
-  public sampledNodesFbo: regl.Framebuffer2D | undefined
   private drawCommand: regl.DrawCommand | undefined
   private drawHighlightedCommand: regl.DrawCommand | undefined
   private updatePositionCommand: regl.DrawCommand | undefined
   private findPointsOnAreaSelectionCommand: regl.DrawCommand | undefined
   private findHoveredPointCommand: regl.DrawCommand | undefined
   private clearHoveredFboCommand: regl.DrawCommand | undefined
-  private clearSampledNodesFboCommand: regl.DrawCommand | undefined
-  private fillSampledNodesFboCommand: regl.DrawCommand | undefined
   private trackPointsCommand: regl.DrawCommand | undefined
   private trackedIds: string[] | undefined
   private trackedPositionsById: Map<string, [number, number]> = new Map()
@@ -114,7 +109,6 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
     this.updateSize()
     this.updateColor()
     this.updateGreyoutStatus()
-    this.updateSampledNodesGrid()
   }
 
   public initPrograms (): void {
@@ -228,33 +222,6 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
         mask: false,
       },
     })
-    this.clearSampledNodesFboCommand = reglInstance({
-      frag: clearFrag,
-      vert: updateVert,
-      framebuffer: () => this.sampledNodesFbo as regl.Framebuffer2D,
-      primitive: 'triangle strip',
-      count: 4,
-      attributes: { quad: createQuadBuffer(reglInstance) },
-    })
-    this.fillSampledNodesFboCommand = reglInstance({
-      frag: fillGridWithSampledNodesFrag,
-      vert: fillGridWithSampledNodesVert,
-      primitive: 'points',
-      count: () => data.nodes.length,
-      framebuffer: () => this.sampledNodesFbo as regl.Framebuffer2D,
-      attributes: { indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
-      uniforms: {
-        position: () => this.currentPositionFbo,
-        pointsTextureSize: () => store.pointsTextureSize,
-        transform: () => store.transform,
-        spaceSize: () => store.adjustedSpaceSize,
-        screenSize: () => store.screenSize,
-      },
-      depth: {
-        enable: false,
-        mask: false,
-      },
-    })
     this.drawHighlightedCommand = reglInstance({
       frag: drawHighlightedFrag,
       vert: drawHighlightedVert,
@@ -328,20 +295,6 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
     this.sizeFbo = createSizeBuffer(data, reglInstance, pointsTextureSize, config.nodeSize)
   }
 
-  public updateSampledNodesGrid (): void {
-    const { store: { screenSize }, config: { nodeSamplingDistance }, reglInstance } = this
-    const dist = nodeSamplingDistance ?? Math.min(...screenSize) / 2
-    const w = Math.ceil(screenSize[0] / dist)
-    const h = Math.ceil(screenSize[1] / dist)
-    destroyFramebuffer(this.sampledNodesFbo)
-    this.sampledNodesFbo = reglInstance.framebuffer({
-      shape: [w, h],
-      depth: false,
-      stencil: false,
-      colorType: 'float',
-    })
-  }
-
   public trackPoints (): void {
     if (!this.trackedIndicesFbo || !this.trackedPositionsFbo) return
     this.trackPointsCommand?.()
@@ -409,29 +362,6 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
       if (x !== undefined && y !== undefined) this.trackedPositionsById.set(id, [x, y])
     })
     return this.trackedPositionsById
-  }
-
-  public getSampledNodePositionsMap (): Map<string, [number, number]> {
-    const positions = new Map<string, [number, number]>()
-    if (!this.sampledNodesFbo) return positions
-    this.clearSampledNodesFboCommand?.()
-    this.fillSampledNodesFboCommand?.()
-    const pixels = readPixels(this.reglInstance, this.sampledNodesFbo as regl.Framebuffer2D)
-    for (let i = 0; i < pixels.length / 4; i++) {
-      const index = pixels[i * 4]
-      const isNotEmpty = !!pixels[i * 4 + 1]
-      const x = pixels[i * 4 + 2]
-      const y = pixels[i * 4 + 3]
-
-      if (isNotEmpty && index !== undefined && x !== undefined && y !== undefined) {
-        const inputIndex = this.data.getInputIndexBySortedIndex(index)
-        if (inputIndex !== undefined) {
-          const id = this.data.getNodeByIndex(inputIndex)?.id
-          if (id !== undefined) positions.set(id, [x, y])
-        }
-      }
-    }
-    return positions
   }
 
   public destroy (): void {

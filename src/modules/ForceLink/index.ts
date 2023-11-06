@@ -12,6 +12,7 @@ export enum LinkDirection {
 
 export class ForceLink<N extends CosmosInputNode, L extends CosmosInputLink> extends CoreModule<N, L> {
   public linkFirstIndicesAndAmountFbo: regl.Framebuffer2D | undefined
+  public linkSpringTextureFbo: regl.Framebuffer2D | undefined
   public indicesFbo: regl.Framebuffer2D | undefined
   public biasAndStrengthFbo: regl.Framebuffer2D | undefined
   public randomDistanceFbo: regl.Framebuffer2D | undefined
@@ -37,13 +38,16 @@ export class ForceLink<N extends CosmosInputNode, L extends CosmosInputLink> ext
       this.linkFirstIndicesAndAmount[nodeIndex * 4 + 2] = connectedNodeIndices.size
 
       connectedNodeIndices.forEach((connectedNodeIndex) => {
-        this.indices[linkIndex * 4 + 0] = connectedNodeIndex % pointsTextureSize
-        this.indices[linkIndex * 4 + 1] = Math.floor(connectedNodeIndex / pointsTextureSize)
-        const degree = data.degree[data.getInputIndexBySortedIndex(connectedNodeIndex) as number] ?? 0
+        this.indices[linkIndex * 4 + 0] = connectedNodeIndex[0] % pointsTextureSize
+        this.indices[linkIndex * 4 + 1] = Math.floor(connectedNodeIndex[0] / pointsTextureSize)
+        const degree = data.degree[data.getInputIndexBySortedIndex(connectedNodeIndex[0]) as number] ?? 0
         const connectedDegree = data.degree[data.getInputIndexBySortedIndex(nodeIndex) as number] ?? 0
         const bias = degree / (degree + connectedDegree)
         let strength = 1 / Math.min(degree, connectedDegree)
-        strength = Math.sqrt(strength)
+        strength *= connectedNodeIndex[1]
+        // strength *= connectedNodeIndex[2]
+        strength = Math.sqrt(strength/5)
+
         linkBiasAndStrengthState[linkIndex * 4 + 0] = bias
         linkBiasAndStrengthState[linkIndex * 4 + 1] = strength
         linkDistanceState[linkIndex * 4] = this.store.getRandomFloat(0, 1)

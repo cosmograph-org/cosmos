@@ -7,6 +7,9 @@ export type CosmosInputNode = {
 export type CosmosInputLink = {
   source: string;
   target: string;
+  Is_directed?: number;
+  hasForce?: number;
+  Weight?: number;
 }
 
 /**
