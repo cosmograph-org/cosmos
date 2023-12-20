@@ -1,5 +1,7 @@
 import regl from 'regl'
+import { scaleLinear } from 'd3-scale'
 import { CoreModule } from '@/graph/modules/core-module'
+import { defaultConfigValues } from '@/graph/variables'
 import { createColorBuffer, createGreyoutStatusBuffer } from '@/graph/modules/Points/color-buffer'
 import drawPointsFrag from '@/graph/modules/Points/draw-points.frag'
 import drawPointsVert from '@/graph/modules/Points/draw-points.vert'
@@ -45,11 +47,12 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
   private trackedPositionsById: Map<string, [number, number]> = new Map()
 
   public create (): void {
-    const { reglInstance, store, data } = this
+    const { reglInstance, store, data, config } = this
     const { pointsTextureSize, adjustedSpaceSize } = store
     if (!pointsTextureSize) return
     const numParticles = data.nodes.length
     const initialState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
+    if (!config.disableSimulation) this.rescaleInitialNodePositions()
     for (let i = 0; i < numParticles; ++i) {
       const sortedIndex = this.data.getSortedIndexByInputIndex(i)
       const node = data.nodes[i]
@@ -451,5 +454,36 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
     const temp = this.previousPositionFbo
     this.previousPositionFbo = this.currentPositionFbo
     this.currentPositionFbo = temp
+  }
+
+  private rescaleInitialNodePositions (): void {
+    const { nodes } = this.data
+    const { spaceSize } = this.config
+    if (nodes.length === 0) return
+    const xs = nodes.map(n => n.x).filter((n): n is number => n !== undefined)
+    if (xs.length === 0) return
+    const ys = nodes.map(n => n.y).filter((n): n is number => n !== undefined)
+    if (ys.length === 0) return
+    const minX = Math.min(...xs)
+    const maxX = Math.max(...xs)
+    const minY = Math.min(...ys)
+    const maxY = Math.max(...ys)
+    const w = maxX - minX
+    const h = maxY - minY
+
+    const size = Math.max(w, h)
+    const dw = (size - w) / 2
+    const dh = (size - h) / 2
+
+    const scaleX = scaleLinear()
+      .range([0, spaceSize ?? defaultConfigValues.spaceSize])
+      .domain([minX - dw, maxX + dw])
+    const scaleY = scaleLinear()
+      .range([0, spaceSize ?? defaultConfigValues.spaceSize])
+      .domain([minY - dh, maxY + dh])
+    nodes.forEach(n => {
+      n.x = scaleX(n.x as number)
+      n.y = scaleY(n.y as number)
+    })
   }
 }
