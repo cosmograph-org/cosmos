@@ -12,7 +12,7 @@ import findHoveredPointFrag from '@/graph/modules/Points/find-hovered-point.frag
 import findHoveredPointVert from '@/graph/modules/Points/find-hovered-point.vert'
 import fillGridWithSampledNodesFrag from '@/graph/modules/Points/fill-sampled-nodes.frag'
 import fillGridWithSampledNodesVert from '@/graph/modules/Points/fill-sampled-nodes.vert'
-import { createSizeBuffer, getNodeSize } from '@/graph/modules/Points/size-buffer'
+import { createSizeBufferAndFillSizeStore } from '@/graph/modules/Points/size-buffer'
 import updatePositionFrag from '@/graph/modules/Points/update-position.frag'
 import { createIndexesBuffer, createQuadBuffer, destroyFramebuffer } from '@/graph/modules/Shared/buffer'
 import { createTrackedIndicesBuffer, createTrackedPositionsBuffer } from '@/graph/modules/Points/tracked-buffer'
@@ -45,6 +45,7 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
   private trackPointsCommand: regl.DrawCommand | undefined
   private trackedIds: string[] | undefined
   private trackedPositionsById: Map<string, [number, number]> = new Map()
+  private sizeByIndex: Float32Array | undefined
 
   public create (): void {
     const { reglInstance, store, data, config } = this
@@ -328,7 +329,8 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
   public updateSize (): void {
     const { reglInstance, config, store: { pointsTextureSize }, data } = this
     if (!pointsTextureSize) return
-    this.sizeFbo = createSizeBuffer(data, reglInstance, pointsTextureSize, config.nodeSize)
+    this.sizeByIndex = new Float32Array(data.nodes.length)
+    this.sizeFbo = createSizeBufferAndFillSizeStore(data, reglInstance, pointsTextureSize, config.nodeSize, this.sizeByIndex)
   }
 
   public updateSampledNodesGrid (): void {
@@ -383,9 +385,8 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
     this.findHoveredPointCommand?.()
   }
 
-  public getNodeRadius (node: N, index?: number): number {
-    const { nodeSize } = this.config
-    return getNodeSize(node, nodeSize, index) / 2
+  public getNodeRadiusByIndex (index: number): number | undefined {
+    return this.sizeByIndex?.[index]
   }
 
   public trackNodesByIds (ids: string[]): void {

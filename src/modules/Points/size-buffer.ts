@@ -14,11 +14,12 @@ export function getNodeSize<N extends CosmosInputNode> (
   return size ?? defaultNodeSize
 }
 
-export function createSizeBuffer <N extends CosmosInputNode, L extends CosmosInputLink> (
+export function createSizeBufferAndFillSizeStore <N extends CosmosInputNode, L extends CosmosInputLink> (
   data: GraphData<N, L>,
   reglInstance: regl.Regl,
   pointTextureSize: number,
-  sizeAccessor: NumericAccessor<N>
+  sizeAccessor: NumericAccessor<N>,
+  sizeStore: Float32Array
 ): regl.Framebuffer2D | undefined {
   if (pointTextureSize === 0) return undefined
   const numParticles = data.nodes.length
@@ -28,7 +29,9 @@ export function createSizeBuffer <N extends CosmosInputNode, L extends CosmosInp
     const sortedIndex = data.getSortedIndexByInputIndex(i)
     const node = data.nodes[i]
     if (node && sortedIndex !== undefined) {
-      initialState[sortedIndex * 4] = getNodeSize(node, sizeAccessor, i)
+      const nodeSize = getNodeSize(node, sizeAccessor, i)
+      initialState[sortedIndex * 4] = nodeSize
+      sizeStore[i] = nodeSize
     }
   }
 
