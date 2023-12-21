@@ -41,6 +41,8 @@ export const defaultConfigValues = {
   scaleNodesOnZoom: true,
   initialZoomLevel: 1,
   disableZoom: false,
+  fitViewOnInit: true,
+  fitViewDelay: 250,
   nodeSamplingDistance: 150,
 }
 

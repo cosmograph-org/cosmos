@@ -364,6 +364,23 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    */
   disableZoom?: boolean;
   /**
+   * Whether to center and zoom the view to fit all nodes in the scene on initialization or not.
+   * Default: `true`
+   */
+  fitViewOnInit?: boolean;
+  /**
+   * Delay in milliseconds before fitting the view.
+   * Useful if you want the layout to stabilize a bit before fitting.
+   * Default: `250`
+   */
+  fitViewDelay?: number;
+  /**
+   * When `fitViewOnInit` is set to `true`, fits the view to show the nodes within a rectangle
+   * defined by its two corner coordinates `[[left, bottom], [right, top]]` in the scene space.
+   * Default: `undefined`
+   */
+  fitViewByNodesInRect?: [[number, number], [number, number]] | [number, number][];
+  /**
    * Providing a `randomSeed` value allows you to control
    * the randomness of the layout across different simulation runs.
    * It is useful when you want the graph to always look the same on same datasets.
@@ -444,6 +461,9 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
   public scaleNodesOnZoom = defaultConfigValues.scaleNodesOnZoom
   public initialZoomLevel = defaultConfigValues.initialZoomLevel
   public disableZoom = defaultConfigValues.disableZoom
+  public fitViewOnInit = defaultConfigValues.fitViewOnInit
+  public fitViewDelay = defaultConfigValues.fitViewDelay
+  public fitViewByNodesInRect = undefined
 
   public randomSeed = undefined
   public nodeSamplingDistance = defaultConfigValues.nodeSamplingDistance
