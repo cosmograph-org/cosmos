@@ -46,17 +46,18 @@ export class Zoom <N extends CosmosInputNode, L extends CosmosInputLink> {
     this.config = config
   }
 
-  public getTransform (positions: [number, number][], scale?: number): ZoomTransform {
+  public getTransform (positions: [number, number][], scale?: number, padding = this.store.maxPointSize / 2): ZoomTransform {
     if (positions.length === 0) return this.eventTransform
-    const { store: { screenSize, maxPointSize } } = this
+    const { store: { screenSize } } = this
     const width = screenSize[0]
     const height = screenSize[1]
     const xExtent = extent(positions.map(d => d[0])) as [number, number]
     const yExtent = extent(positions.map(d => d[1])) as [number, number]
-    xExtent[0] = this.store.scaleX(xExtent[0] - maxPointSize / 2)
-    xExtent[1] = this.store.scaleX(xExtent[1] + maxPointSize / 2)
-    yExtent[0] = this.store.scaleY(yExtent[0] - maxPointSize / 2)
-    yExtent[1] = this.store.scaleY(yExtent[1] + maxPointSize / 2)
+    xExtent[0] = this.store.scaleX(xExtent[0] - padding)
+    xExtent[1] = this.store.scaleX(xExtent[1] + padding)
+    yExtent[0] = this.store.scaleY(yExtent[0] - padding)
+    yExtent[1] = this.store.scaleY(yExtent[1] + padding)
+
     const xScale = width / (xExtent[1] - xExtent[0])
     const yScale = height / (yExtent[0] - yExtent[1])
     const clampedScale = clamp(scale ?? Math.min(xScale, yScale), ...this.behavior.scaleExtent())

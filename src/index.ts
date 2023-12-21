@@ -51,6 +51,11 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * If the mouse is not on the Canvas, the `findHoveredPoint` method will not be executed.
    */
   private _isMouseOnCanvas = false
+  /**
+   * After setting data at a first time, the fit logic will run
+   * */
+  private _isFirstDataAfterInit = true
+  private _fitViewOnInitTimeoutID: number | undefined
 
   public constructor (canvas: HTMLCanvasElement, config?: GraphConfigInterface<N, L>) {
     if (config) this.config.init(config)
@@ -212,6 +217,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * @param runSimulation When set to `false`, the simulation won't be started automatically (`true` by default).
    */
   public setData (nodes: N[], links: L[], runSimulation = true): void {
+    const { fitViewOnInit, fitViewDelay, fitViewByNodesInRect } = this.config
     if (!nodes.length && !links.length) {
       this.destroyParticleSystem()
       this.reglInstance.clear({
@@ -222,6 +228,14 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       return
     }
     this.graph.setData(nodes, links)
+    if (this._isFirstDataAfterInit && fitViewOnInit) {
+      this._fitViewOnInitTimeoutID = window.setTimeout(() => {
+        if (fitViewByNodesInRect) this.setZoomTransformByNodePositions(fitViewByNodesInRect, undefined, undefined, 0)
+        else this.fitView()
+      }, fitViewDelay)
+    }
+    this._isFirstDataAfterInit = false
+
     this.update(runSimulation)
   }
 
@@ -608,6 +622,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * Destroy this Cosmos instance.
    */
   public destroy (): void {
+    window.clearTimeout(this._fitViewOnInitTimeoutID)
     this.stopFrames()
     this.destroyParticleSystem()
     this.fpsMonitor?.destroy()
@@ -803,9 +818,9 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     }
   }
 
-  private setZoomTransformByNodePositions (positions: [number, number][], duration = 250, scale?: number): void {
+  private setZoomTransformByNodePositions (positions: [number, number][], duration = 250, scale?: number, padding?: number): void {
     this.resizeCanvas()
-    const transform = this.zoomInstance.getTransform(positions, scale)
+    const transform = this.zoomInstance.getTransform(positions, scale, padding)
     this.canvasD3Selection
       .transition()
       .ease(easeQuadInOut)
