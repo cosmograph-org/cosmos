@@ -15,6 +15,7 @@ import { isPlainObject } from '@/graph/helper'
 export type NumericAccessor<Datum> = ((d: Datum, i: number, ...rest: unknown[]) => number | null) | number | null | undefined
 export type ColorAccessor<Datum> = ((d: Datum, i: number, ...rest: unknown[]) => string | [number, number, number, number] | null)
   | string | [number, number, number, number] | null | undefined
+export type BooleanAccessor<Datum> = ((d: Datum, i: number, ...rest: unknown[]) => boolean | null) | boolean | null | undefined
 
 export interface GraphEvents <N extends CosmosInputNode> {
   /**
@@ -299,10 +300,10 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    */
   curvedLinkControlPointDistance?: number;
   /**
-   * Turns link arrow rendering on / off.
+   * Link arrow accessor function or value. Turns link arrow rendering on / off.
    * Default value: `true`
    */
-  linkArrows?: boolean;
+  linkArrows?: BooleanAccessor<L>;
   /**
    * Scale factor for the link arrows size.
    * Default value: `1`

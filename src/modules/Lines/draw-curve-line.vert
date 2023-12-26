@@ -2,13 +2,13 @@ precision highp float;
 attribute vec2 position, pointA, pointB;
 attribute vec4 color;
 attribute float width;
+attribute float arrow;
 uniform sampler2D positions;
 uniform sampler2D particleGreyoutStatus;
 uniform mat3 transform;
 uniform float pointsTextureSize;
 uniform float widthScale;
 uniform float nodeSizeScale;
-uniform bool useArrow;
 uniform float arrowSizeScale;
 uniform float spaceSize;
 uniform vec2 screenSize;
@@ -26,6 +26,7 @@ varying vec2 pos;
 varying float arrowLength;
 varying float linkWidthArrowWidthRatio;
 varying float smoothWidthRatio;
+varying float useArrow;
 
 float map(float value, float min1, float max1, float min2, float max2) {
   return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
@@ -71,7 +72,8 @@ void main() {
   float smoothWidth = 2.0;
   float arrowExtraWidth = arrowWidth - linkWidth;
   linkWidth += smoothWidth / 2.0;
-  if (useArrow) {
+  useArrow = arrow;
+  if (useArrow > 0.5) {
     linkWidth += arrowExtraWidth;
   }
   smoothWidthRatio = smoothWidth / linkWidth;
