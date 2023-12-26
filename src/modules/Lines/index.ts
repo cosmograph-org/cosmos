@@ -12,12 +12,14 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
   private drawCurveCommand: regl.DrawCommand | undefined
   private colorBuffer: regl.Buffer | undefined
   private widthBuffer: regl.Buffer | undefined
+  private arrowBuffer: regl.Buffer | undefined
   private curveLineGeometry: number[][] | undefined
   private curveLineBuffer: regl.Buffer | undefined
 
   public create (): void {
     this.updateColor()
     this.updateWidth()
+    this.updateArrow()
     this.updateCurveLineGeometry()
   }
 
@@ -72,6 +74,12 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
           offset: Float32Array.BYTES_PER_ELEMENT * 0,
           stride: Float32Array.BYTES_PER_ELEMENT * 1,
         },
+        arrow: {
+          buffer: () => this.arrowBuffer,
+          divisor: 1,
+          offset: Float32Array.BYTES_PER_ELEMENT * 0,
+          stride: Float32Array.BYTES_PER_ELEMENT * 1,
+        },
       },
       uniforms: {
         positions: () => points?.currentPositionFbo,
@@ -80,7 +88,6 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
         pointsTextureSize: () => store.pointsTextureSize,
         nodeSizeScale: () => config.nodeSizeScale,
         widthScale: () => config.linkWidthScale,
-        useArrow: () => config.linkArrows,
         arrowSizeScale: () => config.linkArrowsSizeScale,
         spaceSize: () => store.adjustedSpaceSize,
         screenSize: () => store.screenSize,
@@ -146,6 +153,16 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
     this.widthBuffer = reglInstance.buffer(instancePoints)
   }
 
+  public updateArrow (): void {
+    const { reglInstance, config, data } = this
+    const instancePoints: number[][] = []
+    data.completeLinks.forEach(l => {
+      const useArrow = getValue<L, boolean>(l, config.linkArrows)
+      instancePoints.push([useArrow ? 1.0 : 0.0 ?? 0.0])
+    })
+    this.arrowBuffer = reglInstance.buffer(instancePoints)
+  }
+
   public updateCurveLineGeometry (): void {
     const { reglInstance, config: { curvedLinks, curvedLinkSegments } } = this
     this.curveLineGeometry = getCurveLineGeometry(curvedLinks ? curvedLinkSegments ?? defaultConfigValues.curvedLinkSegments : 1)
@@ -155,6 +172,7 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
   public destroy (): void {
     destroyBuffer(this.colorBuffer)
     destroyBuffer(this.widthBuffer)
+    destroyBuffer(this.arrowBuffer)
     destroyBuffer(this.curveLineBuffer)
   }
 }

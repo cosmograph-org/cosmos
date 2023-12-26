@@ -171,6 +171,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     if (prevConfig.nodeColor !== this.config.nodeColor) this.points.updateColor()
     if (prevConfig.nodeSize !== this.config.nodeSize) this.points.updateSize()
     if (prevConfig.linkWidth !== this.config.linkWidth) this.lines.updateWidth()
+    if (prevConfig.linkArrows !== this.config.linkArrows) this.lines.updateArrow()
     if (prevConfig.curvedLinkSegments !== this.config.curvedLinkSegments ||
       prevConfig.curvedLinks !== this.config.curvedLinks) {
       this.lines.updateCurveLineGeometry()
