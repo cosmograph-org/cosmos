@@ -300,7 +300,7 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    */
   curvedLinkControlPointDistance?: number;
   /**
-   * Link arrow accessor function or value. Turns link arrow rendering on / off.
+   * Link arrow accessor function or value that controls whether or not to display link arrows.
    * Default value: `true`
    */
   linkArrows?: BooleanAccessor<L>;

@@ -157,8 +157,8 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
     const { reglInstance, config, data } = this
     const instancePoints: number[][] = []
     data.completeLinks.forEach(l => {
-      const useArrow = getValue<L, boolean>(l, config.linkArrows)
-      instancePoints.push([useArrow ? 1.0 : 0.0 ?? 0.0])
+      const useArrow = getValue<L, boolean>(l, config.linkArrows) ?? defaultConfigValues.arrowLinks
+      instancePoints.push([useArrow ? 1.0 : 0.0])
     })
     this.arrowBuffer = reglInstance.buffer(instancePoints)
   }
