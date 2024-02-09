@@ -2,6 +2,7 @@ import path from 'path'
 import alias from '@rollup/plugin-alias'
 import commonjs from '@rollup/plugin-commonjs'
 import resolve from '@rollup/plugin-node-resolve'
+import terser from '@rollup/plugin-terser'
 import glslify from 'rollup-plugin-glslify'
 import typescript from 'rollup-plugin-typescript2'
 import ttypescript from 'ttypescript'
@@ -14,17 +15,15 @@ const externals = [
   ...Object.keys(pkg.dependencies || {}),
   ...Object.keys(pkg.peerDependencies || {}),
 ]
-export default {
+
+const config = {
   input: 'src/index.ts',
-  external: externals,
-  output: [
-    {
-      file: `${outputFolder}/${libraryName}.js`,
-      name: libraryName,
-      format: 'es',
-      sourcemap: true,
-    },
-  ],
+  output: {
+    file: `${outputFolder}/${libraryName}.js`,
+    name: 'Cosmos',
+    format: 'umd',
+    sourcemap: true,
+  },
   plugins: [
     resolve(),
     commonjs(),
@@ -49,3 +48,25 @@ export default {
     }),
   ],
 }
+// eslint-disable-next-line import/no-default-export
+export default [
+  {
+    ...config,
+    external: externals,
+    output: {
+      ...config.output,
+      format: 'es',
+    },
+  },
+  {
+    ...config,
+    output: {
+      ...config.output,
+      file: `${outputFolder}/${libraryName}.min.js`,
+    },
+    plugins: [
+      ...config.plugins,
+      terser(),
+    ],
+  },
+]
