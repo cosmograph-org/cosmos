@@ -356,7 +356,7 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
   scaleNodesOnZoom?: boolean;
   /**
    * Initial zoom level. Can be set once during graph initialization.
-   * Default value: `1`
+   * Default value: `undefined`
    */
   initialZoomLevel?: number;
   /**
@@ -460,7 +460,7 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
   public pixelRatio = defaultConfigValues.pixelRatio
 
   public scaleNodesOnZoom = defaultConfigValues.scaleNodesOnZoom
-  public initialZoomLevel = defaultConfigValues.initialZoomLevel
+  public initialZoomLevel = undefined
   public disableZoom = defaultConfigValues.disableZoom
   public fitViewOnInit = defaultConfigValues.fitViewOnInit
   public fitViewDelay = defaultConfigValues.fitViewDelay
