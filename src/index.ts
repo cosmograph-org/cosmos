@@ -93,7 +93,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       .on('mousemove', this.onMouseMove.bind(this))
       .on('contextmenu', this.onRightClickMouse.bind(this))
     if (this.config.disableZoom) this.disableZoom()
-    this.setZoomLevel(this.config.initialZoomLevel)
+    this.setZoomLevel(this.config.initialZoomLevel ?? 1)
 
     this.reglInstance = regl({
       canvas: this.canvas,
@@ -218,7 +218,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * @param runSimulation When set to `false`, the simulation won't be started automatically (`true` by default).
    */
   public setData (nodes: N[], links: L[], runSimulation = true): void {
-    const { fitViewOnInit, fitViewDelay, fitViewByNodesInRect } = this.config
+    const { fitViewOnInit, fitViewDelay, fitViewByNodesInRect, initialZoomLevel } = this.config
     if (!nodes.length && !links.length) {
       this.destroyParticleSystem()
       this.reglInstance.clear({
@@ -229,7 +229,8 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       return
     }
     this.graph.setData(nodes, links)
-    if (this._isFirstDataAfterInit && fitViewOnInit) {
+    // If `initialZoomLevel` is set, we don't need to fit the view
+    if (this._isFirstDataAfterInit && fitViewOnInit && initialZoomLevel === undefined) {
       this._fitViewOnInitTimeoutID = window.setTimeout(() => {
         if (fitViewByNodesInRect) this.setZoomTransformByNodePositions(fitViewByNodesInRect, undefined, undefined, 0)
         else this.fitView()

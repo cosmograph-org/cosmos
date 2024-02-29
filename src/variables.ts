@@ -39,7 +39,6 @@ export const defaultConfigValues = {
   showFPSMonitor: false,
   pixelRatio: 2,
   scaleNodesOnZoom: true,
-  initialZoomLevel: 1,
   disableZoom: false,
   fitViewOnInit: true,
   fitViewDelay: 250,
