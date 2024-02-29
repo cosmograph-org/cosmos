@@ -282,10 +282,15 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * @param duration Duration of the zoom in/out transition.
    */
   public setZoomLevel (value: number, duration = 0): void {
-    this.canvasD3Selection
-      .transition()
-      .duration(duration)
-      .call(this.zoomInstance.behavior.scaleTo, value)
+    if (duration === 0) {
+      this.canvasD3Selection
+        .call(this.zoomInstance.behavior.scaleTo, value)
+    } else {
+      this.canvasD3Selection
+        .transition()
+        .duration(duration)
+        .call(this.zoomInstance.behavior.scaleTo, value)
+    }
   }
 
   /**
