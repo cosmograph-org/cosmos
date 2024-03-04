@@ -100,8 +100,6 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       attributes: {
         antialias: false,
         preserveDrawingBuffer: true,
-        premultipliedAlpha: false,
-        alpha: false,
       },
       extensions: ['OES_texture_float', 'ANGLE_instanced_arrays'],
     })
