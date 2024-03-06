@@ -16,6 +16,7 @@ uniform float spaceSize;
 uniform vec2 screenSize;
 uniform float greyoutOpacity;
 uniform bool scaleNodesOnZoom;
+uniform float maxPointSize;
 
 varying vec2 index;
 varying vec3 rgbColor;
@@ -28,7 +29,8 @@ float pointSize(float size) {
   } else {
     pSize = size * ratio * min(5.0, max(1.0, transform[0][0] * 0.01));
   }
-  return pSize;
+
+  return min(pSize, maxPointSize * ratio);
 }
 
 void main() {  

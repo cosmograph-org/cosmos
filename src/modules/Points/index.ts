@@ -159,6 +159,7 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
         screenSize: () => store.screenSize,
         greyoutOpacity: () => config.nodeGreyoutOpacity,
         scaleNodesOnZoom: () => config.scaleNodesOnZoom,
+        maxPointSize: () => store.maxPointSize,
       },
       blend: {
         enable: true,

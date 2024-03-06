@@ -25,7 +25,7 @@ float pointSize(float size) {
   } else {
     pSize = size * ratio * min(5.0, max(1.0, transform[0][0] * 0.01));
   }
-  return min(pSize, maxPointSize);
+  return min(pSize, maxPointSize * ratio);
 }
 
 float euclideanDistance (float x1, float x2, float y1, float y2) {
@@ -45,7 +45,7 @@ void main() {
   vec2 pointScreenPosition = (final.xy + 1.0) * screenSize / 2.0;
   rgba = vec4(0.0);
   gl_Position = vec4(0.5, 0.5, 0.0, 1.0);
-  if (euclideanDistance(pointScreenPosition.x, mousePosition.x, pointScreenPosition.y, mousePosition.y) < pointRadius) {
+  if (euclideanDistance(pointScreenPosition.x, mousePosition.x, pointScreenPosition.y, mousePosition.y) < pointRadius / ratio) {
     float index = indexes.g * pointsTextureSize + indexes.r;
     rgba = vec4(index, pSize.r, pointPosition.xy);
     gl_Position = vec4(-0.5, -0.5, 0.0, 1.0);
