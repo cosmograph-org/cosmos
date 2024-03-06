@@ -22,7 +22,7 @@ float pointSize(float size) {
   } else {
     pSize = size * ratio * min(5.0, max(1.0, transform[0][0] * 0.01));
   }
-  return min(pSize, maxPointSize);
+  return min(pSize, maxPointSize * ratio);
 }
 
 void main() {
