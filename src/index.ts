@@ -778,15 +778,9 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
 
   private updateMousePosition (event: MouseEvent): void {
     if (!event || event.offsetX === undefined || event.offsetY === undefined) return
-    const { x, y, k } = this.zoomInstance.eventTransform
-    const h = this.canvas.clientHeight
     const mouseX = event.offsetX
     const mouseY = event.offsetY
-    const invertedX = (mouseX - x) / k
-    const invertedY = (mouseY - y) / k
-    this.store.mousePosition = [invertedX, (h - invertedY)]
-    this.store.mousePosition[0] -= (this.store.screenSize[0] - this.store.adjustedSpaceSize) / 2
-    this.store.mousePosition[1] -= (this.store.screenSize[1] - this.store.adjustedSpaceSize) / 2
+    this.store.mousePosition = this.zoomInstance.convertScreenToSpacePosition([mouseX, mouseY])
     this.store.screenMousePosition = [mouseX, (this.store.screenSize[1] - mouseY)]
   }
 
@@ -813,12 +807,16 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     const h = this.canvas.clientHeight
 
     if (forceResize || prevWidth !== w * this.config.pixelRatio || prevHeight !== h * this.config.pixelRatio) {
+      const [prevW, prevH] = this.store.screenSize
+      const { k } = this.zoomInstance.eventTransform
+      const centerPosition = this.zoomInstance.convertScreenToSpacePosition([prevW / 2, prevH / 2])
+
       this.store.updateScreenSize(w, h)
       this.canvas.width = w * this.config.pixelRatio
       this.canvas.height = h * this.config.pixelRatio
       this.reglInstance.poll()
       this.canvasD3Selection
-        .call(this.zoomInstance.behavior.transform, this.zoomInstance.eventTransform)
+        .call(this.zoomInstance.behavior.transform, this.zoomInstance.getTransform([centerPosition], k))
       this.points.updateSampledNodesGrid()
     }
   }

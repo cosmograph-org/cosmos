@@ -101,6 +101,18 @@ export class Zoom <N extends CosmosInputNode, L extends CosmosInputLink> {
       .scale(scale)
   }
 
+  public convertScreenToSpacePosition (screenPosition: [number, number]): [number, number] {
+    const { eventTransform: { x, y, k }, store: { screenSize } } = this
+    const w = screenSize[0]
+    const h = screenSize[1]
+    const invertedX = (screenPosition[0] - x) / k
+    const invertedY = (screenPosition[1] - y) / k
+    const spacePosition = [invertedX, (h - invertedY)] as [number, number]
+    spacePosition[0] -= (w - this.store.adjustedSpaceSize) / 2
+    spacePosition[1] -= (h - this.store.adjustedSpaceSize) / 2
+    return spacePosition
+  }
+
   public convertSpaceToScreenPosition (spacePosition: [number, number]): [number, number] {
     const screenPointX = this.eventTransform.applyX(this.store.scaleX(spacePosition[0]))
     const screenPointY = this.eventTransform.applyY(this.store.scaleY(spacePosition[1]))
