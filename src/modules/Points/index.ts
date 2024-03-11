@@ -1,5 +1,6 @@
 import regl from 'regl'
 import { scaleLinear } from 'd3-scale'
+import { extent } from 'd3-array'
 import { CoreModule } from '@/graph/modules/core-module'
 import { defaultConfigValues } from '@/graph/variables'
 import { createColorBuffer, createGreyoutStatusBuffer } from '@/graph/modules/Points/color-buffer'
@@ -466,10 +467,10 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
     if (xs.length === 0) return
     const ys = nodes.map(n => n.y).filter((n): n is number => n !== undefined)
     if (ys.length === 0) return
-    const minX = Math.min(...xs)
-    const maxX = Math.max(...xs)
-    const minY = Math.min(...ys)
-    const maxY = Math.max(...ys)
+    const [minX, maxX] = extent(xs)
+    if (minX === undefined || maxX === undefined) return
+    const [minY, maxY] = extent(ys)
+    if (minY === undefined || maxY === undefined) return
     const w = maxX - minX
     const h = maxY - minY
 
