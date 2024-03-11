@@ -363,19 +363,21 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   /**
    * Center and zoom in/out the view to fit all nodes in the scene.
    * @param duration Duration of the center and zoom in/out animation in milliseconds (`250` by default).
+   * @param padding Padding around the viewport in percentage
    */
-  public fitView (duration = 250): void {
-    this.setZoomTransformByNodePositions(this.getNodePositionsArray(), duration)
+  public fitView (duration = 250, padding = 0.1): void {
+    this.setZoomTransformByNodePositions(this.getNodePositionsArray(), duration, undefined, padding)
   }
 
   /**
    * Center and zoom in/out the view to fit nodes by their ids in the scene.
    * @param duration Duration of the center and zoom in/out animation in milliseconds (`250` by default).
+   * @param padding Padding around the viewport in percentage
    */
-  public fitViewByNodeIds (ids: string[], duration = 250): void {
+  public fitViewByNodeIds (ids: string[], duration = 250, padding = 0.1): void {
     const positionsMap = this.getNodePositionsMap()
     const positions = ids.map(id => positionsMap.get(id)).filter((d): d is [number, number] => d !== undefined)
-    this.setZoomTransformByNodePositions(positions, duration)
+    this.setZoomTransformByNodePositions(positions, duration, undefined, padding)
   }
 
   /** Select nodes inside a rectangular area.
