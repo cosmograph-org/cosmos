@@ -1,9 +1,8 @@
 import regl from 'regl'
-import { getValue, getRgbaColor } from '@/graph/helper'
 import { CoreModule } from '@/graph/modules/core-module'
 import drawLineFrag from '@/graph/modules/Lines/draw-curve-line.frag'
 import drawLineVert from '@/graph/modules/Lines/draw-curve-line.vert'
-import { defaultConfigValues, defaultLinkColor, defaultLinkWidth } from '@/graph/variables'
+import { defaultConfigValues } from '@/graph/variables'
 import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 import { destroyBuffer } from '@/graph/modules/Shared/buffer'
 import { getCurveLineGeometry } from '@/graph/modules/Lines/geometry'
@@ -25,21 +24,8 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
 
   public initPrograms (): void {
     const { reglInstance, config, store, data, points } = this
-    const { pointsTextureSize } = store
 
-    const instancePoints: number[][] = []
-    data.completeLinks.forEach(l => {
-      const toIndex = data.getSortedIndexById(l.target) as number
-      const fromIndex = data.getSortedIndexById(l.source) as number
-      const fromX = fromIndex % pointsTextureSize
-      const fromY = Math.floor(fromIndex / pointsTextureSize)
-
-      const toX = toIndex % pointsTextureSize
-      const toY = Math.floor(toIndex / pointsTextureSize)
-      instancePoints.push([fromX, fromY])
-      instancePoints.push([toX, toY])
-    })
-    const pointsBuffer = reglInstance.buffer(instancePoints)
+    const pointsBuffer = reglInstance.buffer(data.links ?? [])
 
     this.drawCurveCommand = reglInstance({
       vert: drawLineVert,
@@ -50,17 +36,11 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
           buffer: () => this.curveLineBuffer,
           divisor: 0,
         },
-        pointA: {
+        points: {
           buffer: () => pointsBuffer,
           divisor: 1,
           offset: Float32Array.BYTES_PER_ELEMENT * 0,
-          stride: Float32Array.BYTES_PER_ELEMENT * 4,
-        },
-        pointB: {
-          buffer: () => pointsBuffer,
-          divisor: 1,
-          offset: Float32Array.BYTES_PER_ELEMENT * 2,
-          stride: Float32Array.BYTES_PER_ELEMENT * 4,
+          stride: Float32Array.BYTES_PER_ELEMENT * 2,
         },
         color: {
           buffer: () => this.colorBuffer,
@@ -133,34 +113,18 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
   }
 
   public updateColor (): void {
-    const { reglInstance, config, data } = this
-    const instancePoints: number[][] = []
-    data.completeLinks.forEach(l => {
-      const c = getValue<L, string | [number, number, number, number]>(l, config.linkColor) ?? defaultLinkColor
-      const rgba = getRgbaColor(c)
-      instancePoints.push(rgba)
-    })
-    this.colorBuffer = reglInstance.buffer(instancePoints)
+    const { reglInstance, data } = this
+    this.colorBuffer = reglInstance.buffer(data.linkColors as number[])
   }
 
   public updateWidth (): void {
-    const { reglInstance, config, data } = this
-    const instancePoints: number[][] = []
-    data.completeLinks.forEach(l => {
-      const linkWidth = getValue<L, number>(l, config.linkWidth)
-      instancePoints.push([linkWidth ?? defaultLinkWidth])
-    })
-    this.widthBuffer = reglInstance.buffer(instancePoints)
+    const { reglInstance, data } = this
+    this.widthBuffer = reglInstance.buffer(data.linkWidths as number[])
   }
 
   public updateArrow (): void {
-    const { reglInstance, config, data } = this
-    const instancePoints: number[][] = []
-    data.completeLinks.forEach(l => {
-      const useArrow = getValue<L, boolean>(l, config.linkArrows) ?? defaultConfigValues.arrowLinks
-      instancePoints.push([useArrow ? 1.0 : 0.0])
-    })
-    this.arrowBuffer = reglInstance.buffer(instancePoints)
+    const { reglInstance, data } = this
+    this.arrowBuffer = reglInstance.buffer(data.linkArrows as number[])
   }
 
   public updateCurveLineGeometry (): void {
