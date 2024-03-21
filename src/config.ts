@@ -50,7 +50,7 @@ export interface GraphEvents <N extends CosmosInputNode> {
    * Default value: `undefined`
    */
   onNodeMouseOver?: (
-      hoveredNode: N, index: number, nodePosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined
+      hoveredNode: N | undefined, index: number, nodePosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined
     ) => void;
   /**
    * Callback function that will be called when a node is no longer underneath

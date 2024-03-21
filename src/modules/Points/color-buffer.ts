@@ -1,34 +1,27 @@
 import regl from 'regl'
-import { ColorAccessor } from '@/graph/config'
-import { getValue, getRgbaColor } from '@/graph/helper'
-import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
-import { GraphData } from '@/graph/modules/GraphData'
-import { defaultNodeColor } from '@/graph/variables'
+// import { ColorAccessor } from '@/graph/config'
+// import { getValue, getRgbaColor } from '@/graph/helper'
+// import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
+// import { GraphData } from '@/graph/modules/GraphData'
+import { GraphDataLow } from '@/graph/modules/GraphDataLow'
+// import { defaultNodeColor } from '@/graph/variables'
 
-export function createColorBuffer <N extends CosmosInputNode, L extends CosmosInputLink> (
-  data: GraphData<N, L>,
+export function createColorBuffer (
+  data: GraphDataLow,
   reglInstance: regl.Regl,
-  textureSize: number,
-  colorAccessor: ColorAccessor<N>
+  textureSize: number
+  // colorAccessor: ColorAccessor<N>
 ): regl.Framebuffer2D | undefined {
   if (textureSize === 0) return undefined
-  const initialState = new Float32Array(textureSize * textureSize * 4)
 
-  for (let i = 0; i < data.nodes.length; ++i) {
-    const sortedIndex = data.getSortedIndexByInputIndex(i)
-    const node = data.nodes[i]
-    if (node && sortedIndex !== undefined) {
-      const c = getValue<N, string | [number, number, number, number]>(node, colorAccessor, i) ?? defaultNodeColor
-      const rgba = getRgbaColor(c)
-      initialState[sortedIndex * 4 + 0] = rgba[0]
-      initialState[sortedIndex * 4 + 1] = rgba[1]
-      initialState[sortedIndex * 4 + 2] = rgba[2]
-      initialState[sortedIndex * 4 + 3] = rgba[3]
-    }
+  // Fill texture with zero if there are less nodes than texture size
+  const delta = textureSize * textureSize * 4 - data.nodesNumber * 4
+  for (let i = 0; i < delta; i += 1) {
+    data.nodeColors?.push(0)
   }
 
   const initialTexture = reglInstance.texture({
-    data: initialState,
+    data: data.nodeColors,
     width: textureSize,
     height: textureSize,
     type: 'float',

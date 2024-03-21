@@ -3,11 +3,13 @@ precision highp float;
 #endif
 
 attribute vec2 indexes;
+attribute float size;
+attribute vec4 color;
 
 uniform sampler2D positions;
-uniform sampler2D particleColor;
+// uniform sampler2D particleColor;
 uniform sampler2D particleGreyoutStatus;
-uniform sampler2D particleSize;
+// uniform sampler2D particleSize;
 uniform float ratio;
 uniform mat3 transform;
 uniform float pointsTextureSize;
@@ -44,13 +46,13 @@ void main() {
   gl_Position = vec4(final.rg, 0, 1);
 
   // Size
-  vec4 pSize = texture2D(particleSize, (index + 0.5) / pointsTextureSize);
-  float size = pSize.r * sizeScale;
+  // vec4 pSize = size; // texture2D(particleSize, (index + 0.5) / pointsTextureSize);
+  float pSize = size * sizeScale;
 
   // Color
-  vec4 pColor = texture2D(particleColor, (index + 0.5) / pointsTextureSize);
+  vec4 pColor = color; // texture2D(particleColor, (index + 0.5) / pointsTextureSize);
   rgbColor = pColor.rgb;
-  gl_PointSize = pointSize(size);
+  gl_PointSize = pointSize(pSize);
 
   alpha = pColor.a;
   // Alpha of selected points

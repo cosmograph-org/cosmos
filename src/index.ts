@@ -1,28 +1,29 @@
 import { select, Selection } from 'd3-selection'
 import 'd3-transition'
-import { easeQuadIn, easeQuadOut, easeQuadInOut } from 'd3-ease'
+import { easeQuadInOut } from 'd3-ease'
 import { D3ZoomEvent } from 'd3-zoom'
 import regl from 'regl'
 import { GraphConfig, GraphConfigInterface } from '@/graph/config'
 import { getRgbaColor, readPixels } from '@/graph/helper'
 import { ForceCenter } from '@/graph/modules/ForceCenter'
 import { ForceGravity } from '@/graph/modules/ForceGravity'
-import { ForceLink, LinkDirection } from '@/graph/modules/ForceLink'
+// import { ForceLink, LinkDirection } from '@/graph/modules/ForceLink'
 import { ForceManyBody } from '@/graph/modules/ForceManyBody'
 import { ForceManyBodyQuadtree } from '@/graph/modules/ForceManyBodyQuadtree'
 import { ForceMouse } from '@/graph/modules/ForceMouse'
 import { FPSMonitor } from '@/graph/modules/FPSMonitor'
-import { GraphData } from '@/graph/modules/GraphData'
+// import { GraphData } from '@/graph/modules/GraphData'
+import { GraphDataLow } from '@/graph/modules/GraphDataLow'
 import { Lines } from '@/graph/modules/Lines'
 import { Points } from '@/graph/modules/Points'
 import { Store, ALPHA_MIN, MAX_POINT_SIZE } from '@/graph/modules/Store'
 import { Zoom } from '@/graph/modules/Zoom'
 import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
-import { defaultConfigValues, defaultScaleToZoom } from '@/graph/variables'
+import { defaultConfigValues } from '@/graph/variables'
 
 export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   public config = new GraphConfig<N, L>()
-  public graph = new GraphData<N, L>()
+  public graph = new GraphDataLow()
   private canvas: HTMLCanvasElement
   private canvasD3Selection: Selection<HTMLCanvasElement, undefined, null, undefined>
   private reglInstance: regl.Regl
@@ -35,8 +36,8 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   private forceGravity: ForceGravity<N, L> | undefined
   private forceCenter: ForceCenter<N, L> | undefined
   private forceManyBody: ForceManyBody<N, L> | ForceManyBodyQuadtree<N, L> | undefined
-  private forceLinkIncoming: ForceLink<N, L> | undefined
-  private forceLinkOutgoing: ForceLink<N, L> | undefined
+  // private forceLinkIncoming: ForceLink<N, L> | undefined
+  // private forceLinkOutgoing: ForceLink<N, L> | undefined
   private forceMouse: ForceMouse<N, L> | undefined
   private zoomInstance = new Zoom(this.store, this.config)
   private fpsMonitor: FPSMonitor | undefined
@@ -116,8 +117,8 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       this.forceManyBody = this.config.useQuadtree
         ? new ForceManyBodyQuadtree(this.reglInstance, this.config, this.store, this.graph, this.points)
         : new ForceManyBody(this.reglInstance, this.config, this.store, this.graph, this.points)
-      this.forceLinkIncoming = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
-      this.forceLinkOutgoing = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
+      // this.forceLinkIncoming = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
+      // this.forceLinkOutgoing = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
       this.forceMouse = new ForceMouse(this.reglInstance, this.config, this.store, this.graph, this.points)
     }
 
@@ -209,6 +210,35 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     }
   }
 
+  public setNodePositions (nodePositions: number[]): void {
+    this.graph.nodePositions = nodePositions
+  }
+
+  public setNodeColors (nodeColors: number[]): void {
+    this.graph.nodeColors = nodeColors
+  }
+
+  public setNodeSizes (nodeSizes: number[]): void {
+    this.graph.nodeSizes = nodeSizes
+  }
+
+  public setLinks (links: number[]): void {
+    this.graph.links = links
+  }
+
+  public setLinkColors (linkColors: number[]): void {
+    this.graph.linkColors = linkColors
+  }
+
+  public setLinkWidths (linkWidths: number[]): void {
+    this.graph.linkWidths = linkWidths
+  }
+
+  public render (): void {
+    this.graph.update()
+    this.update(false)
+  }
+
   /**
    * Pass data to Cosmos.
    * @param nodes Array of nodes.
@@ -226,12 +256,12 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       })
       return
     }
-    this.graph.setData(nodes, links)
+    // this.graph.setData(nodes, links)
     // If `initialZoomLevel` is set, we don't need to fit the view
     if (this._isFirstDataAfterInit && fitViewOnInit && initialZoomLevel === undefined) {
       this._fitViewOnInitTimeoutID = window.setTimeout(() => {
         if (fitViewByNodesInRect) this.setZoomTransformByNodePositions(fitViewByNodesInRect, undefined, undefined, 0)
-        else this.fitView()
+        // else this.fitView()
       }, fitViewDelay)
     }
     this._isFirstDataAfterInit = false
@@ -246,11 +276,11 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * @param scale Scale value to zoom in or out (`3` by default).
    * @param canZoomOut Set to `false` to prevent zooming out from the node (`true` by default).
    */
-  public zoomToNodeById (id: string, duration = 700, scale = defaultScaleToZoom, canZoomOut = true): void {
-    const node = this.graph.getNodeById(id)
-    if (!node) return
-    this.zoomToNode(node, duration, scale, canZoomOut)
-  }
+  // public zoomToNodeById (id: string, duration = 700, scale = defaultScaleToZoom, canZoomOut = true): void {
+  //   const node = this.graph.getNodeById(id)
+  //   if (!node) return
+  //   this.zoomToNode(node, duration, scale, canZoomOut)
+  // }
 
   /**
    * Center the view on a node and zoom in, by node index.
@@ -259,11 +289,11 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * @param scale Scale value to zoom in or out (`3` by default).
    * @param canZoomOut Set to `false` to prevent zooming out from the node (`true` by default).
    */
-  public zoomToNodeByIndex (index: number, duration = 700, scale = defaultScaleToZoom, canZoomOut = true): void {
-    const node = this.graph.getNodeByIndex(index)
-    if (!node) return
-    this.zoomToNode(node, duration, scale, canZoomOut)
-  }
+  // public zoomToNodeByIndex (index: number, duration = 700, scale = defaultScaleToZoom, canZoomOut = true): void {
+  //   const node = this.graph.getNodeByIndex(index)
+  //   if (!node) return
+  //   this.zoomToNode(node, duration, scale, canZoomOut)
+  // }
 
   /**
    * Zoom the view in or out to the specified zoom level.
@@ -304,81 +334,81 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * Get current X and Y coordinates of the nodes.
    * @returns Object where keys are the ids of the nodes and values are corresponding `{ x: number; y: number }` objects.
    */
-  public getNodePositions (): { [key: string]: { x: number; y: number } } {
-    if (this.hasParticleSystemDestroyed) return {}
-    const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
-    return this.graph.nodes.reduce<{ [key: string]: { x: number; y: number } }>((acc, curr) => {
-      const index = this.graph.getSortedIndexById(curr.id) as number
-      const posX = particlePositionPixels[index * 4 + 0]
-      const posY = particlePositionPixels[index * 4 + 1]
-      if (posX !== undefined && posY !== undefined) {
-        acc[curr.id] = {
-          x: posX,
-          y: posY,
-        }
-      }
-      return acc
-    }, {})
-  }
+  // public getNodePositions (): { [key: string]: { x: number; y: number } } {
+  //   if (this.hasParticleSystemDestroyed) return {}
+  //   const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
+  //   return this.graph.nodes.reduce<{ [key: string]: { x: number; y: number } }>((acc, curr) => {
+  //     const index = this.graph.getSortedIndexById(curr.id) as number
+  //     const posX = particlePositionPixels[index * 4 + 0]
+  //     const posY = particlePositionPixels[index * 4 + 1]
+  //     if (posX !== undefined && posY !== undefined) {
+  //       acc[curr.id] = {
+  //         x: posX,
+  //         y: posY,
+  //       }
+  //     }
+  //     return acc
+  //   }, {})
+  // }
 
   /**
    * Get current X and Y coordinates of the nodes.
    * @returns A Map object where keys are the ids of the nodes and values are their corresponding X and Y coordinates in the [number, number] format.
    */
-  public getNodePositionsMap (): Map<string, [number, number]> {
-    const positionMap = new Map()
-    if (this.hasParticleSystemDestroyed) return positionMap
-    const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
-    return this.graph.nodes.reduce<Map<string, [number, number]>>((acc, curr) => {
-      const index = this.graph.getSortedIndexById(curr.id) as number
-      const posX = particlePositionPixels[index * 4 + 0]
-      const posY = particlePositionPixels[index * 4 + 1]
-      if (posX !== undefined && posY !== undefined) {
-        acc.set(curr.id, [posX, posY])
-      }
-      return acc
-    }, positionMap)
-  }
+  // public getNodePositionsMap (): Map<string, [number, number]> {
+  //   const positionMap = new Map()
+  //   if (this.hasParticleSystemDestroyed) return positionMap
+  //   const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
+  //   return this.graph.nodes.reduce<Map<string, [number, number]>>((acc, curr) => {
+  //     const index = this.graph.getSortedIndexById(curr.id) as number
+  //     const posX = particlePositionPixels[index * 4 + 0]
+  //     const posY = particlePositionPixels[index * 4 + 1]
+  //     if (posX !== undefined && posY !== undefined) {
+  //       acc.set(curr.id, [posX, posY])
+  //     }
+  //     return acc
+  //   }, positionMap)
+  // }
 
   /**
    * Get current X and Y coordinates of the nodes.
    * @returns Array of `[x: number, y: number]` arrays.
    */
-  public getNodePositionsArray (): [number, number][] {
-    const positions: [number, number][] = []
-    if (this.hasParticleSystemDestroyed) return []
-    const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
-    positions.length = this.graph.nodes.length
-    for (let i = 0; i < this.graph.nodes.length; i += 1) {
-      const index = this.graph.getSortedIndexByInputIndex(i) as number
-      const posX = particlePositionPixels[index * 4 + 0]
-      const posY = particlePositionPixels[index * 4 + 1]
-      if (posX !== undefined && posY !== undefined) {
-        positions[i] = [posX, posY]
-      }
-    }
-    return positions
-  }
+  // public getNodePositionsArray (): [number, number][] {
+  //   const positions: [number, number][] = []
+  //   if (this.hasParticleSystemDestroyed) return []
+  //   const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
+  //   positions.length = this.graph.nodes.length
+  //   for (let i = 0; i < this.graph.nodes.length; i += 1) {
+  //     const index = this.graph.getSortedIndexByInputIndex(i) as number
+  //     const posX = particlePositionPixels[index * 4 + 0]
+  //     const posY = particlePositionPixels[index * 4 + 1]
+  //     if (posX !== undefined && posY !== undefined) {
+  //       positions[i] = [posX, posY]
+  //     }
+  //   }
+  //   return positions
+  // }
 
   /**
    * Center and zoom in/out the view to fit all nodes in the scene.
    * @param duration Duration of the center and zoom in/out animation in milliseconds (`250` by default).
    * @param padding Padding around the viewport in percentage
    */
-  public fitView (duration = 250, padding = 0.1): void {
-    this.setZoomTransformByNodePositions(this.getNodePositionsArray(), duration, undefined, padding)
-  }
+  // public fitView (duration = 250, padding = 0.1): void {
+  //   this.setZoomTransformByNodePositions(this.getNodePositionsArray(), duration, undefined, padding)
+  // }
 
   /**
    * Center and zoom in/out the view to fit nodes by their ids in the scene.
    * @param duration Duration of the center and zoom in/out animation in milliseconds (`250` by default).
    * @param padding Padding around the viewport in percentage
    */
-  public fitViewByNodeIds (ids: string[], duration = 250, padding = 0.1): void {
-    const positionsMap = this.getNodePositionsMap()
-    const positions = ids.map(id => positionsMap.get(id)).filter((d): d is [number, number] => d !== undefined)
-    this.setZoomTransformByNodePositions(positions, duration, undefined, padding)
-  }
+  // public fitViewByNodeIds (ids: string[], duration = 250, padding = 0.1): void {
+  //   const positionsMap = this.getNodePositionsMap()
+  //   const positions = ids.map(id => positionsMap.get(id)).filter((d): d is [number, number] => d !== undefined)
+  //   this.setZoomTransformByNodePositions(positions, duration, undefined, padding)
+  // }
 
   /** Select nodes inside a rectangular area.
    * @param selection - Array of two corner points `[[left, top], [right, bottom]]`.
@@ -407,30 +437,30 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * @param id Id of the node.
    * @param selectAdjacentNodes When set to `true`, selects adjacent nodes (`false` by default).
    */
-  public selectNodeById (id: string, selectAdjacentNodes = false): void {
-    if (selectAdjacentNodes) {
-      const adjacentNodes = this.graph.getAdjacentNodes(id) ?? []
-      this.selectNodesByIds([id, ...adjacentNodes.map(d => d.id)])
-    } else this.selectNodesByIds([id])
-  }
+  // public selectNodeById (id: string, selectAdjacentNodes = false): void {
+  //   if (selectAdjacentNodes) {
+  //     const adjacentNodes = this.graph.getAdjacentNodes(id) ?? []
+  //     this.selectNodesByIds([id, ...adjacentNodes.map(d => d.id)])
+  //   } else this.selectNodesByIds([id])
+  // }
 
   /**
    * Select a node by index. If you want the adjacent nodes to get selected too, provide `true` as the second argument.
    * @param index The index of the node in the array of nodes.
    * @param selectAdjacentNodes When set to `true`, selects adjacent nodes (`false` by default).
    */
-  public selectNodeByIndex (index: number, selectAdjacentNodes = false): void {
-    const node = this.graph.getNodeByIndex(index)
-    if (node) this.selectNodeById(node.id, selectAdjacentNodes)
-  }
+  // public selectNodeByIndex (index: number, selectAdjacentNodes = false): void {
+  //   const node = this.graph.getNodeByIndex(index)
+  //   if (node) this.selectNodeById(node.id, selectAdjacentNodes)
+  // }
 
   /**
    * Select multiples nodes by their ids.
    * @param ids Array of nodes ids.
    */
-  public selectNodesByIds (ids?: (string | undefined)[] | null): void {
-    this.selectNodesByIndices(ids?.map(d => this.graph.getSortedIndexById(d)))
-  }
+  // public selectNodesByIds (ids?: (string | undefined)[] | null): void {
+  //   this.selectNodesByIndices(ids?.map(d => this.graph.getSortedIndexById(d)))
+  // }
 
   /**
    * Select multiples nodes by their indices.
@@ -460,18 +490,18 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * Get nodes that are currently selected.
    * @returns Array of selected nodes.
    */
-  public getSelectedNodes (): N[] | null {
-    const { selectedIndices } = this.store
-    if (!selectedIndices) return null
-    const points = new Array(selectedIndices.length)
-    for (const [i, selectedIndex] of selectedIndices.entries()) {
-      if (selectedIndex !== undefined) {
-        const index = this.graph.getInputIndexBySortedIndex(selectedIndex)
-        if (index !== undefined) points[i] = this.graph.nodes[index]
-      }
-    }
-    return points
-  }
+  // public getSelectedNodes (): N[] | null {
+  //   const { selectedIndices } = this.store
+  //   if (!selectedIndices) return null
+  //   const points = new Array(selectedIndices.length)
+  //   for (const [i, selectedIndex] of selectedIndices.entries()) {
+  //     if (selectedIndex !== undefined) {
+  //       const index = this.graph.getInputIndexBySortedIndex(selectedIndex)
+  //       if (index !== undefined) points[i] = this.graph.nodes[index]
+  //     }
+  //   }
+  //   return points
+  // }
 
   /**
    * Get nodes that are adjacent to a specific node by its id.
@@ -479,35 +509,35 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * @returns Array of adjacent nodes.
    */
 
-  public getAdjacentNodes (id: string): N[] | undefined {
-    return this.graph.getAdjacentNodes(id)
-  }
+  // public getAdjacentNodes (id: string): N[] | undefined {
+  //   return this.graph.getAdjacentNodes(id)
+  // }
 
   /**
    * Set focus on a node by id. A ring will be highlighted around the focused node.
    * If no id is specified, the focus will be reset.
    * @param id Id of the node.
    */
-  public setFocusedNodeById (id?: string): void {
-    if (id === undefined) {
-      this.store.setFocusedNode()
-    } else {
-      this.store.setFocusedNode(this.graph.getNodeById(id), this.graph.getSortedIndexById(id))
-    }
-  }
+  // public setFocusedNodeById (id?: string): void {
+  //   if (id === undefined) {
+  //     this.store.setFocusedNode()
+  //   } else {
+  //     this.store.setFocusedNode(this.graph.getNodeById(id), this.graph.getSortedIndexById(id))
+  //   }
+  // }
 
   /**
    * Set focus on a node by index. A ring will be highlighted around the focused node.
    * If no index is specified, the focus will be reset.
    * @param index The index of the node in the array of nodes.
    */
-  public setFocusedNodeByIndex (index?: number): void {
-    if (index === undefined) {
-      this.store.setFocusedNode()
-    } else {
-      this.store.setFocusedNode(this.graph.getNodeByIndex(index), index)
-    }
-  }
+  // public setFocusedNodeByIndex (index?: number): void {
+  //   if (index === undefined) {
+  //     this.store.setFocusedNode()
+  //   } else {
+  //     this.store.setFocusedNode(this.graph.getNodeByIndex(index), index)
+  //   }
+  // }
 
   /**
    * Converts the X and Y node coordinates from the space coordinate system to the screen coordinate system.
@@ -542,31 +572,31 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * @param id Id of the node.
    * @returns Radius of the node.
    */
-  public getNodeRadiusById (id: string): number | undefined {
-    const index = this.graph.getInputIndexById(id)
-    if (index === undefined) return undefined
-    return this.points.getNodeRadiusByIndex(index)
-  }
+  // public getNodeRadiusById (id: string): number | undefined {
+  //   const index = this.graph.getInputIndexById(id)
+  //   if (index === undefined) return undefined
+  //   return this.points.getNodeRadiusByIndex(index)
+  // }
 
   /**
    * Track multiple node positions by their ids on each Cosmos tick.
    * @param ids Array of nodes ids.
    */
-  public trackNodePositionsByIds (ids: string[]): void {
-    this.points.trackNodesByIds(ids)
-  }
+  // public trackNodePositionsByIds (ids: string[]): void {
+  //   this.points.trackNodesByIds(ids)
+  // }
 
   /**
    * Track multiple node positions by their indices on each Cosmos tick.
    * @param ids Array of nodes indices.
    */
-  public trackNodePositionsByIndices (indices: number[]): void {
-    this.points.trackNodesByIds(
-      indices.map(index => this.graph.getNodeByIndex(index))
-        .filter((d): d is N => d !== undefined)
-        .map(d => d.id)
-    )
-  }
+  // public trackNodePositionsByIndices (indices: number[]): void {
+  //   this.points.trackNodesByIds(
+  //     indices.map(index => this.graph.getNodeByIndex(index))
+  //       .filter((d): d is N => d !== undefined)
+  //       .map(d => d.id)
+  //   )
+  // }
 
   /**
    * Get current X and Y coordinates of the tracked nodes.
@@ -591,7 +621,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * @param alpha Value from 0 to 1. The higher the value, the more initial energy the simulation will get.
    */
   public start (alpha = 1): void {
-    if (!this.graph.nodes.length) return
+    if (!this.graph.nodesNumber) return
     this.store.isSimulationRunning = true
     this.store.alpha = alpha
     this.store.simulationProgress = 0
@@ -643,8 +673,8 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     this.points.create()
     this.lines.create()
     this.forceManyBody?.create()
-    this.forceLinkIncoming?.create(LinkDirection.INCOMING)
-    this.forceLinkOutgoing?.create(LinkDirection.OUTGOING)
+    // this.forceLinkIncoming?.create(LinkDirection.INCOMING)
+    // this.forceLinkOutgoing?.create(LinkDirection.OUTGOING)
     this.forceCenter?.create()
     this.hasParticleSystemDestroyed = false
   }
@@ -654,8 +684,8 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     this.points.destroy()
     this.lines.destroy()
     this.forceCenter?.destroy()
-    this.forceLinkIncoming?.destroy()
-    this.forceLinkOutgoing?.destroy()
+    // this.forceLinkIncoming?.destroy()
+    // this.forceLinkOutgoing?.destroy()
     this.forceManyBody?.destroy()
     this.reglInstance.destroy()
     this.hasParticleSystemDestroyed = true
@@ -663,12 +693,12 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
 
   private update (runSimulation: boolean): void {
     const { graph } = this
-    this.store.pointsTextureSize = Math.ceil(Math.sqrt(graph.nodes.length))
+    this.store.pointsTextureSize = Math.ceil(Math.sqrt(graph.nodesNumber))
     this.store.linksTextureSize = Math.ceil(Math.sqrt(graph.linksNumber * 2))
     this.destroyParticleSystem()
     this.create()
     this.initPrograms()
-    this.setFocusedNodeById()
+    // this.setFocusedNodeById()
     this.store.hoveredNode = undefined
     if (runSimulation) {
       this.start()
@@ -681,8 +711,8 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     this.points.initPrograms()
     this.lines.initPrograms()
     this.forceGravity?.initPrograms()
-    this.forceLinkIncoming?.initPrograms()
-    this.forceLinkOutgoing?.initPrograms()
+    // this.forceLinkIncoming?.initPrograms()
+    // this.forceLinkOutgoing?.initPrograms()
     this.forceMouse?.initPrograms()
     this.forceManyBody?.initPrograms()
     this.forceCenter?.initPrograms()
@@ -697,14 +727,12 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       this.fpsMonitor?.begin()
       this.resizeCanvas()
       this.findHoveredPoint()
-
       if (!disableSimulation) {
         if (this.isRightClickMouse) {
           if (!isSimulationRunning) this.start(0.1)
           this.forceMouse?.run()
           this.points.updatePosition()
         }
-
         if ((isSimulationRunning && !this.zoomInstance.isRunning)) {
           if (simulation.gravity) {
             this.forceGravity?.run()
@@ -719,12 +747,12 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
           this.forceManyBody?.run()
           this.points.updatePosition()
 
-          if (this.store.linksTextureSize) {
-            this.forceLinkIncoming?.run()
-            this.points.updatePosition()
-            this.forceLinkOutgoing?.run()
-            this.points.updatePosition()
-          }
+          // if (this.store.linksTextureSize) {
+          //   this.forceLinkIncoming?.run()
+          //   this.points.updatePosition()
+          //   this.forceLinkOutgoing?.run()
+          //   this.points.updatePosition()
+          // }
 
           this.store.alpha += this.store.addAlpha(this.config.simulation.decay ?? defaultConfigValues.simulation.decay)
           if (this.isRightClickMouse) this.store.alpha = Math.max(this.store.alpha, 0.1)
@@ -732,7 +760,8 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
           this.config.simulation.onTick?.(
             this.store.alpha,
             this.store.hoveredNode?.node,
-            this.store.hoveredNode ? this.graph.getInputIndexBySortedIndex(this.store.hoveredNode.index) : undefined,
+            undefined,
+            // this.store.hoveredNode ? this.graph.getInputIndexBySortedIndex(this.store.hoveredNode.index) : undefined,
             this.store.hoveredNode?.position
           )
         }
@@ -772,7 +801,8 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   private onClick (event: MouseEvent): void {
     this.config.events.onClick?.(
       this.store.hoveredNode?.node,
-      this.store.hoveredNode ? this.graph.getInputIndexBySortedIndex(this.store.hoveredNode.index) : undefined,
+      undefined,
+      // this.store.hoveredNode ? this.graph.getInputIndexBySortedIndex(this.store.hoveredNode.index) : undefined,
       this.store.hoveredNode?.position,
       event
     )
@@ -792,7 +822,8 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     this.isRightClickMouse = event.which === 3
     this.config.events.onMouseMove?.(
       this.store.hoveredNode?.node,
-      this.store.hoveredNode ? this.graph.getInputIndexBySortedIndex(this.store.hoveredNode.index) : undefined,
+      undefined,
+      // this.store.hoveredNode ? this.graph.getInputIndexBySortedIndex(this.store.hoveredNode.index) : undefined,
       this.store.hoveredNode?.position,
       this.currentEvent
     )
@@ -833,32 +864,32 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
       .call(this.zoomInstance.behavior.transform, transform)
   }
 
-  private zoomToNode (node: N, duration: number, scale: number, canZoomOut: boolean): void {
-    const { graph, store: { screenSize } } = this
-    const positionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
-    const nodeIndex = graph.getSortedIndexById(node.id)
-    if (nodeIndex === undefined) return
-    const posX = positionPixels[nodeIndex * 4 + 0]
-    const posY = positionPixels[nodeIndex * 4 + 1]
-    if (posX === undefined || posY === undefined) return
-    const distance = this.zoomInstance.getDistanceToPoint([posX, posY])
-    const zoomLevel = canZoomOut ? scale : Math.max(this.getZoomLevel(), scale)
-    if (distance < Math.min(screenSize[0], screenSize[1])) {
-      this.setZoomTransformByNodePositions([[posX, posY]], duration, zoomLevel)
-    } else {
-      const transform = this.zoomInstance.getTransform([[posX, posY]], zoomLevel)
-      const middle = this.zoomInstance.getMiddlePointTransform([posX, posY])
-      this.canvasD3Selection
-        .transition()
-        .ease(easeQuadIn)
-        .duration(duration / 2)
-        .call(this.zoomInstance.behavior.transform, middle)
-        .transition()
-        .ease(easeQuadOut)
-        .duration(duration / 2)
-        .call(this.zoomInstance.behavior.transform, transform)
-    }
-  }
+  // private zoomToNode (node: N, duration: number, scale: number, canZoomOut: boolean): void {
+  //   const { graph, store: { screenSize } } = this
+  //   const positionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
+  //   const nodeIndex = graph.getSortedIndexById(node.id)
+  //   if (nodeIndex === undefined) return
+  //   const posX = positionPixels[nodeIndex * 4 + 0]
+  //   const posY = positionPixels[nodeIndex * 4 + 1]
+  //   if (posX === undefined || posY === undefined) return
+  //   const distance = this.zoomInstance.getDistanceToPoint([posX, posY])
+  //   const zoomLevel = canZoomOut ? scale : Math.max(this.getZoomLevel(), scale)
+  //   if (distance < Math.min(screenSize[0], screenSize[1])) {
+  //     this.setZoomTransformByNodePositions([[posX, posY]], duration, zoomLevel)
+  //   } else {
+  //     const transform = this.zoomInstance.getTransform([[posX, posY]], zoomLevel)
+  //     const middle = this.zoomInstance.getMiddlePointTransform([posX, posY])
+  //     this.canvasD3Selection
+  //       .transition()
+  //       .ease(easeQuadIn)
+  //       .duration(duration / 2)
+  //       .call(this.zoomInstance.behavior.transform, middle)
+  //       .transition()
+  //       .ease(easeQuadOut)
+  //       .duration(duration / 2)
+  //       .call(this.zoomInstance.behavior.transform, transform)
+  //   }
+  // }
 
   private disableZoom (): void {
     this.canvasD3Selection
@@ -882,13 +913,16 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     let isMouseout = false
     const pixels = readPixels(this.reglInstance, this.points.hoveredFbo as regl.Framebuffer2D)
     const nodeSize = pixels[1] as number
+    const position = [0, 0] as [number, number]
     if (nodeSize) {
       const index = pixels[0] as number
-      const inputIndex = this.graph.getInputIndexBySortedIndex(index)
-      const hovered = inputIndex !== undefined ? this.graph.getNodeByIndex(inputIndex) : undefined
+      // const inputIndex = this.graph.getInputIndexBySortedIndex(index)
+      const hovered = undefined // inputIndex !== undefined ? this.graph.getNodeByIndex(inputIndex) : undefined
       if (this.store.hoveredNode?.node !== hovered) isMouseover = true
       const pointX = pixels[2] as number
       const pointY = pixels[3] as number
+      position[0] = pointX
+      position[1] = pointY
       this.store.hoveredNode = hovered && {
         node: hovered,
         index,
@@ -901,11 +935,13 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
 
     if (isMouseover && this.store.hoveredNode) {
       this.config.events.onNodeMouseOver?.(
-        this.store.hoveredNode.node as N,
-        this.graph.getInputIndexBySortedIndex(
-          this.graph.getSortedIndexById(this.store.hoveredNode.node.id) as number
-        ) as number,
-        this.store.hoveredNode.position,
+        undefined,
+        pixels[0] as number,
+        // this.store.hoveredNode.node as N,
+        // this.graph.getInputIndexBySortedIndex(
+        //   this.graph.getSortedIndexById(this.store.hoveredNode.node.id) as number
+        // ) as number,
+        position,
         this.currentEvent
       )
     }
