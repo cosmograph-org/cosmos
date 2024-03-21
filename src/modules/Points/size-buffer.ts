@@ -1,7 +1,7 @@
 import regl from 'regl'
 import { NumericAccessor } from '@/graph/config'
 import { getValue } from '@/graph/helper'
-import { GraphData } from '@/graph/modules/GraphData'
+import { GraphDataLow } from '@/graph/modules/GraphDataLow'
 import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 import { defaultNodeSize } from '@/graph/variables'
 
@@ -15,26 +15,26 @@ export function getNodeSize<N extends CosmosInputNode> (
 }
 
 export function createSizeBufferAndFillSizeStore <N extends CosmosInputNode, L extends CosmosInputLink> (
-  data: GraphData<N, L>,
+  data: GraphDataLow,
   reglInstance: regl.Regl,
   pointTextureSize: number,
-  sizeAccessor: NumericAccessor<N>,
+  // sizeAccessor: NumericAccessor<N>,
   sizeStore: Float32Array
 ): regl.Framebuffer2D | undefined {
   if (pointTextureSize === 0) return undefined
-  const numParticles = data.nodes.length
+  if (!data.nodeSizes) return undefined
+  const numParticles = data.nodesNumber
   const initialState = new Float32Array(pointTextureSize * pointTextureSize * 4)
 
   for (let i = 0; i < numParticles; ++i) {
-    const sortedIndex = data.getSortedIndexByInputIndex(i)
-    const node = data.nodes[i]
-    if (node && sortedIndex !== undefined) {
-      const nodeSize = getNodeSize(node, sizeAccessor, i)
-      initialState[sortedIndex * 4] = nodeSize
-      sizeStore[i] = nodeSize
-    }
+  //   const sortedIndex = data.getSortedIndexByInputIndex(i)
+  //   const node = data.nodes[i]
+  //   if (node && sortedIndex !== undefined) {
+  //     const nodeSize = getNodeSize(node, sizeAccessor, i)
+    initialState[i * 4] = data.nodeSizes[i] as number
+    sizeStore[i] = data.nodeSizes[i] as number
+  //   }
   }
-
   const initialTexture = reglInstance.texture({
     data: initialState,
     width: pointTextureSize,

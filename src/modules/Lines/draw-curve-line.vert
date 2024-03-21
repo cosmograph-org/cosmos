@@ -1,5 +1,5 @@
 precision highp float;
-attribute vec2 position, pointA, pointB;
+attribute vec2 position, points;
 attribute vec4 color;
 attribute float width;
 attribute float arrow;
@@ -41,8 +41,8 @@ vec2 conicParametricCurve(vec2 A, vec2 B, vec2 ControlPoint, float t, float w) {
 void main() {
   pos = position;
 
-  vec2 pointTexturePosA = (pointA + 0.5) / pointsTextureSize;
-  vec2 pointTexturePosB = (pointB + 0.5) / pointsTextureSize;
+  vec2 pointTexturePosA = vec2(mod(points.x, pointsTextureSize), floor(points.x / pointsTextureSize)) / pointsTextureSize;
+  vec2 pointTexturePosB = vec2(mod(points.y, pointsTextureSize), floor(points.y / pointsTextureSize)) / pointsTextureSize;
   // Greyed out status of points
   vec4 greyoutStatusA = texture2D(particleGreyoutStatus, pointTexturePosA);
   vec4 greyoutStatusB = texture2D(particleGreyoutStatus, pointTexturePosB);

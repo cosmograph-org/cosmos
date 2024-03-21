@@ -42,7 +42,7 @@ export class ForceCenter<N extends CosmosInputNode, L extends CosmosInputLink> e
       vert: calculateCentermassVert,
       framebuffer: () => this.centermassFbo as regl.Framebuffer2D,
       primitive: 'points',
-      count: () => data.nodes.length,
+      count: () => data.nodesNumber,
       attributes: { indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
       uniforms: {
         position: () => points?.previousPositionFbo,

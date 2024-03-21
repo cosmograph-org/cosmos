@@ -66,7 +66,7 @@ export class ForceManyBody<N extends CosmosInputNode, L extends CosmosInputLink>
       vert: calculateLevelVert,
       framebuffer: (_: regl.DefaultContext, props: { levelFbo: regl.Framebuffer2D; levelTextureSize: number; cellSize: number }) => props.levelFbo,
       primitive: 'points',
-      count: () => data.nodes.length,
+      count: () => data.nodesNumber,
       attributes: { indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
       uniforms: {
         position: () => points?.previousPositionFbo,
