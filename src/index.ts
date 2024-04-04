@@ -261,7 +261,7 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
     if (this._isFirstDataAfterInit && fitViewOnInit && initialZoomLevel === undefined) {
       this._fitViewOnInitTimeoutID = window.setTimeout(() => {
         if (fitViewByNodesInRect) this.setZoomTransformByNodePositions(fitViewByNodesInRect, undefined, undefined, 0)
-        // else this.fitView()
+        else this.fitView()
       }, fitViewDelay)
     }
     this._isFirstDataAfterInit = false
@@ -374,30 +374,29 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
    * Get current X and Y coordinates of the nodes.
    * @returns Array of `[x: number, y: number]` arrays.
    */
-  // public getNodePositionsArray (): [number, number][] {
-  //   const positions: [number, number][] = []
-  //   if (this.hasParticleSystemDestroyed) return []
-  //   const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
-  //   positions.length = this.graph.nodes.length
-  //   for (let i = 0; i < this.graph.nodes.length; i += 1) {
-  //     const index = this.graph.getSortedIndexByInputIndex(i) as number
-  //     const posX = particlePositionPixels[index * 4 + 0]
-  //     const posY = particlePositionPixels[index * 4 + 1]
-  //     if (posX !== undefined && posY !== undefined) {
-  //       positions[i] = [posX, posY]
-  //     }
-  //   }
-  //   return positions
-  // }
+  public getNodePositionsArray (): [number, number][] {
+    const positions: [number, number][] = []
+    if (this.hasParticleSystemDestroyed) return []
+    const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
+    positions.length = this.graph.nodesNumber
+    for (let i = 0; i < this.graph.nodesNumber; i += 1) {
+      const posX = particlePositionPixels[i * 4 + 0]
+      const posY = particlePositionPixels[i * 4 + 1]
+      if (posX !== undefined && posY !== undefined) {
+        positions[i] = [posX, posY]
+      }
+    }
+    return positions
+  }
 
   /**
    * Center and zoom in/out the view to fit all nodes in the scene.
    * @param duration Duration of the center and zoom in/out animation in milliseconds (`250` by default).
    * @param padding Padding around the viewport in percentage
    */
-  // public fitView (duration = 250, padding = 0.1): void {
-  //   this.setZoomTransformByNodePositions(this.getNodePositionsArray(), duration, undefined, padding)
-  // }
+  public fitView (duration = 250, padding = 0.1): void {
+    this.setZoomTransformByNodePositions(this.getNodePositionsArray(), duration, undefined, padding)
+  }
 
   /**
    * Center and zoom in/out the view to fit nodes by their ids in the scene.
