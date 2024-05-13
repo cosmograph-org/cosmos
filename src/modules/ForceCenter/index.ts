@@ -6,9 +6,8 @@ import forceFrag from '@/graph/modules/ForceCenter/force-center.frag'
 import { createIndexesBuffer, createQuadBuffer, destroyFramebuffer } from '@/graph/modules/Shared/buffer'
 import clearFrag from '@/graph/modules/Shared/clear.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
-import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 
-export class ForceCenter<N extends CosmosInputNode, L extends CosmosInputLink> extends CoreModule<N, L> {
+export class ForceCenter extends CoreModule {
   private centermassFbo: regl.Framebuffer2D | undefined
   private clearCentermassCommand: regl.DrawCommand | undefined
   private calculateCentermassCommand: regl.DrawCommand | undefined
@@ -42,7 +41,7 @@ export class ForceCenter<N extends CosmosInputNode, L extends CosmosInputLink> e
       vert: calculateCentermassVert,
       framebuffer: () => this.centermassFbo as regl.Framebuffer2D,
       primitive: 'points',
-      count: () => data.nodesNumber,
+      count: () => data.nodesNumber ?? 0,
       attributes: { indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
       uniforms: {
         position: () => points?.previousPositionFbo,

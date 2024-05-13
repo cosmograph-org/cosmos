@@ -1,38 +1,4 @@
 import regl from 'regl'
-// import { ColorAccessor } from '@/graph/config'
-// import { getValue, getRgbaColor } from '@/graph/helper'
-// import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
-// import { GraphData } from '@/graph/modules/GraphData'
-import { GraphDataLow } from '@/graph/modules/GraphDataLow'
-// import { defaultNodeColor } from '@/graph/variables'
-
-export function createColorBuffer (
-  data: GraphDataLow,
-  reglInstance: regl.Regl,
-  textureSize: number
-  // colorAccessor: ColorAccessor<N>
-): regl.Framebuffer2D | undefined {
-  if (textureSize === 0) return undefined
-
-  // Fill texture with zero if there are less nodes than texture size
-  const delta = textureSize * textureSize * 4 - data.nodesNumber * 4
-  for (let i = 0; i < delta; i += 1) {
-    data.nodeColors?.push(0)
-  }
-
-  const initialTexture = reglInstance.texture({
-    data: data.nodeColors,
-    width: textureSize,
-    height: textureSize,
-    type: 'float',
-  })
-
-  return reglInstance.framebuffer({
-    color: initialTexture,
-    depth: false,
-    stencil: false,
-  })
-}
 
 export function createGreyoutStatusBuffer (
   selectedIndices: Float32Array | null,

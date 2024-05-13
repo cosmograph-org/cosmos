@@ -7,10 +7,10 @@ import { hoveredNodeRingOpacity, focusedNodeRingOpacity, defaultConfigValues } f
 export const ALPHA_MIN = 0.001
 export const MAX_POINT_SIZE = 64
 
-type Hovered<Node> = { node: Node; index: number; position: [ number, number ] }
-type Focused<Node> = { node: Node; index: number }
+type Hovered = { index: number; position: [ number, number ] }
+type Focused = { index: number }
 
-export class Store <N> {
+export class Store {
   public pointsTextureSize = 0
   public linksTextureSize = 0
   public alpha = 1
@@ -24,8 +24,8 @@ export class Store <N> {
   public simulationProgress = 0
   public selectedIndices: Float32Array | null = null
   public maxPointSize = MAX_POINT_SIZE
-  public hoveredNode: Hovered<N> | undefined = undefined
-  public focusedNode: Focused<N> | undefined = undefined
+  public hoveredNode: Hovered | undefined = undefined
+  public focusedNode: Focused | undefined = undefined
   public adjustedSpaceSize = defaultConfigValues.spaceSize
 
   public hoveredNodeRingColor = [1, 1, 1, hoveredNodeRingOpacity]
@@ -87,9 +87,9 @@ export class Store <N> {
     this.focusedNodeRingColor[2] = convertedRgba[2]
   }
 
-  public setFocusedNode (node?: N, index?: number): void {
-    if (node && index !== undefined) {
-      this.focusedNode = { node, index }
+  public setFocusedNode (index?: number): void {
+    if (index !== undefined) {
+      this.focusedNode = { index }
     } else this.focusedNode = undefined
   }
 

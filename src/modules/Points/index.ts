@@ -3,7 +3,7 @@ import regl from 'regl'
 // import { extent } from 'd3-array'
 import { CoreModule } from '@/graph/modules/core-module'
 // import { defaultConfigValues } from '@/graph/variables'
-import { createColorBuffer, createGreyoutStatusBuffer } from '@/graph/modules/Points/color-buffer'
+import { createGreyoutStatusBuffer } from '@/graph/modules/Points/color-buffer'
 import drawPointsFrag from '@/graph/modules/Points/draw-points.frag'
 import drawPointsVert from '@/graph/modules/Points/draw-points.vert'
 import findPointsOnAreaSelectionFrag from '@/graph/modules/Points/find-points-on-area-selection.frag'
@@ -11,24 +11,21 @@ import drawHighlightedFrag from '@/graph/modules/Points/draw-highlighted.frag'
 import drawHighlightedVert from '@/graph/modules/Points/draw-highlighted.vert'
 import findHoveredPointFrag from '@/graph/modules/Points/find-hovered-point.frag'
 import findHoveredPointVert from '@/graph/modules/Points/find-hovered-point.vert'
-// import fillGridWithSampledNodesFrag from '@/graph/modules/Points/fill-sampled-nodes.frag'
-// import fillGridWithSampledNodesVert from '@/graph/modules/Points/fill-sampled-nodes.vert'
-import { createSizeBufferAndFillSizeStore } from '@/graph/modules/Points/size-buffer'
+import fillGridWithSampledNodesFrag from '@/graph/modules/Points/fill-sampled-nodes.frag'
+import fillGridWithSampledNodesVert from '@/graph/modules/Points/fill-sampled-nodes.vert'
 import updatePositionFrag from '@/graph/modules/Points/update-position.frag'
 import { createIndexesBuffer, createQuadBuffer, destroyBuffer, destroyFramebuffer } from '@/graph/modules/Shared/buffer'
-// import { createTrackedIndicesBuffer, createTrackedPositionsBuffer } from '@/graph/modules/Points/tracked-buffer'
+import { createTrackedIndicesBuffer, createTrackedPositionsBuffer } from '@/graph/modules/Points/tracked-buffer'
 import trackPositionsFrag from '@/graph/modules/Points/track-positions.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
 import clearFrag from '@/graph/modules/Shared/clear.frag'
 import { readPixels } from '@/graph/helper'
-import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 
-export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extends CoreModule<N, L> {
+export class Points extends CoreModule {
   public currentPositionFbo: regl.Framebuffer2D | undefined
   public previousPositionFbo: regl.Framebuffer2D | undefined
   public velocityFbo: regl.Framebuffer2D | undefined
   public selectedFbo: regl.Framebuffer2D | undefined
-  public colorFbo: regl.Framebuffer2D | undefined
   public colorBuffer: regl.Buffer | undefined
   public hoveredFbo: regl.Framebuffer2D | undefined
   public greyoutStatusFbo: regl.Framebuffer2D | undefined
@@ -43,17 +40,16 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
   private findPointsOnAreaSelectionCommand: regl.DrawCommand | undefined
   private findHoveredPointCommand: regl.DrawCommand | undefined
   private clearHoveredFboCommand: regl.DrawCommand | undefined
-  // private clearSampledNodesFboCommand: regl.DrawCommand | undefined
-  // private fillSampledNodesFboCommand: regl.DrawCommand | undefined
+  private clearSampledNodesFboCommand: regl.DrawCommand | undefined
+  private fillSampledNodesFboCommand: regl.DrawCommand | undefined
   private trackPointsCommand: regl.DrawCommand | undefined
-  private trackedIds: string[] | undefined
-  private trackedPositionsById: Map<string, [number, number]> = new Map()
+  private trackedIndices: number[] | undefined
   private sizeByIndex: Float32Array | undefined
 
   public create (): void {
     const { reglInstance, store, data } = this
     const { pointsTextureSize } = store
-    if (!pointsTextureSize || !data.nodePositions) return
+    if (!pointsTextureSize || !data.nodePositions || data.nodesNumber === undefined) return
     const numParticles = data.nodesNumber
     const initialState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
     // if (!config.disableSimulation) this.rescaleInitialNodePositions()
@@ -143,7 +139,7 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
       frag: drawPointsFrag,
       vert: drawPointsVert,
       primitive: 'points',
-      count: () => data.nodesNumber,
+      count: () => data.nodesNumber ?? 0,
       attributes: {
         indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize),
         size: {
@@ -157,9 +153,7 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
       },
       uniforms: {
         positions: () => this.currentPositionFbo,
-        // particleColor: () => this.colorFbo,
         particleGreyoutStatus: () => this.greyoutStatusFbo,
-        // particleSize: () => this.sizeFbo,
         ratio: () => config.pixelRatio,
         sizeScale: () => config.nodeSizeScale,
         pointsTextureSize: () => store.pointsTextureSize,
@@ -194,7 +188,9 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
       framebuffer: () => this.selectedFbo as regl.Framebuffer2D,
       primitive: 'triangle strip',
       count: 4,
-      attributes: { quad: createQuadBuffer(reglInstance) },
+      attributes: {
+        quad: createQuadBuffer(reglInstance),
+      },
       uniforms: {
         position: () => this.currentPositionFbo,
         particleSize: () => this.sizeFbo,
@@ -221,12 +217,17 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
       frag: findHoveredPointFrag,
       vert: findHoveredPointVert,
       primitive: 'points',
-      count: () => data.nodesNumber,
+      count: () => data.nodesNumber ?? 0,
       framebuffer: () => this.hoveredFbo as regl.Framebuffer2D,
-      attributes: { indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
+      attributes: {
+        indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize),
+        size: {
+          buffer: () => this.sizeBuffer,
+          size: 1,
+        },
+      },
       uniforms: {
         position: () => this.currentPositionFbo,
-        particleSize: () => this.sizeFbo,
         ratio: () => config.pixelRatio,
         sizeScale: () => config.nodeSizeScale,
         pointsTextureSize: () => store.pointsTextureSize,
@@ -242,33 +243,33 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
         mask: false,
       },
     })
-    // this.clearSampledNodesFboCommand = reglInstance({
-    //   frag: clearFrag,
-    //   vert: updateVert,
-    //   framebuffer: () => this.sampledNodesFbo as regl.Framebuffer2D,
-    //   primitive: 'triangle strip',
-    //   count: 4,
-    //   attributes: { quad: createQuadBuffer(reglInstance) },
-    // })
-    // this.fillSampledNodesFboCommand = reglInstance({
-    //   frag: fillGridWithSampledNodesFrag,
-    //   vert: fillGridWithSampledNodesVert,
-    //   primitive: 'points',
-    //   count: () => data.nodesNumber,
-    //   framebuffer: () => this.sampledNodesFbo as regl.Framebuffer2D,
-    //   attributes: { indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
-    //   uniforms: {
-    //     position: () => this.currentPositionFbo,
-    //     pointsTextureSize: () => store.pointsTextureSize,
-    //     transform: () => store.transform,
-    //     spaceSize: () => store.adjustedSpaceSize,
-    //     screenSize: () => store.screenSize,
-    //   },
-    //   depth: {
-    //     enable: false,
-    //     mask: false,
-    //   },
-    // })
+    this.clearSampledNodesFboCommand = reglInstance({
+      frag: clearFrag,
+      vert: updateVert,
+      framebuffer: () => this.sampledNodesFbo as regl.Framebuffer2D,
+      primitive: 'triangle strip',
+      count: 4,
+      attributes: { quad: createQuadBuffer(reglInstance) },
+    })
+    this.fillSampledNodesFboCommand = reglInstance({
+      frag: fillGridWithSampledNodesFrag,
+      vert: fillGridWithSampledNodesVert,
+      primitive: 'points',
+      count: () => data.nodesNumber ?? 0,
+      framebuffer: () => this.sampledNodesFbo as regl.Framebuffer2D,
+      attributes: { indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
+      uniforms: {
+        position: () => this.currentPositionFbo,
+        pointsTextureSize: () => store.pointsTextureSize,
+        transform: () => store.transform,
+        spaceSize: () => store.adjustedSpaceSize,
+        screenSize: () => store.screenSize,
+      },
+      depth: {
+        enable: false,
+        mask: false,
+      },
+    })
     this.drawHighlightedCommand = reglInstance({
       frag: drawHighlightedFrag,
       vert: drawHighlightedVert,
@@ -279,9 +280,10 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
         color: reglInstance.prop<{ color: number[] }, 'color'>('color'),
         width: reglInstance.prop<{ width: number }, 'width'>('width'),
         pointIndex: reglInstance.prop<{ pointIndex: number }, 'pointIndex'>('pointIndex'),
+        size: reglInstance.prop<{ size: number }, 'size'>('size'),
         positions: () => this.currentPositionFbo,
-        particleColor: () => this.colorFbo,
-        particleSize: () => this.sizeFbo,
+        // particleColor: () => this.colorFbo,
+        // particleSize: () => this.sizeBuffer,
         sizeScale: () => config.nodeSizeScale,
         pointsTextureSize: () => store.pointsTextureSize,
         transform: () => store.transform,
@@ -328,7 +330,6 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
   public updateColor (): void {
     const { reglInstance, store: { pointsTextureSize }, data } = this
     if (!pointsTextureSize) return
-    this.colorFbo = createColorBuffer(data, reglInstance, pointsTextureSize)
     this.colorBuffer = reglInstance.buffer(data.nodeColors as number[])
   }
 
@@ -339,10 +340,29 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
 
   public updateSize (): void {
     const { reglInstance, store: { pointsTextureSize }, data } = this
-    if (!pointsTextureSize) return
+    if (!pointsTextureSize || data.nodesNumber === undefined || data.nodeSizes === undefined) return
     this.sizeByIndex = new Float32Array(data.nodesNumber)
-    this.sizeFbo = createSizeBufferAndFillSizeStore(data, reglInstance, pointsTextureSize, this.sizeByIndex)
-    this.sizeBuffer = reglInstance.buffer(data.nodeSizes as number[])
+    this.sizeBuffer = reglInstance.buffer(data.nodeSizes)
+
+    // this.sizeFbo = createSizeBufferAndFillSizeStore(data, reglInstance, pointsTextureSize, config.nodeSize, this.sizeByIndex)
+    const initialState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
+
+    for (let i = 0; i < data.nodesNumber; i++) {
+      initialState[i * 4] = data.nodeSizes[i] as number
+    }
+
+    const initialTexture = reglInstance.texture({
+      data: initialState,
+      width: pointsTextureSize,
+      height: pointsTextureSize,
+      type: 'float',
+    })
+
+    this.sizeFbo = reglInstance.framebuffer({
+      color: initialTexture,
+      depth: false,
+      stencil: false,
+    })
   }
 
   public updateSampledNodesGrid (): void {
@@ -365,13 +385,14 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
   }
 
   public draw (): void {
-    const { config: { renderHoveredNodeRing, renderHighlightedNodeRing }, store } = this
+    const { config: { renderHoveredNodeRing, renderHighlightedNodeRing, nodeSize }, store, data } = this
     this.drawCommand?.()
     if ((renderHoveredNodeRing ?? renderHighlightedNodeRing) && store.hoveredNode) {
       this.drawHighlightedCommand?.({
         width: 0.85,
         color: store.hoveredNodeRingColor,
         pointIndex: store.hoveredNode.index,
+        size: data.nodeSizes?.[store.hoveredNode.index] ?? nodeSize,
       })
     }
     if (store.focusedNode) {
@@ -379,6 +400,7 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
         width: 0.75,
         color: store.focusedNodeRingColor,
         pointIndex: store.focusedNode.index,
+        size: data.nodeSizes?.[store.focusedNode.index] ?? nodeSize,
       })
     }
   }
@@ -401,52 +423,49 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
     return this.sizeByIndex?.[index]
   }
 
-  // public trackNodesByIds (ids: string[]): void {
-  //   this.trackedIds = ids.length ? ids : undefined
-  //   this.trackedPositionsById.clear()
-  //   const indices = ids.map(id => this.data.getSortedIndexById(id)).filter((d): d is number => d !== undefined)
-  //   destroyFramebuffer(this.trackedIndicesFbo)
-  //   this.trackedIndicesFbo = undefined
-  //   destroyFramebuffer(this.trackedPositionsFbo)
-  //   this.trackedPositionsFbo = undefined
-  //   if (indices.length) {
-  //     this.trackedIndicesFbo = createTrackedIndicesBuffer(indices, this.store.pointsTextureSize, this.reglInstance)
-  //     this.trackedPositionsFbo = createTrackedPositionsBuffer(indices, this.reglInstance)
-  //   }
-  //   this.trackPoints()
-  // }
-
-  public getTrackedPositions (): Map<string, [number, number]> {
-    if (!this.trackedIds) return this.trackedPositionsById
-    const pixels = readPixels(this.reglInstance, this.trackedPositionsFbo as regl.Framebuffer2D)
-    this.trackedIds.forEach((id, i) => {
-      const x = pixels[i * 4]
-      const y = pixels[i * 4 + 1]
-      if (x !== undefined && y !== undefined) this.trackedPositionsById.set(id, [x, y])
-    })
-    return this.trackedPositionsById
+  public trackNodesByIndices (indices: number[]): void {
+    this.trackedIndices = indices
+    destroyFramebuffer(this.trackedIndicesFbo)
+    this.trackedIndicesFbo = undefined
+    destroyFramebuffer(this.trackedPositionsFbo)
+    this.trackedPositionsFbo = undefined
+    if (indices.length) {
+      this.trackedIndicesFbo = createTrackedIndicesBuffer(indices, this.store.pointsTextureSize, this.reglInstance)
+      this.trackedPositionsFbo = createTrackedPositionsBuffer(indices, this.reglInstance)
+    }
+    this.trackPoints()
   }
 
-  public getSampledNodePositionsMap (): Map<string, [number, number]> {
-    const positions = new Map<string, [number, number]>()
-    // if (!this.sampledNodesFbo) return positions
-    // this.clearSampledNodesFboCommand?.()
-    // this.fillSampledNodesFboCommand?.()
-    // const pixels = readPixels(this.reglInstance, this.sampledNodesFbo as regl.Framebuffer2D)
-    // for (let i = 0; i < pixels.length / 4; i++) {
-    //   const index = pixels[i * 4]
-    //   const isNotEmpty = !!pixels[i * 4 + 1]
-    //   const x = pixels[i * 4 + 2]
-    //   const y = pixels[i * 4 + 3]
+  public getTrackedPositionsMap (): Map<number, [number, number]> {
+    const tracked = new Map<number, [number, number]>()
+    if (!this.trackedIndices) return tracked
+    const pixels = readPixels(this.reglInstance, this.trackedPositionsFbo as regl.Framebuffer2D)
+    this.trackedIndices.forEach(index => {
+      const x = pixels[index * 4]
+      const y = pixels[index * 4 + 1]
+      if (x !== undefined && y !== undefined) {
+        tracked.set(index, [x, y])
+      }
+    })
+    return tracked
+  }
 
-    //   if (isNotEmpty && index !== undefined && x !== undefined && y !== undefined) {
-    //     const inputIndex = this.data.getInputIndexBySortedIndex(index)
-    //     if (inputIndex !== undefined) {
-    //       const id = this.data.getNodeByIndex(inputIndex)?.id
-    //       if (id !== undefined) positions.set(id, [x, y])
-    //     }
-    //   }
-    // }
+  public getSampledNodePositionsMap (): Map<number, [number, number]> {
+    const positions = new Map<number, [number, number]>()
+    if (!this.sampledNodesFbo) return positions
+    this.clearSampledNodesFboCommand?.()
+    this.fillSampledNodesFboCommand?.()
+    const pixels = readPixels(this.reglInstance, this.sampledNodesFbo as regl.Framebuffer2D)
+    for (let i = 0; i < pixels.length / 4; i++) {
+      const index = pixels[i * 4]
+      const isNotEmpty = !!pixels[i * 4 + 1]
+      const x = pixels[i * 4 + 2]
+      const y = pixels[i * 4 + 3]
+
+      if (isNotEmpty && index !== undefined && x !== undefined && y !== undefined) {
+        positions.set(index, [x, y])
+      }
+    }
     return positions
   }
 
@@ -455,9 +474,7 @@ export class Points<N extends CosmosInputNode, L extends CosmosInputLink> extend
     destroyFramebuffer(this.previousPositionFbo)
     destroyFramebuffer(this.velocityFbo)
     destroyFramebuffer(this.selectedFbo)
-    destroyFramebuffer(this.colorFbo)
     destroyBuffer(this.colorBuffer)
-    destroyFramebuffer(this.sizeFbo)
     destroyBuffer(this.sizeBuffer)
     destroyFramebuffer(this.greyoutStatusFbo)
     destroyFramebuffer(this.hoveredFbo)
