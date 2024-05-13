@@ -6,9 +6,8 @@ import { forceFrag } from '@/graph/modules/ForceManyBody/quadtree-frag-shader'
 import { createIndexesBuffer, createQuadBuffer, destroyFramebuffer } from '@/graph/modules/Shared/buffer'
 import clearFrag from '@/graph/modules/Shared/clear.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
-import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 
-export class ForceManyBodyQuadtree<N extends CosmosInputNode, L extends CosmosInputLink> extends CoreModule<N, L> {
+export class ForceManyBodyQuadtree extends CoreModule {
   private randomValuesFbo: regl.Framebuffer2D | undefined
   private levelsFbos = new Map<string, regl.Framebuffer2D>()
   private clearLevelsCommand: regl.DrawCommand | undefined
@@ -66,7 +65,7 @@ export class ForceManyBodyQuadtree<N extends CosmosInputNode, L extends CosmosIn
       vert: calculateLevelVert,
       framebuffer: (_: regl.DefaultContext, props: { levelFbo: regl.Framebuffer2D; levelTextureSize: number; cellSize: number }) => props.levelFbo,
       primitive: 'points',
-      count: () => data.nodesNumber,
+      count: () => data.nodesNumber ?? 0,
       attributes: { indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
       uniforms: {
         position: () => points?.previousPositionFbo,

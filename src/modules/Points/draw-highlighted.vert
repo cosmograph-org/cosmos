@@ -3,9 +3,10 @@ precision mediump float;
 attribute vec2 quad;
 
 uniform sampler2D positions;
-uniform sampler2D particleColor;
+// uniform sampler2D particleColor;
 uniform sampler2D particleGreyoutStatus;
-uniform sampler2D particleSize;
+// uniform sampler2D particleSize;
+uniform float size;
 uniform mat3 transform;
 uniform float pointsTextureSize;
 uniform float sizeScale;
@@ -37,16 +38,16 @@ void main () {
 
   vec2 ij = vec2(mod(pointIndex, pointsTextureSize), floor(pointIndex / pointsTextureSize)) + 0.5;
   vec4 pointPosition = texture2D(positions, ij / pointsTextureSize);
-  vec4 pSize = texture2D(particleSize, ij / pointsTextureSize);
-  vec4 pColor = texture2D(particleColor, ij / pointsTextureSize);
-  particleOpacity = pColor.a;
+  // vec4 pSize = particleSize; // texture2D(particleSize, ij / pointsTextureSize);
+  // vec4 pColor = texture2D(particleColor, ij / pointsTextureSize);
+  particleOpacity = color.a; // pColor.a;
   // Alpha of selected points
   vec4 greyoutStatus = texture2D(particleGreyoutStatus, ij / pointsTextureSize);
   if (greyoutStatus.r > 0.0) {
     particleOpacity *= greyoutOpacity;
   }
-  float size = (pointSize(pSize.r * sizeScale) * relativeRingRadius) / transform[0][0];
-  float radius = size * 0.5;
+  float pSize = (pointSize(size * sizeScale) * relativeRingRadius) / transform[0][0];
+  float radius = pSize * 0.5;
   vec2 a = pointPosition.xy;
   vec2 b = pointPosition.xy + vec2(0.0, radius);
   vec2 xBasis = b - a;
