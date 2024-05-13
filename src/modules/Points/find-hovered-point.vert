@@ -2,9 +2,11 @@
 precision highp float;
 #endif
 
+attribute float size;
+
 uniform sampler2D position;
 uniform float pointsTextureSize;
-uniform sampler2D particleSize;
+// uniform sampler2D particleSize;
 uniform float sizeScale;
 uniform float spaceSize;
 uniform vec2 screenSize;
@@ -38,16 +40,16 @@ void main() {
   p *= spaceSize / screenSize;
   vec3 final = transform * vec3(p, 1);
 
-  vec4 pSize = texture2D(particleSize, indexes / pointsTextureSize);
-  float size = pSize.r * sizeScale;
-  float pointRadius = 0.5 * pointSize(size);
+  // vec4 pSize = texture2D(particleSize, indexes / pointsTextureSize);
+  float pSize = size * sizeScale;
+  float pointRadius = 0.5 * pointSize(pSize);
 
   vec2 pointScreenPosition = (final.xy + 1.0) * screenSize / 2.0;
   rgba = vec4(0.0);
   gl_Position = vec4(0.5, 0.5, 0.0, 1.0);
   if (euclideanDistance(pointScreenPosition.x, mousePosition.x, pointScreenPosition.y, mousePosition.y) < pointRadius / ratio) {
     float index = indexes.g * pointsTextureSize + indexes.r;
-    rgba = vec4(index, pSize.r, pointPosition.xy);
+    rgba = vec4(index, size, pointPosition.xy);
     gl_Position = vec4(-0.5, -0.5, 0.0, 1.0);
   }
 

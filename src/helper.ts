@@ -1,6 +1,5 @@
 import { color as d3Color } from 'd3-color'
 import regl from 'regl'
-import { ColorAccessor, NumericAccessor, BooleanAccessor } from './config'
 
 export const isFunction = <T>(a: T): boolean => typeof a === 'function'
 export const isArray = <T>(a: unknown | T[]): a is T[] => Array.isArray(a)
@@ -12,20 +11,6 @@ export const isAClassInstance = <T>(a: T): boolean => {
   } else return false
 }
 export const isPlainObject = <T>(a: T): boolean => isObject(a) && !isArray(a) && !isFunction(a) && !isAClassInstance(a)
-
-export function getValue<T, ReturnType> (
-  d: T,
-  accessor: NumericAccessor<T> | ColorAccessor<T> | BooleanAccessor<T>,
-  index?: number
-): ReturnType | null | undefined {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  if (isFunction(accessor)) return (accessor as Function)(d, index) as (ReturnType | null | undefined)
-  else return accessor as unknown as (ReturnType | null | undefined)
-}
-
-export function getNumber<T> (d: T, accessor: NumericAccessor<T>, i?: number): number | null | undefined {
-  return getValue<T, number>(d, accessor, i)
-}
 
 export function getRgbaColor (value: string | [number, number, number, number]): [number, number, number, number] {
   let rgba: [number, number, number, number]
@@ -52,17 +37,6 @@ export function readPixels (reglInstance: regl.Regl, fbo: regl.Framebuffer2D): F
   })
 
   return resultPixels
-}
-
-export function group <ArrayItem, Key> (array: ArrayItem[], accessor: (d: ArrayItem) => Key): Map<Key, ArrayItem[]> {
-  const groups = new Map<Key, ArrayItem[]>()
-  array.forEach(item => {
-    const key = accessor(item)
-    const group = groups.get(key)
-    if (group) group.push(item)
-    else groups.set(key, [item])
-  })
-  return groups
 }
 
 export function clamp (num: number, min: number, max: number): number {

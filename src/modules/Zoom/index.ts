@@ -3,12 +3,11 @@ import { extent } from 'd3-array'
 import { mat3 } from 'gl-matrix'
 import { Store } from '@/graph/modules/Store'
 import { GraphConfigInterface } from '@/graph/config'
-import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 import { clamp } from '@/graph/helper'
 
-export class Zoom <N extends CosmosInputNode, L extends CosmosInputLink> {
-  public readonly store: Store<N>
-  public readonly config: GraphConfigInterface<N, L>
+export class Zoom {
+  public readonly store: Store
+  public readonly config: GraphConfigInterface
   public eventTransform = zoomIdentity
   public behavior = zoom<HTMLCanvasElement, undefined>()
     .scaleExtent([0.001, Infinity])
@@ -41,7 +40,7 @@ export class Zoom <N extends CosmosInputNode, L extends CosmosInputLink> {
 
   public isRunning = false
 
-  public constructor (store: Store<N>, config: GraphConfigInterface<N, L>) {
+  public constructor (store: Store, config: GraphConfigInterface) {
     this.store = store
     this.config = config
   }

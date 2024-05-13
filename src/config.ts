@@ -1,5 +1,4 @@
 import { D3ZoomEvent } from 'd3-zoom'
-import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 import {
   defaultNodeColor,
   defaultGreyoutNodeOpacity,
@@ -12,12 +11,7 @@ import {
 } from '@/graph/variables'
 import { isPlainObject } from '@/graph/helper'
 
-export type NumericAccessor<Datum> = ((d: Datum, i: number, ...rest: unknown[]) => number | null) | number | null | undefined
-export type ColorAccessor<Datum> = ((d: Datum, i: number, ...rest: unknown[]) => string | [number, number, number, number] | null)
-  | string | [number, number, number, number] | null | undefined
-export type BooleanAccessor<Datum> = ((d: Datum, i: number, ...rest: unknown[]) => boolean | null) | boolean | null | undefined
-
-export interface GraphEvents <N extends CosmosInputNode> {
+export interface GraphEvents {
   /**
    * Callback function that will be called on every canvas click.
    * If clicked on a node, its data will be passed as the first argument,
@@ -27,7 +21,7 @@ export interface GraphEvents <N extends CosmosInputNode> {
    * Default value: `undefined`
    */
   onClick?: (
-      clickedNode: N | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent
+      index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent
     ) => void;
   /**
    * Callback function that will be called when mouse movement happens.
@@ -38,7 +32,7 @@ export interface GraphEvents <N extends CosmosInputNode> {
    * Default value: `undefined`
    */
   onMouseMove?: (
-      hoveredNode: N | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent
+      index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent
     ) => void;
   /**
    * Callback function that will be called when a node appears under the mouse
@@ -50,7 +44,7 @@ export interface GraphEvents <N extends CosmosInputNode> {
    * Default value: `undefined`
    */
   onNodeMouseOver?: (
-      hoveredNode: N | undefined, index: number, nodePosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined
+      index: number, nodePosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined
     ) => void;
   /**
    * Callback function that will be called when a node is no longer underneath
@@ -86,7 +80,7 @@ export interface GraphEvents <N extends CosmosInputNode> {
   onZoomEnd?: (e: D3ZoomEvent<HTMLCanvasElement, undefined>, userDriven: boolean) => void;
 }
 
-export interface GraphSimulationSettings<N> {
+export interface GraphSimulationSettings {
   /**
    * Decay coefficient. Use smaller values if you want the simulation to "cool down" slower.
    * Default value: `1000`
@@ -159,7 +153,7 @@ export interface GraphSimulationSettings<N> {
    * Default value: `undefined`
    */
   onTick?: (
-    alpha: number, hoveredNode?: N, index?: number, nodePosition?: [number, number]
+    alpha: number, hoveredIndex?: number, nodePosition?: [number, number]
     ) => void;
   /**
    * Callback function that will be called when the simulation stops.
@@ -177,7 +171,7 @@ export interface GraphSimulationSettings<N> {
    */
   onRestart?: () => void;
 }
-export interface GraphConfigInterface<N extends CosmosInputNode, L extends CosmosInputLink> {
+export interface GraphConfigInterface {
   /**
    * Do not run the simulation, just render the graph.
    * Cosmos uses the x and y values of the nodes’ data to determine their position in the graph.
@@ -198,20 +192,20 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    */
   spaceSize?: number;
   /**
-   * Node color accessor function or hex value.
+   * Color hex value for all nodes.
    * Default value: '#b3b3b3'
   */
-  nodeColor?: ColorAccessor<N>;
+  nodeColor?: string;
   /**
    * Greyed out node opacity value when the selection is active.
    * Default value: `0.1`
   */
   nodeGreyoutOpacity?: number;
-  /**
-   * Node size accessor function or value in pixels.
+   /**
+   * Size value in pixels for all nodes.
    * Default value: `4`
   */
-  nodeSize?: NumericAccessor<N>;
+  nodeSize?: number;
   /**
    * Scale factor for the node size.
    * Default value: `1`
@@ -261,17 +255,17 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    * Link color accessor function or hex value.
    * Default value: '#666666'
    */
-  linkColor?: ColorAccessor<L>;
+  linkColor?: string;
   /**
    * Greyed out link opacity value when the selection is active.
    * Default value: `0.1`
   */
   linkGreyoutOpacity?: number;
   /**
-   * Link width accessor function or value in pixels.
+   * Link width value in pixels.
    * Default value: `1`
   */
-  linkWidth?: NumericAccessor<L>;
+  linkWidth?: number;
   /**
    * Scale factor for the link width.
    * Default value: `1`
@@ -303,7 +297,7 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    * Link arrow accessor function or value that controls whether or not to display link arrows.
    * Default value: `true`
    */
-  linkArrows?: BooleanAccessor<L>;
+  linkArrows?: boolean;
   /**
    * Scale factor for the link arrows size.
    * Default value: `1`
@@ -333,11 +327,11 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    */
   useQuadtree?: boolean;
   /** Simulation parameters and event listeners */
-  simulation?: GraphSimulationSettings<N>;
+  simulation?: GraphSimulationSettings;
   /**
    * Events
    */
-  events?: GraphEvents<N>;
+  events?: GraphEvents;
 
   /**
    * Show WebGL performance monitor.
@@ -398,7 +392,7 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
   nodeSamplingDistance?: number;
 }
 
-export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> implements GraphConfigInterface<N, L> {
+export class GraphConfig implements GraphConfigInterface {
   public disableSimulation = defaultConfigValues.disableSimulation
   public backgroundColor = defaultBackgroundColor
   public spaceSize = defaultConfigValues.spaceSize
@@ -426,7 +420,7 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
   public linkVisibilityMinTransparency = defaultConfigValues.linkVisibilityMinTransparency
   public useQuadtree = defaultConfigValues.useQuadtree
 
-  public simulation: GraphSimulationSettings<N> = {
+  public simulation: GraphSimulationSettings = {
     decay: defaultConfigValues.simulation.decay,
     gravity: defaultConfigValues.simulation.gravity,
     center: defaultConfigValues.simulation.center,
@@ -445,7 +439,7 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
     onRestart: undefined,
   }
 
-  public events: GraphEvents<N> = {
+  public events: GraphEvents = {
     onClick: undefined,
     onMouseMove: undefined,
     onNodeMouseOver: undefined,
@@ -469,8 +463,8 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
   public randomSeed = undefined
   public nodeSamplingDistance = defaultConfigValues.nodeSamplingDistance
 
-  public init (config: GraphConfigInterface<N, L>): void {
-    (Object.keys(config) as (keyof GraphConfigInterface<N, L>)[])
+  public init (config: GraphConfigInterface): void {
+    (Object.keys(config) as (keyof GraphConfigInterface)[])
       .forEach(configParameter => {
         this.deepMergeConfig(this.getConfig(), config, configParameter)
       })
@@ -486,7 +480,7 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
     } else current[key] = next[key]
   }
 
-  private getConfig (): GraphConfigInterface<N, L> {
+  private getConfig (): GraphConfigInterface {
     return this
   }
 }

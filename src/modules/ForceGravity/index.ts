@@ -3,9 +3,8 @@ import { CoreModule } from '@/graph/modules/core-module'
 import forceFrag from '@/graph/modules/ForceGravity/force-gravity.frag'
 import { createQuadBuffer } from '@/graph/modules/Shared/buffer'
 import updateVert from '@/graph/modules/Shared/quad.vert'
-import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 
-export class ForceGravity<N extends CosmosInputNode, L extends CosmosInputLink> extends CoreModule<N, L> {
+export class ForceGravity extends CoreModule {
   private runCommand: regl.DrawCommand | undefined
 
   public initPrograms (): void {

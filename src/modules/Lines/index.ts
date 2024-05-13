@@ -3,12 +3,12 @@ import { CoreModule } from '@/graph/modules/core-module'
 import drawLineFrag from '@/graph/modules/Lines/draw-curve-line.frag'
 import drawLineVert from '@/graph/modules/Lines/draw-curve-line.vert'
 import { defaultConfigValues } from '@/graph/variables'
-import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 import { destroyBuffer } from '@/graph/modules/Shared/buffer'
 import { getCurveLineGeometry } from '@/graph/modules/Lines/geometry'
 
-export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends CoreModule<N, L> {
+export class Lines extends CoreModule {
   private drawCurveCommand: regl.DrawCommand | undefined
+  private pointsBuffer: regl.Buffer | undefined
   private colorBuffer: regl.Buffer | undefined
   private widthBuffer: regl.Buffer | undefined
   private arrowBuffer: regl.Buffer | undefined
@@ -16,6 +16,7 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
   private curveLineBuffer: regl.Buffer | undefined
 
   public create (): void {
+    this.updatePointsBuffer()
     this.updateColor()
     this.updateWidth()
     this.updateArrow()
@@ -23,9 +24,7 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
   }
 
   public initPrograms (): void {
-    const { reglInstance, config, store, data, points } = this
-
-    const pointsBuffer = reglInstance.buffer(data.links ?? [])
+    const { reglInstance, config, store } = this
 
     this.drawCurveCommand = reglInstance({
       vert: drawLineVert,
@@ -36,11 +35,24 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
           buffer: () => this.curveLineBuffer,
           divisor: 0,
         },
-        points: {
-          buffer: () => pointsBuffer,
+        // points: {
+        //   buffer: () => this.pointsBuffer,
+        //   divisor: 1,
+        //   offset: Float32Array.BYTES_PER_ELEMENT * 0,
+        //   stride: Float32Array.BYTES_PER_ELEMENT * 2,
+        //   type: 'uint16',
+        // },
+        pointA: {
+          buffer: () => this.pointsBuffer,
           divisor: 1,
           offset: Float32Array.BYTES_PER_ELEMENT * 0,
-          stride: Float32Array.BYTES_PER_ELEMENT * 2,
+          stride: Float32Array.BYTES_PER_ELEMENT * 4,
+        },
+        pointB: {
+          buffer: () => this.pointsBuffer,
+          divisor: 1,
+          offset: Float32Array.BYTES_PER_ELEMENT * 2,
+          stride: Float32Array.BYTES_PER_ELEMENT * 4,
         },
         color: {
           buffer: () => this.colorBuffer,
@@ -62,8 +74,8 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
         },
       },
       uniforms: {
-        positions: () => points?.currentPositionFbo,
-        particleGreyoutStatus: () => points?.greyoutStatusFbo,
+        positions: () => this.points?.currentPositionFbo,
+        particleGreyoutStatus: () => this.points?.greyoutStatusFbo,
         transform: () => store.transform,
         pointsTextureSize: () => store.pointsTextureSize,
         nodeSizeScale: () => config.nodeSizeScale,
@@ -102,29 +114,46 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
         mask: false,
       },
       count: () => this.curveLineGeometry?.length ?? 0,
-      instances: () => data.linksNumber,
+      instances: () => this.data.linksNumber ?? 0,
       primitive: 'triangle strip',
     })
   }
 
   public draw (): void {
-    if (!this.colorBuffer || !this.widthBuffer || !this.curveLineBuffer) return
+    if (!this.pointsBuffer || !this.colorBuffer || !this.widthBuffer || !this.curveLineBuffer) return
     this.drawCurveCommand?.()
+  }
+
+  public updatePointsBuffer (): void {
+    const { reglInstance, data, store } = this
+    if (data.linksNumber === undefined || data.links === undefined) return
+    const instancePoints: [number, number][] = [] // new Float32Array(data.linksNumber * 2)
+    for (let i = 0; i < data.linksNumber; i++) {
+      const fromIndex = data.links[i * 2] as number
+      const toIndex = data.links[i * 2 + 1] as number
+      const fromX = fromIndex % store.pointsTextureSize
+      const fromY = Math.floor(fromIndex / store.pointsTextureSize)
+      const toX = toIndex % store.pointsTextureSize
+      const toY = Math.floor(toIndex / store.pointsTextureSize)
+      instancePoints[i * 2] = [fromX, fromY]
+      instancePoints[i * 2 + 1] = [toX, toY]
+    }
+    this.pointsBuffer = reglInstance.buffer(instancePoints)
   }
 
   public updateColor (): void {
     const { reglInstance, data } = this
-    this.colorBuffer = reglInstance.buffer(data.linkColors as number[])
+    this.colorBuffer = reglInstance.buffer(data.linkColors ?? [])
   }
 
   public updateWidth (): void {
     const { reglInstance, data } = this
-    this.widthBuffer = reglInstance.buffer(data.linkWidths as number[])
+    this.widthBuffer = reglInstance.buffer(data.linkWidths ?? [])
   }
 
   public updateArrow (): void {
     const { reglInstance, data } = this
-    this.arrowBuffer = reglInstance.buffer(data.linkArrows as number[])
+    this.arrowBuffer = reglInstance.buffer(data.linkArrows ?? [])
   }
 
   public updateCurveLineGeometry (): void {
@@ -134,6 +163,7 @@ export class Lines<N extends CosmosInputNode, L extends CosmosInputLink> extends
   }
 
   public destroy (): void {
+    destroyBuffer(this.pointsBuffer)
     destroyBuffer(this.colorBuffer)
     destroyBuffer(this.widthBuffer)
     destroyBuffer(this.arrowBuffer)
