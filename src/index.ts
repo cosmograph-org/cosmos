@@ -471,9 +471,17 @@ export class Graph {
    * @param spacePosition Array of x and y coordinates in the space coordinate system.
    * @returns Array of x and y coordinates in the screen coordinate system.
    */
-
   public spaceToScreenPosition (spacePosition: [number, number]): [number, number] {
     return this.zoomInstance.convertSpaceToScreenPosition(spacePosition)
+  }
+
+  /**
+   * Converts the X and Y node coordinates from the screen coordinate system to the space coordinate system.
+   * @param screenPosition Array of x and y coordinates in the screen coordinate system.
+   * @returns Array of x and y coordinates in the space coordinate system.
+   */
+  public screenToSpacePosition (screenPosition: [number, number]): [number, number] {
+    return this.zoomInstance.convertScreenToSpacePosition(screenPosition)
   }
 
   /**
@@ -588,7 +596,7 @@ export class Graph {
    * @param nodePositions An array of tuple positions
    * @returns A flatten array of coordinates
    */
-  public convertNodePositionsToFlattenedArray (nodePositions: [number, number][]): number[] {
+  public flatten (nodePositions: [number, number][]): number[] {
     return nodePositions.flat()
   }
 
@@ -597,7 +605,7 @@ export class Graph {
    * @param nodePositions A flattened array of coordinates
    * @returns An array of tuple positions
    */
-  public groupNodePositionsIntoPairs (nodePositions: number[]): [number, number][] {
+  public pair (nodePositions: number[]): [number, number][] {
     const arr = new Array(nodePositions.length / 2) as [number, number][]
     for (let i = 0; i < nodePositions.length / 2; i++) {
       arr[i] = [nodePositions[i * 2] as number, nodePositions[i * 2 + 1] as number]
@@ -779,7 +787,7 @@ export class Graph {
 
   private setZoomTransformByNodePositions (positions: number[], duration = 250, scale?: number, padding?: number): void {
     this.resizeCanvas()
-    const transform = this.zoomInstance.getTransform(this.groupNodePositionsIntoPairs(positions), scale, padding)
+    const transform = this.zoomInstance.getTransform(this.pair(positions), scale, padding)
     this.canvasD3Selection
       .transition()
       .ease(easeQuadInOut)
