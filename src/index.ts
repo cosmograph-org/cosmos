@@ -21,7 +21,7 @@ import { defaultConfigValues, defaultScaleToZoom } from '@/graph/variables'
 
 export class Graph {
   public config = new GraphConfig()
-  public graph = new GraphData()
+  public graph = new GraphData(this.config)
   private canvas: HTMLCanvasElement
   private canvasD3Selection: Selection<HTMLCanvasElement, undefined, null, undefined>
   private reglInstance: regl.Regl
@@ -164,10 +164,24 @@ export class Graph {
   public setConfig (config: Partial<GraphConfigInterface>): void {
     const prevConfig = { ...this.config }
     this.config.init(config)
-    if (prevConfig.linkColor !== this.config.linkColor) this.lines.updateColor()
-    if (prevConfig.linkWidth !== this.config.linkWidth) this.lines.updateWidth()
-    if (prevConfig.linkArrows !== this.config.linkArrows) {
-      this.graph.updateArrows(this.config)
+    if (prevConfig.defaultNodeColor !== this.config.defaultNodeColor) {
+      this.graph.updateNodeColor()
+      this.points.updateColor()
+    }
+    if (prevConfig.defaultNodeSize !== this.config.defaultNodeSize) {
+      this.graph.updateNodeSize()
+      this.points.updateSize()
+    }
+    if (prevConfig.defaultLinkColor !== this.config.defaultLinkColor) {
+      this.graph.updateLinkColor()
+      this.lines.updateColor()
+    }
+    if (prevConfig.defaultLinkWidth !== this.config.defaultLinkWidth) {
+      this.graph.updateLinkWidth()
+      this.lines.updateWidth()
+    }
+    if (prevConfig.defaultLinkArrows !== this.config.defaultLinkArrows) {
+      this.graph.updateArrows()
       this.lines.updateArrow()
     }
     if (prevConfig.curvedLinkSegments !== this.config.curvedLinkSegments ||
@@ -214,11 +228,11 @@ export class Graph {
   }
 
   public setNodeColors (nodeColors: number[]): void {
-    this.graph.nodeColors = nodeColors
+    this.graph.inputNodeColors = nodeColors
   }
 
   public setNodeSizes (nodeSizes: number[]): void {
-    this.graph.nodeSizes = nodeSizes
+    this.graph.inputNodeSizes = nodeSizes
   }
 
   public setLinks (links: number[]): void {
@@ -226,11 +240,11 @@ export class Graph {
   }
 
   public setLinkColors (linkColors: number[]): void {
-    this.graph.linkColors = linkColors
+    this.graph.inputLinkColors = linkColors
   }
 
   public setLinkWidths (linkWidths: number[]): void {
-    this.graph.linkWidths = linkWidths
+    this.graph.inputLinkWidths = linkWidths
   }
 
   public setLinkArrows (linkArrows: boolean[]): void {
@@ -238,7 +252,7 @@ export class Graph {
   }
 
   public render (runSimulation = true): void {
-    this.graph.update(this.config)
+    this.graph.update()
     const { fitViewOnInit, fitViewDelay, fitViewByNodesInRect, initialZoomLevel } = this.config
     if (!this.graph.nodesNumber && !this.graph.linksNumber) {
       this.destroyParticleSystem()
@@ -499,7 +513,7 @@ export class Graph {
    * @returns Radius of the node.
    */
   public getNodeRadiusByIndex (index: number): number | undefined {
-    return this.points.getNodeRadiusByIndex(index)
+    return this.graph.nodeSizes?.[index]
   }
 
   /**

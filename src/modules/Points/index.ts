@@ -44,7 +44,6 @@ export class Points extends CoreModule {
   private fillSampledNodesFboCommand: regl.DrawCommand | undefined
   private trackPointsCommand: regl.DrawCommand | undefined
   private trackedIndices: number[] | undefined
-  private sizeByIndex: Float32Array | undefined
 
   public create (): void {
     const { reglInstance, store, data } = this
@@ -330,6 +329,7 @@ export class Points extends CoreModule {
   public updateColor (): void {
     const { reglInstance, store: { pointsTextureSize }, data } = this
     if (!pointsTextureSize) return
+    destroyBuffer(this.colorBuffer)
     this.colorBuffer = reglInstance.buffer(data.nodeColors as number[])
   }
 
@@ -341,10 +341,9 @@ export class Points extends CoreModule {
   public updateSize (): void {
     const { reglInstance, store: { pointsTextureSize }, data } = this
     if (!pointsTextureSize || data.nodesNumber === undefined || data.nodeSizes === undefined) return
-    this.sizeByIndex = new Float32Array(data.nodesNumber)
+    destroyBuffer(this.sizeBuffer)
     this.sizeBuffer = reglInstance.buffer(data.nodeSizes)
 
-    // this.sizeFbo = createSizeBufferAndFillSizeStore(data, reglInstance, pointsTextureSize, config.nodeSize, this.sizeByIndex)
     const initialState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
 
     for (let i = 0; i < data.nodesNumber; i++) {
@@ -385,14 +384,14 @@ export class Points extends CoreModule {
   }
 
   public draw (): void {
-    const { config: { renderHoveredNodeRing, renderHighlightedNodeRing, nodeSize }, store, data } = this
+    const { config: { renderHoveredNodeRing, renderHighlightedNodeRing, defaultNodeSize }, store, data } = this
     this.drawCommand?.()
     if ((renderHoveredNodeRing ?? renderHighlightedNodeRing) && store.hoveredNode) {
       this.drawHighlightedCommand?.({
         width: 0.85,
         color: store.hoveredNodeRingColor,
         pointIndex: store.hoveredNode.index,
-        size: data.nodeSizes?.[store.hoveredNode.index] ?? nodeSize,
+        size: data.nodeSizes?.[store.hoveredNode.index] ?? defaultNodeSize,
       })
     }
     if (store.focusedNode) {
@@ -400,7 +399,7 @@ export class Points extends CoreModule {
         width: 0.75,
         color: store.focusedNodeRingColor,
         pointIndex: store.focusedNode.index,
-        size: data.nodeSizes?.[store.focusedNode.index] ?? nodeSize,
+        size: data.nodeSizes?.[store.focusedNode.index] ?? defaultNodeSize,
       })
     }
   }
@@ -417,10 +416,6 @@ export class Points extends CoreModule {
   public findHoveredPoint (): void {
     this.clearHoveredFboCommand?.()
     this.findHoveredPointCommand?.()
-  }
-
-  public getNodeRadiusByIndex (index: number): number | undefined {
-    return this.sizeByIndex?.[index]
   }
 
   public trackNodesByIndices (indices: number[]): void {
