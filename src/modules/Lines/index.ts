@@ -143,16 +143,19 @@ export class Lines extends CoreModule {
 
   public updateColor (): void {
     const { reglInstance, data } = this
+    destroyBuffer(this.colorBuffer)
     this.colorBuffer = reglInstance.buffer(data.linkColors ?? [])
   }
 
   public updateWidth (): void {
     const { reglInstance, data } = this
+    destroyBuffer(this.widthBuffer)
     this.widthBuffer = reglInstance.buffer(data.linkWidths ?? [])
   }
 
   public updateArrow (): void {
     const { reglInstance, data } = this
+    destroyBuffer(this.arrowBuffer)
     this.arrowBuffer = reglInstance.buffer(data.linkArrows ?? [])
   }
 

@@ -195,7 +195,7 @@ export interface GraphConfigInterface {
    * Color hex value for all nodes.
    * Default value: '#b3b3b3'
   */
-  nodeColor?: string;
+  defaultNodeColor?: string;
   /**
    * Greyed out node opacity value when the selection is active.
    * Default value: `0.1`
@@ -205,7 +205,7 @@ export interface GraphConfigInterface {
    * Size value in pixels for all nodes.
    * Default value: `4`
   */
-  nodeSize?: number;
+  defaultNodeSize?: number;
   /**
    * Scale factor for the node size.
    * Default value: `1`
@@ -255,7 +255,7 @@ export interface GraphConfigInterface {
    * Link color accessor function or hex value.
    * Default value: '#666666'
    */
-  linkColor?: string;
+  defaultLinkColor?: string;
   /**
    * Greyed out link opacity value when the selection is active.
    * Default value: `0.1`
@@ -265,7 +265,7 @@ export interface GraphConfigInterface {
    * Link width value in pixels.
    * Default value: `1`
   */
-  linkWidth?: number;
+  defaultLinkWidth?: number;
   /**
    * Scale factor for the link width.
    * Default value: `1`
@@ -294,10 +294,10 @@ export interface GraphConfigInterface {
    */
   curvedLinkControlPointDistance?: number;
   /**
-   * Link arrow accessor function or value that controls whether or not to display link arrows.
+   * Link arrow value that controls whether or not to display link arrows.
    * Default value: `true`
    */
-  linkArrows?: boolean;
+  defaultLinkArrows?: boolean;
   /**
    * Scale factor for the link arrows size.
    * Default value: `1`
@@ -396,25 +396,25 @@ export class GraphConfig implements GraphConfigInterface {
   public disableSimulation = defaultConfigValues.disableSimulation
   public backgroundColor = defaultBackgroundColor
   public spaceSize = defaultConfigValues.spaceSize
-  public nodeColor = defaultNodeColor
+  public defaultNodeColor = defaultNodeColor
   public nodeGreyoutOpacity = defaultGreyoutNodeOpacity
-  public nodeSize = defaultNodeSize
+  public defaultNodeSize = defaultNodeSize
   public nodeSizeScale = defaultConfigValues.nodeSizeScale
   public renderHighlightedNodeRing = true
   public highlightedNodeRingColor = undefined
   public renderHoveredNodeRing = true
   public hoveredNodeRingColor = defaultConfigValues.hoveredNodeRingColor
   public focusedNodeRingColor = defaultConfigValues.focusedNodeRingColor
-  public linkColor = defaultLinkColor
+  public defaultLinkColor = defaultLinkColor
   public linkGreyoutOpacity = defaultGreyoutLinkOpacity
-  public linkWidth = defaultLinkWidth
+  public defaultLinkWidth = defaultLinkWidth
   public linkWidthScale = defaultConfigValues.linkWidthScale
   public renderLinks = defaultConfigValues.renderLinks
   public curvedLinks = defaultConfigValues.curvedLinks
   public curvedLinkSegments = defaultConfigValues.curvedLinkSegments
   public curvedLinkWeight = defaultConfigValues.curvedLinkWeight
   public curvedLinkControlPointDistance = defaultConfigValues.curvedLinkControlPointDistance
-  public linkArrows = defaultConfigValues.arrowLinks
+  public defaultLinkArrows = defaultConfigValues.arrowLinks
   public linkArrowsSizeScale = defaultConfigValues.arrowSizeScale
   public linkVisibilityDistanceRange = defaultConfigValues.linkVisibilityDistanceRange
   public linkVisibilityMinTransparency = defaultConfigValues.linkVisibilityMinTransparency
