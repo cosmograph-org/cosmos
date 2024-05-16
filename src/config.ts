@@ -295,7 +295,7 @@ export interface GraphConfigInterface {
   curvedLinkControlPointDistance?: number;
   /**
    * Link arrow value that controls whether or not to display link arrows.
-   * Default value: `true`
+   * Default value: `false`
    */
   defaultLinkArrows?: boolean;
   /**
