@@ -380,6 +380,15 @@ export class Graph {
     this.setZoomTransformByPointPositions(positions, duration, undefined, padding)
   }
 
+  /**
+   * Center and zoom in/out the view to fit points by their positions in the scene.
+   * @param duration Duration of the center and zoom in/out animation in milliseconds (`250` by default).
+   * @param padding Padding around the viewport in percentage
+   */
+  public fitViewByPointPositions (positions: number[], duration = 250, padding = 0.1): void {
+    this.setZoomTransformByPointPositions(positions, duration, undefined, padding)
+  }
+
   /** Select points inside a rectangular area.
    * @param selection - Array of two corner points `[[left, top], [right, bottom]]`.
    * The `left` and `right` coordinates should be from 0 to the width of the canvas.
