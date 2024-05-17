@@ -1,8 +1,8 @@
 import { D3ZoomEvent } from 'd3-zoom'
 import {
-  defaultNodeColor,
-  defaultGreyoutNodeOpacity,
-  defaultNodeSize,
+  defaultPointColor,
+  defaultGreyoutPointOpacity,
+  defaultPointSize,
   defaultLinkColor,
   defaultGreyoutLinkOpacity,
   defaultLinkWidth,
@@ -14,46 +14,43 @@ import { isPlainObject } from '@/graph/helper'
 export interface GraphEvents {
   /**
    * Callback function that will be called on every canvas click.
-   * If clicked on a node, its data will be passed as the first argument,
-   * index as the second argument, position as the third argument
-   * and the corresponding mouse event as the forth argument:
-   * `(node: Node | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void`.
+   * If clicked on a point, its index will be passed as the first argument,
+   * position as the second argument and the corresponding mouse event as the third argument:
+   * `(index: number | undefined, pointPosition: [number, number] | undefined, event: MouseEvent) => void`.
    * Default value: `undefined`
    */
   onClick?: (
-      index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent
+      index: number | undefined, pointPosition: [number, number] | undefined, event: MouseEvent
     ) => void;
   /**
    * Callback function that will be called when mouse movement happens.
-   * If the mouse moves over a node, its data will be passed as the first argument,
-   * index as the second argument, position as the third argument
-   * and the corresponding mouse event as the forth argument:
-   * `(node: Node | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void`.
+   * If the mouse moves over a point, its index will be passed as the first argument,
+   * position as the second argument and the corresponding mouse event as the third argument:
+   * `(index: number | undefined, pointPosition: [number, number] | undefined, event: MouseEvent) => void`.
    * Default value: `undefined`
    */
   onMouseMove?: (
-      index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent
+      index: number | undefined, pointPosition: [number, number] | undefined, event: MouseEvent
     ) => void;
   /**
-   * Callback function that will be called when a node appears under the mouse
-   * as a result of a mouse event, zooming and panning, or movement of nodes.
-   * The node data will be passed as the first argument,
-   * index as the second argument, position as the third argument
-   * and the corresponding mouse event or D3's zoom event as the forth argument:
-   * `(node: Node, index: number, nodePosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined) => void`.
+   * Callback function that will be called when a point appears under the mouse
+   * as a result of a mouse event, zooming and panning, or movement of points.
+   * The point index will be passed as the first argument, position as the second argument
+   * and the corresponding mouse event or D3's zoom event as the third argument:
+   * `(index: number, pointPosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined) => void`.
    * Default value: `undefined`
    */
-  onNodeMouseOver?: (
-      index: number, nodePosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined
+  onPointMouseOver?: (
+      index: number, pointPosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined
     ) => void;
   /**
-   * Callback function that will be called when a node is no longer underneath
-   * the mouse pointer because of a mouse event, zoom/pan event, or movement of nodes.
+   * Callback function that will be called when a point is no longer underneath
+   * the mouse pointer because of a mouse event, zoom/pan event, or movement of points.
    * The corresponding mouse event or D3's zoom event will be passed as the first argument:
    * `(event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined) => void`.
    * Default value: `undefined`
    */
-  onNodeMouseOut?: (event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined) => void;
+  onPointMouseOut?: (event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined) => void;
   /**
    * Callback function that will be called when zooming or panning starts.
    * First argument is a D3 Zoom Event and second indicates whether
@@ -147,13 +144,13 @@ export interface GraphSimulationSettings {
   /**
    * Callback function that will be called on every simulation tick.
    * The value of the first argument `alpha` will decrease over time as the simulation "cools down".
-   * If there's a node under the mouse pointer, its datum will be passed as the second argument,
-   * index as the third argument and position as the forth argument:
-   * `(alpha: number, node: Node | undefined, index: number | undefined, nodePosition: [number, number] | undefined) => void`.
+   * If there's a point under the mouse pointer, its index will be passed as the second argument
+   * and position as the third argument:
+   * `(alpha: number, hoveredIndex: number | undefined, pointPosition: [number, number] | undefined) => void`.
    * Default value: `undefined`
    */
   onTick?: (
-    alpha: number, hoveredIndex?: number, nodePosition?: [number, number]
+    alpha: number, hoveredIndex?: number, pointPosition?: [number, number]
     ) => void;
   /**
    * Callback function that will be called when the simulation stops.
@@ -173,9 +170,10 @@ export interface GraphSimulationSettings {
 }
 export interface GraphConfigInterface {
   /**
+   * TODO: rethink the logic of `disableSimulation` param 👇.
    * Do not run the simulation, just render the graph.
-   * Cosmos uses the x and y values of the nodes’ data to determine their position in the graph.
-   * If x and y values are not specified, the position of the nodes will be assigned randomly.
+   * Cosmos uses the x and y values of the points’ data to determine their position in the graph.
+   * If x and y values are not specified, the position of the points will be assigned randomly.
    * This property will be applied only on component initialization and it
    * can't be changed using the `setConfig` method.
    * Default value: `false`
@@ -192,59 +190,45 @@ export interface GraphConfigInterface {
    */
   spaceSize?: number;
   /**
-   * Color hex value for all nodes.
+   * The default color hex value to use for points when no point colors are provided or
+   * if the color value in the array is `undefined` or `null`.
    * Default value: '#b3b3b3'
   */
-  defaultNodeColor?: string;
+  defaultPointColor?: string;
   /**
-   * Greyed out node opacity value when the selection is active.
+   * Greyed out point opacity value when the selection is active.
    * Default value: `0.1`
   */
-  nodeGreyoutOpacity?: number;
-   /**
-   * Size value in pixels for all nodes.
+  pointGreyoutOpacity?: number;
+  /**
+   * The default size value to use for points when no point sizes are provided or
+   * if the size value in the array is `undefined` or `null`.
    * Default value: `4`
   */
-  defaultNodeSize?: number;
+  defaultPointSize?: number;
   /**
-   * Scale factor for the node size.
+   * Scale factor for the point size.
    * Default value: `1`
    */
-  nodeSizeScale?: number;
+  pointSizeScale?: number;
 
   /**
-   * Turns the node highlight on hover on / off.
-   * @deprecated Will be removed from version 2.0. Use property `renderHoveredNodeRing` instead.
-   * @todo Remove deprecated type `InputNode` in version 2.0.
+   * Turns ring rendering around a point on hover on / off
    * Default value: `true`
    */
-  renderHighlightedNodeRing?: boolean;
+  renderHoveredPointRing?: boolean;
 
   /**
-   * Turns ring rendering around a node on hover on / off
-   * Default value: `true`
-   */
-  renderHoveredNodeRing?: boolean;
-
-  /**
-   * Highlighted node ring color hex value.
-   * @deprecated Will be removed from version 2.0. Use property `hoveredNodeRingColor` or `focusedNodeRingColor` instead.
-   * @todo Remove deprecated type `InputNode` in version 2.0.
-   * Default value: undefined
-   */
-  highlightedNodeRingColor?: string;
-
-  /**
-   * Hovered node ring color hex value.
+   * Hovered point ring color hex value.
    * Default value: `white`
    */
-  hoveredNodeRingColor?: string;
+  hoveredPointRingColor?: string;
 
   /**
-   * Focused node ring color hex value.
+   * Focused point ring color hex value.
    * Default value: `white`
    */
-  focusedNodeRingColor?: string;
+  focusedPointRingColor?: string;
 
   /**
    * Turns link rendering on / off.
@@ -344,10 +328,10 @@ export interface GraphConfigInterface {
    */
   pixelRatio?: number;
   /**
-   * Increase or decrease the size of the nodes when zooming in or out.
+   * Increase or decrease the size of the points when zooming in or out.
    * Default value: true
    */
-  scaleNodesOnZoom?: boolean;
+  scalePointsOnZoom?: boolean;
   /**
    * Initial zoom level. Can be set once during graph initialization.
    * Default value: `undefined`
@@ -359,7 +343,7 @@ export interface GraphConfigInterface {
    */
   disableZoom?: boolean;
   /**
-   * Whether to center and zoom the view to fit all nodes in the scene on initialization or not.
+   * Whether to center and zoom the view to fit all points in the scene on initialization or not.
    * Default: `true`
    */
   fitViewOnInit?: boolean;
@@ -370,11 +354,11 @@ export interface GraphConfigInterface {
    */
   fitViewDelay?: number;
   /**
-   * When `fitViewOnInit` is set to `true`, fits the view to show the nodes within a rectangle
+   * When `fitViewOnInit` is set to `true`, fits the view to show the points within a rectangle
    * defined by its two corner coordinates `[[left, bottom], [right, top]]` in the scene space.
    * Default: `undefined`
    */
-  fitViewByNodesInRect?: [[number, number], [number, number]] | [number, number][];
+  fitViewByPointsInRect?: [[number, number], [number, number]] | [number, number][];
   /**
    * Providing a `randomSeed` value allows you to control
    * the randomness of the layout across different simulation runs.
@@ -385,26 +369,24 @@ export interface GraphConfigInterface {
    */
   randomSeed?: number | string;
   /**
-   * Node sampling distance in pixels between neighboring nodes when calling the `getSampledNodePositionsMap` method.
-   * This parameter determines how many nodes will be included in the sample.
+   * Point sampling distance in pixels between neighboring points when calling the `getSampledPointPositionsMap` method.
+   * This parameter determines how many points will be included in the sample.
    * Default value: `150`
   */
-  nodeSamplingDistance?: number;
+  pointSamplingDistance?: number;
 }
 
 export class GraphConfig implements GraphConfigInterface {
   public disableSimulation = defaultConfigValues.disableSimulation
   public backgroundColor = defaultBackgroundColor
   public spaceSize = defaultConfigValues.spaceSize
-  public defaultNodeColor = defaultNodeColor
-  public nodeGreyoutOpacity = defaultGreyoutNodeOpacity
-  public defaultNodeSize = defaultNodeSize
-  public nodeSizeScale = defaultConfigValues.nodeSizeScale
-  public renderHighlightedNodeRing = true
-  public highlightedNodeRingColor = undefined
-  public renderHoveredNodeRing = true
-  public hoveredNodeRingColor = defaultConfigValues.hoveredNodeRingColor
-  public focusedNodeRingColor = defaultConfigValues.focusedNodeRingColor
+  public defaultPointColor = defaultPointColor
+  public pointGreyoutOpacity = defaultGreyoutPointOpacity
+  public defaultPointSize = defaultPointSize
+  public pointSizeScale = defaultConfigValues.pointSizeScale
+  public renderHoveredPointRing = true
+  public hoveredPointRingColor = defaultConfigValues.hoveredPointRingColor
+  public focusedPointRingColor = defaultConfigValues.focusedPointRingColor
   public defaultLinkColor = defaultLinkColor
   public linkGreyoutOpacity = defaultGreyoutLinkOpacity
   public defaultLinkWidth = defaultLinkWidth
@@ -442,8 +424,8 @@ export class GraphConfig implements GraphConfigInterface {
   public events: GraphEvents = {
     onClick: undefined,
     onMouseMove: undefined,
-    onNodeMouseOver: undefined,
-    onNodeMouseOut: undefined,
+    onPointMouseOver: undefined,
+    onPointMouseOut: undefined,
     onZoomStart: undefined,
     onZoom: undefined,
     onZoomEnd: undefined,
@@ -453,15 +435,15 @@ export class GraphConfig implements GraphConfigInterface {
 
   public pixelRatio = defaultConfigValues.pixelRatio
 
-  public scaleNodesOnZoom = defaultConfigValues.scaleNodesOnZoom
+  public scalePointsOnZoom = defaultConfigValues.scalePointsOnZoom
   public initialZoomLevel = undefined
   public disableZoom = defaultConfigValues.disableZoom
   public fitViewOnInit = defaultConfigValues.fitViewOnInit
   public fitViewDelay = defaultConfigValues.fitViewDelay
-  public fitViewByNodesInRect = undefined
+  public fitViewByPointsInRect = undefined
 
   public randomSeed = undefined
-  public nodeSamplingDistance = defaultConfigValues.nodeSamplingDistance
+  public pointSamplingDistance = defaultConfigValues.pointSamplingDistance
 
   public init (config: GraphConfigInterface): void {
     (Object.keys(config) as (keyof GraphConfigInterface)[])

@@ -3,27 +3,25 @@ precision mediump float;
 attribute vec2 quad;
 
 uniform sampler2D positions;
-// uniform sampler2D particleColor;
-uniform sampler2D particleGreyoutStatus;
-// uniform sampler2D particleSize;
+uniform sampler2D pointGreyoutStatus;
 uniform float size;
 uniform mat3 transform;
 uniform float pointsTextureSize;
 uniform float sizeScale;
 uniform float spaceSize;
 uniform vec2 screenSize;
-uniform bool scaleNodesOnZoom;
+uniform bool scalePointsOnZoom;
 uniform float pointIndex;
 uniform float maxPointSize;
 uniform vec4 color;
 uniform float greyoutOpacity;
 
 varying vec2 pos;
-varying float particleOpacity;
+varying float pointOpacity;
 
 float pointSize(float size) {
   float pSize;
-  if (scaleNodesOnZoom) { 
+  if (scalePointsOnZoom) { 
     pSize = size * transform[0][0];
   } else {
     pSize = size * min(5.0, max(1.0, transform[0][0] * 0.01));
@@ -40,11 +38,11 @@ void main () {
   vec4 pointPosition = texture2D(positions, ij / pointsTextureSize);
   // vec4 pSize = particleSize; // texture2D(particleSize, ij / pointsTextureSize);
   // vec4 pColor = texture2D(particleColor, ij / pointsTextureSize);
-  particleOpacity = color.a; // pColor.a;
+  pointOpacity = color.a; // pColor.a;
   // Alpha of selected points
-  vec4 greyoutStatus = texture2D(particleGreyoutStatus, ij / pointsTextureSize);
+  vec4 greyoutStatus = texture2D(pointGreyoutStatus, ij / pointsTextureSize);
   if (greyoutStatus.r > 0.0) {
-    particleOpacity *= greyoutOpacity;
+    pointOpacity *= greyoutOpacity;
   }
   float pSize = (pointSize(size * sizeScale) * relativeRingRadius) / transform[0][0];
   float radius = pSize * 0.5;

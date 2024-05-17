@@ -6,14 +6,13 @@ attribute float size;
 
 uniform sampler2D position;
 uniform float pointsTextureSize;
-// uniform sampler2D particleSize;
 uniform float sizeScale;
 uniform float spaceSize;
 uniform vec2 screenSize;
 uniform float ratio;
 uniform mat3 transform;
 uniform vec2 mousePosition;
-uniform bool scaleNodesOnZoom;
+uniform bool scalePointsOnZoom;
 uniform float maxPointSize;
 
 attribute vec2 indexes;
@@ -22,7 +21,7 @@ varying vec4 rgba;
 
 float pointSize(float size) {
   float pSize;
-  if (scaleNodesOnZoom) { 
+  if (scalePointsOnZoom) { 
     pSize = size * ratio * transform[0][0];
   } else {
     pSize = size * ratio * min(5.0, max(1.0, transform[0][0] * 0.01));
@@ -40,7 +39,6 @@ void main() {
   p *= spaceSize / screenSize;
   vec3 final = transform * vec3(p, 1);
 
-  // vec4 pSize = texture2D(particleSize, indexes / pointsTextureSize);
   float pSize = size * sizeScale;
   float pointRadius = 0.5 * pointSize(pSize);
 

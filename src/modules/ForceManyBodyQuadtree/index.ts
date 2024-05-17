@@ -65,7 +65,7 @@ export class ForceManyBodyQuadtree extends CoreModule {
       vert: calculateLevelVert,
       framebuffer: (_: regl.DefaultContext, props: { levelFbo: regl.Framebuffer2D; levelTextureSize: number; cellSize: number }) => props.levelFbo,
       primitive: 'points',
-      count: () => data.nodesNumber ?? 0,
+      count: () => data.pointsNumber ?? 0,
       attributes: { indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
       uniforms: {
         position: () => points?.previousPositionFbo,
