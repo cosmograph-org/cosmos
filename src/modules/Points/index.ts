@@ -11,8 +11,8 @@ import drawHighlightedFrag from '@/graph/modules/Points/draw-highlighted.frag'
 import drawHighlightedVert from '@/graph/modules/Points/draw-highlighted.vert'
 import findHoveredPointFrag from '@/graph/modules/Points/find-hovered-point.frag'
 import findHoveredPointVert from '@/graph/modules/Points/find-hovered-point.vert'
-import fillGridWithSampledNodesFrag from '@/graph/modules/Points/fill-sampled-nodes.frag'
-import fillGridWithSampledNodesVert from '@/graph/modules/Points/fill-sampled-nodes.vert'
+import fillGridWithSampledPointsFrag from '@/graph/modules/Points/fill-sampled-points.frag'
+import fillGridWithSampledPointsVert from '@/graph/modules/Points/fill-sampled-points.vert'
 import updatePositionFrag from '@/graph/modules/Points/update-position.frag'
 import { createIndexesBuffer, createQuadBuffer, destroyBuffer, destroyFramebuffer } from '@/graph/modules/Shared/buffer'
 import { createTrackedIndicesBuffer, createTrackedPositionsBuffer } from '@/graph/modules/Points/tracked-buffer'
@@ -33,28 +33,27 @@ export class Points extends CoreModule {
   public sizeBuffer: regl.Buffer | undefined
   public trackedIndicesFbo: regl.Framebuffer2D | undefined
   public trackedPositionsFbo: regl.Framebuffer2D | undefined
-  public sampledNodesFbo: regl.Framebuffer2D | undefined
+  public sampledPointsFbo: regl.Framebuffer2D | undefined
   private drawCommand: regl.DrawCommand | undefined
   private drawHighlightedCommand: regl.DrawCommand | undefined
   private updatePositionCommand: regl.DrawCommand | undefined
   private findPointsOnAreaSelectionCommand: regl.DrawCommand | undefined
   private findHoveredPointCommand: regl.DrawCommand | undefined
   private clearHoveredFboCommand: regl.DrawCommand | undefined
-  private clearSampledNodesFboCommand: regl.DrawCommand | undefined
-  private fillSampledNodesFboCommand: regl.DrawCommand | undefined
+  private clearSampledPointsFboCommand: regl.DrawCommand | undefined
+  private fillSampledPointsFboCommand: regl.DrawCommand | undefined
   private trackPointsCommand: regl.DrawCommand | undefined
   private trackedIndices: number[] | undefined
 
   public create (): void {
     const { reglInstance, store, data } = this
     const { pointsTextureSize } = store
-    if (!pointsTextureSize || !data.nodePositions || data.nodesNumber === undefined) return
-    const numParticles = data.nodesNumber
+    if (!pointsTextureSize || !data.pointPositions || data.pointsNumber === undefined) return
     const initialState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
-    // if (!config.disableSimulation) this.rescaleInitialNodePositions()
-    for (let i = 0; i < numParticles; ++i) {
-      initialState[i * 4 + 0] = data.nodePositions[i * 2 + 0] as number
-      initialState[i * 4 + 1] = data.nodePositions[i * 2 + 1] as number
+    // if (!config.disableSimulation) this.rescaleInitialNodePositions() // TODO ⁉️
+    for (let i = 0; i < data.pointsNumber; ++i) {
+      initialState[i * 4 + 0] = data.pointPositions[i * 2 + 0] as number
+      initialState[i * 4 + 1] = data.pointPositions[i * 2 + 1] as number
     }
 
     // Create position buffer
@@ -112,7 +111,7 @@ export class Points extends CoreModule {
     this.updateSize()
     this.updateColor()
     this.updateGreyoutStatus()
-    this.updateSampledNodesGrid()
+    this.updateSampledPointsGrid()
   }
 
   public initPrograms (): void {
@@ -138,7 +137,7 @@ export class Points extends CoreModule {
       frag: drawPointsFrag,
       vert: drawPointsVert,
       primitive: 'points',
-      count: () => data.nodesNumber ?? 0,
+      count: () => data.pointsNumber ?? 0,
       attributes: {
         indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize),
         size: {
@@ -152,15 +151,15 @@ export class Points extends CoreModule {
       },
       uniforms: {
         positions: () => this.currentPositionFbo,
-        particleGreyoutStatus: () => this.greyoutStatusFbo,
+        pointGreyoutStatus: () => this.greyoutStatusFbo,
         ratio: () => config.pixelRatio,
-        sizeScale: () => config.nodeSizeScale,
+        sizeScale: () => config.pointSizeScale,
         pointsTextureSize: () => store.pointsTextureSize,
         transform: () => store.transform,
         spaceSize: () => store.adjustedSpaceSize,
         screenSize: () => store.screenSize,
-        greyoutOpacity: () => config.nodeGreyoutOpacity,
-        scaleNodesOnZoom: () => config.scaleNodesOnZoom,
+        greyoutOpacity: () => config.pointGreyoutOpacity,
+        scalePointsOnZoom: () => config.scalePointsOnZoom,
         maxPointSize: () => store.maxPointSize,
       },
       blend: {
@@ -192,15 +191,15 @@ export class Points extends CoreModule {
       },
       uniforms: {
         position: () => this.currentPositionFbo,
-        particleSize: () => this.sizeFbo,
+        pointSize: () => this.sizeFbo,
         spaceSize: () => store.adjustedSpaceSize,
         screenSize: () => store.screenSize,
-        sizeScale: () => config.nodeSizeScale,
+        sizeScale: () => config.pointSizeScale,
         transform: () => store.transform,
         ratio: () => config.pixelRatio,
         'selection[0]': () => store.selectedArea[0],
         'selection[1]': () => store.selectedArea[1],
-        scaleNodesOnZoom: () => config.scaleNodesOnZoom,
+        scalePointsOnZoom: () => config.scalePointsOnZoom,
         maxPointSize: () => store.maxPointSize,
       },
     })
@@ -216,7 +215,7 @@ export class Points extends CoreModule {
       frag: findHoveredPointFrag,
       vert: findHoveredPointVert,
       primitive: 'points',
-      count: () => data.nodesNumber ?? 0,
+      count: () => data.pointsNumber ?? 0,
       framebuffer: () => this.hoveredFbo as regl.Framebuffer2D,
       attributes: {
         indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize),
@@ -228,12 +227,12 @@ export class Points extends CoreModule {
       uniforms: {
         position: () => this.currentPositionFbo,
         ratio: () => config.pixelRatio,
-        sizeScale: () => config.nodeSizeScale,
+        sizeScale: () => config.pointSizeScale,
         pointsTextureSize: () => store.pointsTextureSize,
         transform: () => store.transform,
         spaceSize: () => store.adjustedSpaceSize,
         screenSize: () => store.screenSize,
-        scaleNodesOnZoom: () => config.scaleNodesOnZoom,
+        scalePointsOnZoom: () => config.scalePointsOnZoom,
         mousePosition: () => store.screenMousePosition,
         maxPointSize: () => store.maxPointSize,
       },
@@ -242,20 +241,20 @@ export class Points extends CoreModule {
         mask: false,
       },
     })
-    this.clearSampledNodesFboCommand = reglInstance({
+    this.clearSampledPointsFboCommand = reglInstance({
       frag: clearFrag,
       vert: updateVert,
-      framebuffer: () => this.sampledNodesFbo as regl.Framebuffer2D,
+      framebuffer: () => this.sampledPointsFbo as regl.Framebuffer2D,
       primitive: 'triangle strip',
       count: 4,
       attributes: { quad: createQuadBuffer(reglInstance) },
     })
-    this.fillSampledNodesFboCommand = reglInstance({
-      frag: fillGridWithSampledNodesFrag,
-      vert: fillGridWithSampledNodesVert,
+    this.fillSampledPointsFboCommand = reglInstance({
+      frag: fillGridWithSampledPointsFrag,
+      vert: fillGridWithSampledPointsVert,
       primitive: 'points',
-      count: () => data.nodesNumber ?? 0,
-      framebuffer: () => this.sampledNodesFbo as regl.Framebuffer2D,
+      count: () => data.pointsNumber ?? 0,
+      framebuffer: () => this.sampledPointsFbo as regl.Framebuffer2D,
       attributes: { indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
       uniforms: {
         position: () => this.currentPositionFbo,
@@ -281,17 +280,15 @@ export class Points extends CoreModule {
         pointIndex: reglInstance.prop<{ pointIndex: number }, 'pointIndex'>('pointIndex'),
         size: reglInstance.prop<{ size: number }, 'size'>('size'),
         positions: () => this.currentPositionFbo,
-        // particleColor: () => this.colorFbo,
-        // particleSize: () => this.sizeBuffer,
-        sizeScale: () => config.nodeSizeScale,
+        sizeScale: () => config.pointSizeScale,
         pointsTextureSize: () => store.pointsTextureSize,
         transform: () => store.transform,
         spaceSize: () => store.adjustedSpaceSize,
         screenSize: () => store.screenSize,
-        scaleNodesOnZoom: () => config.scaleNodesOnZoom,
+        scalePointsOnZoom: () => config.scalePointsOnZoom,
         maxPointSize: () => store.maxPointSize,
-        particleGreyoutStatus: () => this.greyoutStatusFbo,
-        greyoutOpacity: () => config.nodeGreyoutOpacity,
+        pointGreyoutStatus: () => this.greyoutStatusFbo,
+        greyoutOpacity: () => config.pointGreyoutOpacity,
       },
       blend: {
         enable: true,
@@ -330,7 +327,7 @@ export class Points extends CoreModule {
     const { reglInstance, store: { pointsTextureSize }, data } = this
     if (!pointsTextureSize) return
     destroyBuffer(this.colorBuffer)
-    this.colorBuffer = reglInstance.buffer(data.nodeColors as number[])
+    this.colorBuffer = reglInstance.buffer(data.pointColors as number[])
   }
 
   public updateGreyoutStatus (): void {
@@ -340,14 +337,14 @@ export class Points extends CoreModule {
 
   public updateSize (): void {
     const { reglInstance, store: { pointsTextureSize }, data } = this
-    if (!pointsTextureSize || data.nodesNumber === undefined || data.nodeSizes === undefined) return
+    if (!pointsTextureSize || data.pointsNumber === undefined || data.pointSizes === undefined) return
     destroyBuffer(this.sizeBuffer)
-    this.sizeBuffer = reglInstance.buffer(data.nodeSizes)
+    this.sizeBuffer = reglInstance.buffer(data.pointSizes)
 
     const initialState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
 
-    for (let i = 0; i < data.nodesNumber; i++) {
-      initialState[i * 4] = data.nodeSizes[i] as number
+    for (let i = 0; i < data.pointsNumber; i++) {
+      initialState[i * 4] = data.pointSizes[i] as number
     }
 
     const initialTexture = reglInstance.texture({
@@ -364,13 +361,13 @@ export class Points extends CoreModule {
     })
   }
 
-  public updateSampledNodesGrid (): void {
-    const { store: { screenSize }, config: { nodeSamplingDistance }, reglInstance } = this
-    const dist = nodeSamplingDistance ?? Math.min(...screenSize) / 2
+  public updateSampledPointsGrid (): void {
+    const { store: { screenSize }, config: { pointSamplingDistance }, reglInstance } = this
+    const dist = pointSamplingDistance ?? Math.min(...screenSize) / 2
     const w = Math.ceil(screenSize[0] / dist)
     const h = Math.ceil(screenSize[1] / dist)
-    destroyFramebuffer(this.sampledNodesFbo)
-    this.sampledNodesFbo = reglInstance.framebuffer({
+    destroyFramebuffer(this.sampledPointsFbo)
+    this.sampledPointsFbo = reglInstance.framebuffer({
       shape: [w, h],
       depth: false,
       stencil: false,
@@ -384,22 +381,22 @@ export class Points extends CoreModule {
   }
 
   public draw (): void {
-    const { config: { renderHoveredNodeRing, renderHighlightedNodeRing, defaultNodeSize }, store, data } = this
+    const { config: { renderHoveredPointRing, defaultPointSize }, store, data } = this
     this.drawCommand?.()
-    if ((renderHoveredNodeRing ?? renderHighlightedNodeRing) && store.hoveredNode) {
+    if ((renderHoveredPointRing) && store.hoveredPoint) {
       this.drawHighlightedCommand?.({
         width: 0.85,
-        color: store.hoveredNodeRingColor,
-        pointIndex: store.hoveredNode.index,
-        size: data.nodeSizes?.[store.hoveredNode.index] ?? defaultNodeSize,
+        color: store.hoveredPointRingColor,
+        pointIndex: store.hoveredPoint.index,
+        size: data.pointSizes?.[store.hoveredPoint.index] ?? defaultPointSize,
       })
     }
-    if (store.focusedNode) {
+    if (store.focusedPoint) {
       this.drawHighlightedCommand?.({
         width: 0.75,
-        color: store.focusedNodeRingColor,
-        pointIndex: store.focusedNode.index,
-        size: data.nodeSizes?.[store.focusedNode.index] ?? defaultNodeSize,
+        color: store.focusedPointRingColor,
+        pointIndex: store.focusedPoint.index,
+        size: data.pointSizes?.[store.focusedPoint.index] ?? defaultPointSize,
       })
     }
   }
@@ -418,7 +415,7 @@ export class Points extends CoreModule {
     this.findHoveredPointCommand?.()
   }
 
-  public trackNodesByIndices (indices: number[]): void {
+  public trackPointsByIndices (indices: number[]): void {
     this.trackedIndices = indices
     destroyFramebuffer(this.trackedIndicesFbo)
     this.trackedIndicesFbo = undefined
@@ -445,12 +442,12 @@ export class Points extends CoreModule {
     return tracked
   }
 
-  public getSampledNodePositionsMap (): Map<number, [number, number]> {
+  public getSampledPointPositionsMap (): Map<number, [number, number]> {
     const positions = new Map<number, [number, number]>()
-    if (!this.sampledNodesFbo) return positions
-    this.clearSampledNodesFboCommand?.()
-    this.fillSampledNodesFboCommand?.()
-    const pixels = readPixels(this.reglInstance, this.sampledNodesFbo as regl.Framebuffer2D)
+    if (!this.sampledPointsFbo) return positions
+    this.clearSampledPointsFboCommand?.()
+    this.fillSampledPointsFboCommand?.()
+    const pixels = readPixels(this.reglInstance, this.sampledPointsFbo as regl.Framebuffer2D)
     for (let i = 0; i < pixels.length / 4; i++) {
       const index = pixels[i * 4]
       const isNotEmpty = !!pixels[i * 4 + 1]

@@ -4,11 +4,11 @@ attribute vec4 color;
 attribute float width;
 attribute float arrow;
 uniform sampler2D positions;
-uniform sampler2D particleGreyoutStatus;
+uniform sampler2D pointGreyoutStatus;
 uniform mat3 transform;
 uniform float pointsTextureSize;
 uniform float widthScale;
-uniform float nodeSizeScale;
+// uniform float pointSizeScale;
 uniform float arrowSizeScale;
 uniform float spaceSize;
 uniform vec2 screenSize;
@@ -16,7 +16,7 @@ uniform float ratio;
 uniform vec2 linkVisibilityDistanceRange;
 uniform float linkVisibilityMinTransparency;
 uniform float greyoutOpacity;
-uniform bool scaleNodesOnZoom;
+// uniform bool scalePointsOnZoom;
 uniform float curvedWeight;
 uniform float curvedLinkControlPointDistance;
 uniform float curvedLinkSegments;
@@ -44,8 +44,8 @@ void main() {
   vec2 pointTexturePosA = (pointA + 0.5) / pointsTextureSize;
   vec2 pointTexturePosB = (pointB + 0.5) / pointsTextureSize;
   // Greyed out status of points
-  vec4 greyoutStatusA = texture2D(particleGreyoutStatus, pointTexturePosA);
-  vec4 greyoutStatusB = texture2D(particleGreyoutStatus, pointTexturePosB);
+  vec4 greyoutStatusA = texture2D(pointGreyoutStatus, pointTexturePosA);
+  vec4 greyoutStatusB = texture2D(pointGreyoutStatus, pointTexturePosB);
   // Position
   vec4 pointPositionA = texture2D(positions, pointTexturePosA);
   vec4 pointPositionB = texture2D(positions, pointTexturePosB);

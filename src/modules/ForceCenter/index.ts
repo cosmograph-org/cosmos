@@ -41,7 +41,7 @@ export class ForceCenter extends CoreModule {
       vert: calculateCentermassVert,
       framebuffer: () => this.centermassFbo as regl.Framebuffer2D,
       primitive: 'points',
-      count: () => data.nodesNumber ?? 0,
+      count: () => data.pointsNumber ?? 0,
       attributes: { indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
       uniforms: {
         position: () => points?.previousPositionFbo,

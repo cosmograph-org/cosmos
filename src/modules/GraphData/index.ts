@@ -1,14 +1,14 @@
 import { getRgbaColor } from '@/graph/helper'
 import { GraphConfig } from '@/graph/config'
 export class GraphData {
-  public inputNodeColors: number[] | undefined
-  public inputNodeSizes: number[] | undefined
+  public inputPointColors: number[] | undefined
+  public inputPointSizes: number[] | undefined
   public inputLinkColors: number[] | undefined
   public inputLinkWidths: number[] | undefined
 
-  public nodePositions: number[] | undefined
-  public nodeColors: number[] | undefined
-  public nodeSizes: number[] | undefined
+  public pointPositions: number[] | undefined
+  public pointColors: number[] | undefined
+  public pointSizes: number[] | undefined
 
   public links: number[] | undefined
   public linkColors: number[] | undefined
@@ -26,8 +26,8 @@ export class GraphData {
     this._config = config
   }
 
-  public get nodesNumber (): number | undefined {
-    return this.nodePositions && this.nodePositions.length / 2
+  public get pointsNumber (): number | undefined {
+    return this.pointPositions && this.pointPositions.length / 2
   }
 
   public get linksNumber (): number | undefined {
@@ -35,49 +35,49 @@ export class GraphData {
   }
 
   /**
-   * Updates the node colors based on the input data or default config value.
+   * Updates the point colors based on the input data or default config value.
    */
-  public updateNodeColor (): void {
-    if (this.nodesNumber === undefined) {
-      this.nodeColors = undefined
+  public updatePointColor (): void {
+    if (this.pointsNumber === undefined) {
+      this.pointColors = undefined
       return
     }
 
-    // Sets node colors to default values from config if the input is missing or does not match input nodes number.
-    const defaultRgba = getRgbaColor(this._config.defaultNodeColor)
-    if (this.inputNodeColors === undefined || this.inputNodeColors.length / 4 !== this.nodesNumber) {
-      this.nodeColors = new Array(this.nodesNumber * 4)
-      for (let i = 0; i < this.nodeColors.length / 4; i++) {
-        this.nodeColors[i * 4] = defaultRgba[0]
-        this.nodeColors[i * 4 + 1] = defaultRgba[1]
-        this.nodeColors[i * 4 + 2] = defaultRgba[2]
-        this.nodeColors[i * 4 + 3] = defaultRgba[3]
+    // Sets point colors to default values from config if the input is missing or does not match input points number.
+    const defaultRgba = getRgbaColor(this._config.defaultPointColor)
+    if (this.inputPointColors === undefined || this.inputPointColors.length / 4 !== this.pointsNumber) {
+      this.pointColors = new Array(this.pointsNumber * 4)
+      for (let i = 0; i < this.pointColors.length / 4; i++) {
+        this.pointColors[i * 4] = defaultRgba[0]
+        this.pointColors[i * 4 + 1] = defaultRgba[1]
+        this.pointColors[i * 4 + 2] = defaultRgba[2]
+        this.pointColors[i * 4 + 3] = defaultRgba[3]
       }
     } else {
-      this.nodeColors = this.inputNodeColors
-      for (let i = 0; i < this.nodeColors.length / 4; i++) {
-        if (this.nodeColors[i * 4] === undefined || this.nodeColors[i * 4] === null) this.nodeColors[i * 4] = defaultRgba[0]
-        if (this.nodeColors[i * 4 + 1] === undefined || this.nodeColors[i * 4 + 1] === null) this.nodeColors[i * 4 + 1] = defaultRgba[1]
-        if (this.nodeColors[i * 4 + 2] === undefined || this.nodeColors[i * 4 + 2] === null) this.nodeColors[i * 4 + 2] = defaultRgba[2]
-        if (this.nodeColors[i * 4 + 3] === undefined || this.nodeColors[i * 4 + 3] === null) this.nodeColors[i * 4 + 3] = defaultRgba[3]
+      this.pointColors = this.inputPointColors
+      for (let i = 0; i < this.pointColors.length / 4; i++) {
+        if (this.pointColors[i * 4] === undefined || this.pointColors[i * 4] === null) this.pointColors[i * 4] = defaultRgba[0]
+        if (this.pointColors[i * 4 + 1] === undefined || this.pointColors[i * 4 + 1] === null) this.pointColors[i * 4 + 1] = defaultRgba[1]
+        if (this.pointColors[i * 4 + 2] === undefined || this.pointColors[i * 4 + 2] === null) this.pointColors[i * 4 + 2] = defaultRgba[2]
+        if (this.pointColors[i * 4 + 3] === undefined || this.pointColors[i * 4 + 3] === null) this.pointColors[i * 4 + 3] = defaultRgba[3]
       }
     }
   }
 
   /**
-   * Updates the node sizes based on the input data or default config value.
+   * Updates the point sizes based on the input data or default config value.
    */
-  public updateNodeSize (): void {
-    if (this.nodesNumber === undefined) {
-      this.nodeSizes = undefined
+  public updatePointSize (): void {
+    if (this.pointsNumber === undefined) {
+      this.pointSizes = undefined
       return
     }
 
-    // Sets node sizes to default values from config if the input is missing or does not match input nodes number.
-    if (this.inputNodeSizes === undefined || this.inputNodeSizes.length !== this.nodesNumber) {
-      this.nodeSizes = new Array(this.nodesNumber).fill(this._config.defaultNodeSize)
+    // Sets point sizes to default values from config if the input is missing or does not match input points number.
+    if (this.inputPointSizes === undefined || this.inputPointSizes.length !== this.pointsNumber) {
+      this.pointSizes = new Array(this.pointsNumber).fill(this._config.defaultPointSize)
     } else {
-      this.nodeSizes = this.inputNodeSizes
+      this.pointSizes = this.inputPointSizes
     }
   }
 
@@ -140,8 +140,8 @@ export class GraphData {
   }
 
   public update (): void {
-    this.updateNodeColor()
-    this.updateNodeSize()
+    this.updatePointColor()
+    this.updatePointSize()
 
     this.updateLinkColor()
     this.updateLinkWidth()
@@ -162,8 +162,8 @@ export class GraphData {
       return
     }
 
-    this.sourceIndexToTargetIndices = new Array(this.nodesNumber).fill(undefined)
-    this.targetIndexToSourceIndices = new Array(this.nodesNumber).fill(undefined)
+    this.sourceIndexToTargetIndices = new Array(this.pointsNumber).fill(undefined)
+    this.targetIndexToSourceIndices = new Array(this.pointsNumber).fill(undefined)
     for (let i = 0; i < this.linksNumber; i++) {
       const sourceIndex = this.links[i * 2]
       const targetIndex = this.links[i * 2 + 1]
@@ -178,12 +178,12 @@ export class GraphData {
   }
 
   private _calculateDegrees (): void {
-    if (this.nodesNumber === undefined) {
+    if (this.pointsNumber === undefined) {
       this.degree = undefined
       return
     }
-    this.degree = new Array(this.nodesNumber).fill(0)
-    for (let i = 0; i < this.nodesNumber; i++) {
+    this.degree = new Array(this.pointsNumber).fill(0)
+    for (let i = 0; i < this.pointsNumber; i++) {
       this.degree[i] = (this.sourceIndexToTargetIndices?.[i]?.length ?? 0) + (this.targetIndexToSourceIndices?.[i]?.length ?? 0)
     }
   }

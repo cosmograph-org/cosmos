@@ -121,16 +121,11 @@ export class Graph {
     }
 
     this.store.backgroundColor = getRgbaColor(this.config.backgroundColor)
-    if (this.config.highlightedNodeRingColor) {
-      this.store.setHoveredNodeRingColor(this.config.highlightedNodeRingColor)
-      this.store.setFocusedNodeRingColor(this.config.highlightedNodeRingColor)
-    } else {
-      if (this.config.hoveredNodeRingColor) {
-        this.store.setHoveredNodeRingColor(this.config.hoveredNodeRingColor)
-      }
-      if (this.config.focusedNodeRingColor) {
-        this.store.setFocusedNodeRingColor(this.config.focusedNodeRingColor)
-      }
+    if (this.config.hoveredPointRingColor) {
+      this.store.setHoveredPointRingColor(this.config.hoveredPointRingColor)
+    }
+    if (this.config.focusedPointRingColor) {
+      this.store.setFocusedPointRingColor(this.config.focusedPointRingColor)
     }
 
     if (this.config.showFPSMonitor) this.fpsMonitor = new FPSMonitor(this.canvas)
@@ -164,12 +159,12 @@ export class Graph {
   public setConfig (config: Partial<GraphConfigInterface>): void {
     const prevConfig = { ...this.config }
     this.config.init(config)
-    if (prevConfig.defaultNodeColor !== this.config.defaultNodeColor) {
-      this.graph.updateNodeColor()
+    if (prevConfig.defaultPointColor !== this.config.defaultPointColor) {
+      this.graph.updatePointColor()
       this.points.updateColor()
     }
-    if (prevConfig.defaultNodeSize !== this.config.defaultNodeSize) {
-      this.graph.updateNodeSize()
+    if (prevConfig.defaultPointSize !== this.config.defaultPointSize) {
+      this.graph.updatePointSize()
       this.points.updateSize()
     }
     if (prevConfig.defaultLinkColor !== this.config.defaultLinkColor) {
@@ -189,15 +184,11 @@ export class Graph {
       this.lines.updateCurveLineGeometry()
     }
     if (prevConfig.backgroundColor !== this.config.backgroundColor) this.store.backgroundColor = getRgbaColor(this.config.backgroundColor)
-    if (prevConfig.highlightedNodeRingColor !== this.config.highlightedNodeRingColor) {
-      this.store.setHoveredNodeRingColor(this.config.highlightedNodeRingColor)
-      this.store.setFocusedNodeRingColor(this.config.highlightedNodeRingColor)
+    if (prevConfig.hoveredPointRingColor !== this.config.hoveredPointRingColor) {
+      this.store.setHoveredPointRingColor(this.config.hoveredPointRingColor)
     }
-    if (prevConfig.hoveredNodeRingColor !== this.config.hoveredNodeRingColor) {
-      this.store.setHoveredNodeRingColor(this.config.hoveredNodeRingColor)
-    }
-    if (prevConfig.focusedNodeRingColor !== this.config.focusedNodeRingColor) {
-      this.store.setFocusedNodeRingColor(this.config.focusedNodeRingColor)
+    if (prevConfig.focusedPointRingColor !== this.config.focusedPointRingColor) {
+      this.store.setFocusedPointRingColor(this.config.focusedPointRingColor)
     }
     if (prevConfig.spaceSize !== this.config.spaceSize ||
       prevConfig.simulation.repulsionQuadtreeLevels !== this.config.simulation.repulsionQuadtreeLevels) {
@@ -223,16 +214,16 @@ export class Graph {
     }
   }
 
-  public setNodePositions (nodePositions: number[]): void {
-    this.graph.nodePositions = nodePositions
+  public setPointPositions (pointPositions: number[]): void {
+    this.graph.pointPositions = pointPositions
   }
 
-  public setNodeColors (nodeColors: number[]): void {
-    this.graph.inputNodeColors = nodeColors
+  public setPointColors (pointColors: number[]): void {
+    this.graph.inputPointColors = pointColors
   }
 
-  public setNodeSizes (nodeSizes: number[]): void {
-    this.graph.inputNodeSizes = nodeSizes
+  public setPointSizes (pointSizes: number[]): void {
+    this.graph.inputPointSizes = pointSizes
   }
 
   public setLinks (links: number[]): void {
@@ -253,8 +244,8 @@ export class Graph {
 
   public render (runSimulation = true): void {
     this.graph.update()
-    const { fitViewOnInit, fitViewDelay, fitViewByNodesInRect, initialZoomLevel } = this.config
-    if (!this.graph.nodesNumber && !this.graph.linksNumber) {
+    const { fitViewOnInit, fitViewDelay, fitViewByPointsInRect, initialZoomLevel } = this.config
+    if (!this.graph.pointsNumber && !this.graph.linksNumber) {
       this.destroyParticleSystem()
       this.reglInstance.clear({
         color: this.store.backgroundColor,
@@ -267,7 +258,7 @@ export class Graph {
     // If `initialZoomLevel` is set, we don't need to fit the view
     if (this._isFirstRenderAfterInit && fitViewOnInit && initialZoomLevel === undefined) {
       this._fitViewOnInitTimeoutID = window.setTimeout(() => {
-        if (fitViewByNodesInRect) this.setZoomTransformByNodePositions(fitViewByNodesInRect, undefined, undefined, 0)
+        if (fitViewByPointsInRect) this.setZoomTransformByPointPositions(fitViewByPointsInRect, undefined, undefined, 0)
         else this.fitView()
       }, fitViewDelay)
     }
@@ -277,13 +268,13 @@ export class Graph {
   }
 
   /**
-   * Center the view on a node and zoom in, by node index.
-   * @param index The index of the node in the array of nodes.
+   * Center the view on a point and zoom in, by point index.
+   * @param index The index of the point in the array of points.
    * @param duration Duration of the animation transition in milliseconds (`700` by default).
    * @param scale Scale value to zoom in or out (`3` by default).
-   * @param canZoomOut Set to `false` to prevent zooming out from the node (`true` by default).
+   * @param canZoomOut Set to `false` to prevent zooming out from the point (`true` by default).
    */
-  public zoomToNodeByIndex (index: number, duration = 700, scale = defaultScaleToZoom, canZoomOut = true): void {
+  public zoomToPointByIndex (index: number, duration = 700, scale = defaultScaleToZoom, canZoomOut = true): void {
     const { store: { screenSize } } = this
     const positionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
     if (index === undefined) return
@@ -293,7 +284,7 @@ export class Graph {
     const distance = this.zoomInstance.getDistanceToPoint([posX, posY])
     const zoomLevel = canZoomOut ? scale : Math.max(this.getZoomLevel(), scale)
     if (distance < Math.min(screenSize[0], screenSize[1])) {
-      this.setZoomTransformByNodePositions([posX, posY], duration, zoomLevel)
+      this.setZoomTransformByPointPositions([posX, posY], duration, zoomLevel)
     } else {
       const transform = this.zoomInstance.getTransform([[posX, posY]], zoomLevel)
       const middle = this.zoomInstance.getMiddlePointTransform([posX, posY])
@@ -345,18 +336,18 @@ export class Graph {
   }
 
   /**
-   * Get current X and Y coordinates of the nodes.
-   * @returns Array of node positions.
+   * Get current X and Y coordinates of the points.
+   * @returns Array of point positions.
    */
-  public getNodePositions (): number[] {
-    if (this.graph.nodesNumber === undefined) return []
+  public getPointPositions (): number[] {
+    if (this.graph.pointsNumber === undefined) return []
     const positions: number[] = []
     if (this.hasParticleSystemDestroyed) return []
-    const particlePositionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
-    positions.length = this.graph.nodesNumber * 2
-    for (let i = 0; i < this.graph.nodesNumber; i += 1) {
-      const posX = particlePositionPixels[i * 4 + 0]
-      const posY = particlePositionPixels[i * 4 + 1]
+    const pointPositionsPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
+    positions.length = this.graph.pointsNumber * 2
+    for (let i = 0; i < this.graph.pointsNumber; i += 1) {
+      const posX = pointPositionsPixels[i * 4 + 0]
+      const posY = pointPositionsPixels[i * 4 + 1]
       if (posX !== undefined && posY !== undefined) {
         positions[i * 2] = posX
         positions[i * 2 + 1] = posY
@@ -366,34 +357,34 @@ export class Graph {
   }
 
   /**
-   * Center and zoom in/out the view to fit all nodes in the scene.
+   * Center and zoom in/out the view to fit all points in the scene.
    * @param duration Duration of the center and zoom in/out animation in milliseconds (`250` by default).
    * @param padding Padding around the viewport in percentage
    */
   public fitView (duration = 250, padding = 0.1): void {
-    this.setZoomTransformByNodePositions(this.getNodePositions(), duration, undefined, padding)
+    this.setZoomTransformByPointPositions(this.getPointPositions(), duration, undefined, padding)
   }
 
   /**
-   * Center and zoom in/out the view to fit nodes by their indices in the scene.
+   * Center and zoom in/out the view to fit points by their indices in the scene.
    * @param duration Duration of the center and zoom in/out animation in milliseconds (`250` by default).
    * @param padding Padding around the viewport in percentage
    */
-  public fitViewByNodeIndices (indices: number[], duration = 250, padding = 0.1): void {
-    const positionsArray = this.getNodePositions()
+  public fitViewByPointIndices (indices: number[], duration = 250, padding = 0.1): void {
+    const positionsArray = this.getPointPositions()
     const positions = new Array(indices.length * 2)
     for (const [i, index] of indices.entries()) {
       positions[i * 2] = positionsArray[index * 2]
       positions[i * 2 + 1] = positionsArray[index * 2 + 1]
     }
-    this.setZoomTransformByNodePositions(positions, duration, undefined, padding)
+    this.setZoomTransformByPointPositions(positions, duration, undefined, padding)
   }
 
-  /** Select nodes inside a rectangular area.
+  /** Select points inside a rectangular area.
    * @param selection - Array of two corner points `[[left, top], [right, bottom]]`.
    * The `left` and `right` coordinates should be from 0 to the width of the canvas.
    * The `top` and `bottom` coordinates should be from 0 to the height of the canvas. */
-  public selectNodesInRange (selection: [[number, number], [number, number]] | null): void {
+  public selectPointsInRange (selection: [[number, number], [number, number]] | null): void {
     if (selection) {
       const h = this.store.screenSize[1]
       this.store.selectedArea = [[selection[0][0], (h - selection[1][1])], [selection[1][0], (h - selection[0][1])]]
@@ -412,22 +403,22 @@ export class Graph {
   }
 
   /**
-   * Select a node by index. If you want the adjacent nodes to get selected too, provide `true` as the second argument.
-   * @param index The index of the node in the array of nodes.
-   * @param selectAdjacentNodes When set to `true`, selects adjacent nodes (`false` by default).
+   * Select a point by index. If you want the adjacent points to get selected too, provide `true` as the second argument.
+   * @param index The index of the point in the array of points.
+   * @param selectAdjacentPoints When set to `true`, selects adjacent points (`false` by default).
    */
-  public selectNodeByIndex (index: number, selectAdjacentNodes = false): void {
-    if (selectAdjacentNodes) {
+  public selectPointByIndex (index: number, selectAdjacentPoints = false): void {
+    if (selectAdjacentPoints) {
       const adjacentIndices = this.graph.getAdjacentIndices(index) ?? []
-      this.selectNodesByIndices([index, ...adjacentIndices])
-    } else this.selectNodesByIndices([index])
+      this.selectPointsByIndices([index, ...adjacentIndices])
+    } else this.selectPointsByIndices([index])
   }
 
   /**
-   * Select multiples nodes by their indices.
-   * @param indices Array of nodes indices.
+   * Select multiples points by their indices.
+   * @param indices Array of points indices.
    */
-  public selectNodesByIndices (indices?: (number | undefined)[] | null): void {
+  public selectPointsByIndices (indices?: (number | undefined)[] | null): void {
     if (!indices) {
       this.store.selectedIndices = null
     } else if (indices.length === 0) {
@@ -440,16 +431,16 @@ export class Graph {
   }
 
   /**
-   * Unselect all nodes.
+   * Unselect all points.
    */
-  public unselectNodes (): void {
+  public unselectPoints (): void {
     this.store.selectedIndices = null
     this.points.updateGreyoutStatus()
   }
 
   /**
-   * Get indices of nodes that are currently selected.
-   * @returns Array of selected indices of nodes.
+   * Get indices of points that are currently selected.
+   * @returns Array of selected indices of points.
    */
   public getSelectedIndices (): number[] | null {
     const { selectedIndices } = this.store
@@ -458,8 +449,8 @@ export class Graph {
   }
 
   /**
-   * Get indices that are adjacent to a specific node by its index.
-   * @param index Index of the node.
+   * Get indices that are adjacent to a specific point by its index.
+   * @param index Index of the point.
    * @returns Array of adjacent indices.
    */
 
@@ -468,20 +459,20 @@ export class Graph {
   }
 
   /**
-   * Set focus on a node by index. A ring will be highlighted around the focused node.
+   * Set focus on a point by index. A ring will be highlighted around the focused point.
    * If no index is specified, the focus will be reset.
-   * @param index The index of the node in the array of nodes.
+   * @param index The index of the point in the array of points.
    */
-  public setFocusedNodeByIndex (index?: number): void {
+  public setFocusedPointByIndex (index?: number): void {
     if (index === undefined) {
-      this.store.setFocusedNode()
+      this.store.setFocusedPoint()
     } else {
-      this.store.setFocusedNode(index)
+      this.store.setFocusedPoint(index)
     }
   }
 
   /**
-   * Converts the X and Y node coordinates from the space coordinate system to the screen coordinate system.
+   * Converts the X and Y point coordinates from the space coordinate system to the screen coordinate system.
    * @param spacePosition Array of x and y coordinates in the space coordinate system.
    * @returns Array of x and y coordinates in the screen coordinate system.
    */
@@ -490,7 +481,7 @@ export class Graph {
   }
 
   /**
-   * Converts the X and Y node coordinates from the screen coordinate system to the space coordinate system.
+   * Converts the X and Y point coordinates from the screen coordinate system to the space coordinate system.
    * @param screenPosition Array of x and y coordinates in the screen coordinate system.
    * @returns Array of x and y coordinates in the space coordinate system.
    */
@@ -499,47 +490,47 @@ export class Graph {
   }
 
   /**
-   * Converts the node radius value from the space coordinate system to the screen coordinate system.
-   * @param spaceRadius Radius of Node in the space coordinate system.
-   * @returns Radius of Node in the screen coordinate system.
+   * Converts the point radius value from the space coordinate system to the screen coordinate system.
+   * @param spaceRadius Radius of point in the space coordinate system.
+   * @returns Radius of point in the screen coordinate system.
    */
   public spaceToScreenRadius (spaceRadius: number): number {
     return this.zoomInstance.convertSpaceToScreenRadius(spaceRadius)
   }
 
   /**
-   * Get node radius by its index.
-   * @param index Index of the node.
-   * @returns Radius of the node.
+   * Get point radius by its index.
+   * @param index Index of the point.
+   * @returns Radius of the point.
    */
-  public getNodeRadiusByIndex (index: number): number | undefined {
-    return this.graph.nodeSizes?.[index]
+  public getPointRadiusByIndex (index: number): number | undefined {
+    return this.graph.pointSizes?.[index]
   }
 
   /**
-   * Track multiple node positions by their indices on each Cosmos tick.
-   * @param indices Array of nodes indices.
+   * Track multiple point positions by their indices on each Cosmos tick.
+   * @param indices Array of points indices.
    */
-  public trackNodePositionsByIndices (indices: number[]): void {
-    this.points.trackNodesByIndices(indices)
+  public trackPointPositionsByIndices (indices: number[]): void {
+    this.points.trackPointsByIndices(indices)
   }
 
   /**
-   * Get current X and Y coordinates of the tracked nodes.
-   * @returns A Map object where keys are the ids of the nodes and values are their corresponding X and Y coordinates in the [number, number] format.
+   * Get current X and Y coordinates of the tracked points.
+   * @returns A Map object where keys are the indices of the points and values are their corresponding X and Y coordinates in the [number, number] format.
    */
-  public getTrackedNodePositionsMap (): Map<number, [number, number]> {
+  public getTrackedPointPositionsMap (): Map<number, [number, number]> {
     return this.points.getTrackedPositionsMap()
   }
 
   /**
-   * For the nodes that are currently visible on the screen, get a sample of node indices with their coordinates.
-   * The resulting number of nodes will depend on the `nodeSamplingDistance` configuration property,
-   * and the sampled nodes will be evenly distributed.
-   * @returns A Map object where keys are the index of the nodes and values are their corresponding X and Y coordinates in the [number, number] format.
+   * For the points that are currently visible on the screen, get a sample of point indices with their coordinates.
+   * The resulting number of points will depend on the `pointSamplingDistance` configuration property,
+   * and the sampled points will be evenly distributed.
+   * @returns A Map object where keys are the index of the points and values are their corresponding X and Y coordinates in the [number, number] format.
    */
-  public getSampledNodePositionsMap (): Map<number, [number, number]> {
-    return this.points.getSampledNodePositionsMap()
+  public getSampledPointPositionsMap (): Map<number, [number, number]> {
+    return this.points.getSampledPointPositionsMap()
   }
 
   /**
@@ -547,7 +538,7 @@ export class Graph {
    * @param alpha Value from 0 to 1. The higher the value, the more initial energy the simulation will get.
    */
   public start (alpha = 1): void {
-    if (!this.graph.nodesNumber) return
+    if (!this.graph.pointsNumber) return
     this.store.isSimulationRunning = true
     this.store.alpha = alpha
     this.store.simulationProgress = 0
@@ -607,22 +598,22 @@ export class Graph {
 
   /**
    * Converts an array of tuple positions to a single array containing all coordinates sequentially
-   * @param nodePositions An array of tuple positions
+   * @param pointPositions An array of tuple positions
    * @returns A flatten array of coordinates
    */
-  public flatten (nodePositions: [number, number][]): number[] {
-    return nodePositions.flat()
+  public flatten (pointPositions: [number, number][]): number[] {
+    return pointPositions.flat()
   }
 
   /**
-   * Converts a flat array of node positions to a tuple pairs representing coordinates
-   * @param nodePositions A flattened array of coordinates
+   * Converts a flat array of point positions to a tuple pairs representing coordinates
+   * @param pointPositions A flattened array of coordinates
    * @returns An array of tuple positions
    */
-  public pair (nodePositions: number[]): [number, number][] {
-    const arr = new Array(nodePositions.length / 2) as [number, number][]
-    for (let i = 0; i < nodePositions.length / 2; i++) {
-      arr[i] = [nodePositions[i * 2] as number, nodePositions[i * 2 + 1] as number]
+  public pair (pointPositions: number[]): [number, number][] {
+    const arr = new Array(pointPositions.length / 2) as [number, number][]
+    for (let i = 0; i < pointPositions.length / 2; i++) {
+      arr[i] = [pointPositions[i * 2] as number, pointPositions[i * 2 + 1] as number]
     }
 
     return arr
@@ -642,14 +633,14 @@ export class Graph {
 
   private update (runSimulation: boolean): void {
     const { graph } = this
-    if (graph.nodesNumber === undefined || graph.linksNumber === undefined) return
-    this.store.pointsTextureSize = Math.ceil(Math.sqrt(graph.nodesNumber))
+    if (graph.pointsNumber === undefined || graph.linksNumber === undefined) return
+    this.store.pointsTextureSize = Math.ceil(Math.sqrt(graph.pointsNumber))
     this.store.linksTextureSize = Math.ceil(Math.sqrt(graph.linksNumber * 2))
     this.destroyParticleSystem()
     this.create()
     this.initPrograms()
-    this.store.setFocusedNode()
-    this.store.hoveredNode = undefined
+    this.store.setFocusedPoint()
+    this.store.hoveredPoint = undefined
     if (runSimulation) {
       this.start()
     } else {
@@ -710,8 +701,8 @@ export class Graph {
           this.store.simulationProgress = Math.sqrt(Math.min(1, ALPHA_MIN / this.store.alpha))
           this.config.simulation.onTick?.(
             this.store.alpha,
-            this.store.hoveredNode?.index,
-            this.store.hoveredNode?.position
+            this.store.hoveredPoint?.index,
+            this.store.hoveredPoint?.position
           )
         }
 
@@ -749,8 +740,8 @@ export class Graph {
 
   private onClick (event: MouseEvent): void {
     this.config.events.onClick?.(
-      this.store.hoveredNode?.index,
-      this.store.hoveredNode?.position,
+      this.store.hoveredPoint?.index,
+      this.store.hoveredPoint?.position,
       event
     )
   }
@@ -768,8 +759,8 @@ export class Graph {
     this.updateMousePosition(event)
     this.isRightClickMouse = event.which === 3
     this.config.events.onMouseMove?.(
-      this.store.hoveredNode?.index,
-      this.store.hoveredNode?.position,
+      this.store.hoveredPoint?.index,
+      this.store.hoveredPoint?.position,
       this.currentEvent
     )
   }
@@ -795,11 +786,11 @@ export class Graph {
       this.reglInstance.poll()
       this.canvasD3Selection
         .call(this.zoomInstance.behavior.transform, this.zoomInstance.getTransform([centerPosition], k))
-      this.points.updateSampledNodesGrid()
+      this.points.updateSampledPointsGrid()
     }
   }
 
-  private setZoomTransformByNodePositions (positions: number[], duration = 250, scale?: number, padding?: number): void {
+  private setZoomTransformByPointPositions (positions: number[], duration = 250, scale?: number, padding?: number): void {
     this.resizeCanvas()
     const transform = this.zoomInstance.getTransform(this.pair(positions), scale, padding)
     this.canvasD3Selection
@@ -830,32 +821,32 @@ export class Graph {
     let isMouseover = false
     let isMouseout = false
     const pixels = readPixels(this.reglInstance, this.points.hoveredFbo as regl.Framebuffer2D)
-    const nodeSize = pixels[1] as number
+    const pointSize = pixels[1] as number
     const position = [0, 0] as [number, number]
-    if (nodeSize) {
+    if (pointSize) {
       const hoveredIndex = pixels[0] as number
-      if (this.store.hoveredNode?.index !== hoveredIndex) isMouseover = true
+      if (this.store.hoveredPoint?.index !== hoveredIndex) isMouseover = true
       const pointX = pixels[2] as number
       const pointY = pixels[3] as number
       position[0] = pointX
       position[1] = pointY
-      this.store.hoveredNode = {
+      this.store.hoveredPoint = {
         index: hoveredIndex,
         position: [pointX, pointY],
       }
     } else {
-      if (this.store.hoveredNode) isMouseout = true
-      this.store.hoveredNode = undefined
+      if (this.store.hoveredPoint) isMouseout = true
+      this.store.hoveredPoint = undefined
     }
 
-    if (isMouseover && this.store.hoveredNode) {
-      this.config.events.onNodeMouseOver?.(
-        this.store.hoveredNode.index,
-        this.store.hoveredNode.position,
+    if (isMouseover && this.store.hoveredPoint) {
+      this.config.events.onPointMouseOver?.(
+        this.store.hoveredPoint.index,
+        this.store.hoveredPoint.position,
         this.currentEvent
       )
     }
-    if (isMouseout) this.config.events.onNodeMouseOut?.(this.currentEvent)
+    if (isMouseout) this.config.events.onPointMouseOut?.(this.currentEvent)
   }
 }
 
