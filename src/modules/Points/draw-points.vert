@@ -7,9 +7,7 @@ attribute float size;
 attribute vec4 color;
 
 uniform sampler2D positions;
-// uniform sampler2D particleColor;
-uniform sampler2D particleGreyoutStatus;
-// uniform sampler2D particleSize;
+uniform sampler2D pointGreyoutStatus;
 uniform float ratio;
 uniform mat3 transform;
 uniform float pointsTextureSize;
@@ -17,7 +15,7 @@ uniform float sizeScale;
 uniform float spaceSize;
 uniform vec2 screenSize;
 uniform float greyoutOpacity;
-uniform bool scaleNodesOnZoom;
+uniform bool scalePointsOnZoom;
 uniform float maxPointSize;
 
 varying vec2 index;
@@ -26,7 +24,7 @@ varying float alpha;
 
 float pointSize(float size) {
   float pSize;
-  if (scaleNodesOnZoom) { 
+  if (scalePointsOnZoom) { 
     pSize = size * ratio * transform[0][0];
   } else {
     pSize = size * ratio * min(5.0, max(1.0, transform[0][0] * 0.01));
@@ -56,7 +54,7 @@ void main() {
 
   alpha = pColor.a;
   // Alpha of selected points
-  vec4 greyoutStatus = texture2D(particleGreyoutStatus, (index + 0.5) / pointsTextureSize);
+  vec4 greyoutStatus = texture2D(pointGreyoutStatus, (index + 0.5) / pointsTextureSize);
   if (greyoutStatus.r > 0.0) {
     alpha *= greyoutOpacity;
   }

@@ -1,6 +1,6 @@
-export const defaultNodeColor = '#b3b3b3'
-export const defaultGreyoutNodeOpacity = 0.1
-export const defaultNodeSize = 4
+export const defaultPointColor = '#b3b3b3'
+export const defaultGreyoutPointOpacity = 0.1
+export const defaultPointSize = 4
 export const defaultLinkColor = '#666666'
 export const defaultGreyoutLinkOpacity = 0.1
 export const defaultLinkWidth = 1
@@ -9,7 +9,7 @@ export const defaultBackgroundColor = '#222222'
 export const defaultConfigValues = {
   disableSimulation: false,
   spaceSize: 4096,
-  nodeSizeScale: 1,
+  pointSizeScale: 1,
   linkWidthScale: 1,
   arrowSizeScale: 1,
   renderLinks: true,
@@ -20,8 +20,8 @@ export const defaultConfigValues = {
   arrowLinks: false,
   linkVisibilityDistanceRange: [50, 150],
   linkVisibilityMinTransparency: 0.25,
-  hoveredNodeRingColor: 'white',
-  focusedNodeRingColor: 'white',
+  hoveredPointRingColor: 'white',
+  focusedPointRingColor: 'white',
   useQuadtree: false,
   simulation: {
     decay: 1000,
@@ -38,13 +38,13 @@ export const defaultConfigValues = {
   },
   showFPSMonitor: false,
   pixelRatio: 2,
-  scaleNodesOnZoom: true,
+  scalePointsOnZoom: true,
   disableZoom: false,
   fitViewOnInit: true,
   fitViewDelay: 250,
-  nodeSamplingDistance: 150,
+  pointSamplingDistance: 150,
 }
 
-export const hoveredNodeRingOpacity = 0.7
-export const focusedNodeRingOpacity = 0.95
+export const hoveredPointRingOpacity = 0.7
+export const focusedPointRingOpacity = 0.95
 export const defaultScaleToZoom = 3

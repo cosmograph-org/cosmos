@@ -30,17 +30,17 @@ export class ForceLink extends CoreModule {
     const grouped = direction === LinkDirection.INCOMING ? data.sourceIndexToTargetIndices : data.targetIndexToSourceIndices
     this.maxPointDegree = 0
     let linkIndex = 0
-    grouped?.forEach((connectedNodeIndices, nodeIndex) => {
-      if (connectedNodeIndices) {
-        this.linkFirstIndicesAndAmount[nodeIndex * 4 + 0] = linkIndex % linksTextureSize
-        this.linkFirstIndicesAndAmount[nodeIndex * 4 + 1] = Math.floor(linkIndex / linksTextureSize)
-        this.linkFirstIndicesAndAmount[nodeIndex * 4 + 2] = connectedNodeIndices.length ?? 0
+    grouped?.forEach((connectedPointIndices, pointIndex) => {
+      if (connectedPointIndices) {
+        this.linkFirstIndicesAndAmount[pointIndex * 4 + 0] = linkIndex % linksTextureSize
+        this.linkFirstIndicesAndAmount[pointIndex * 4 + 1] = Math.floor(linkIndex / linksTextureSize)
+        this.linkFirstIndicesAndAmount[pointIndex * 4 + 2] = connectedPointIndices.length ?? 0
 
-        connectedNodeIndices.forEach((connectedNodeIndex) => {
-          this.indices[linkIndex * 4 + 0] = connectedNodeIndex % pointsTextureSize
-          this.indices[linkIndex * 4 + 1] = Math.floor(connectedNodeIndex / pointsTextureSize)
-          const degree = data.degree?.[connectedNodeIndex] ?? 0
-          const connectedDegree = data.degree?.[nodeIndex] ?? 0
+        connectedPointIndices.forEach((connectedPointIndex) => {
+          this.indices[linkIndex * 4 + 0] = connectedPointIndex % pointsTextureSize
+          this.indices[linkIndex * 4 + 1] = Math.floor(connectedPointIndex / pointsTextureSize)
+          const degree = data.degree?.[connectedPointIndex] ?? 0
+          const connectedDegree = data.degree?.[pointIndex] ?? 0
           const bias = degree / (degree + connectedDegree)
           let strength = 1 / Math.min(degree, connectedDegree)
           strength = Math.sqrt(strength)
@@ -51,7 +51,7 @@ export class ForceLink extends CoreModule {
           linkIndex += 1
         })
 
-        this.maxPointDegree = Math.max(this.maxPointDegree, connectedNodeIndices.length ?? 0)
+        this.maxPointDegree = Math.max(this.maxPointDegree, connectedPointIndices.length ?? 0)
       }
     })
 

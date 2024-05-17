@@ -46,9 +46,9 @@ export class Zoom {
   }
 
   /**
-   * Get the zoom transform that will fit the given node positions into the viewport
+   * Get the zoom transform that will fit the given point positions into the viewport
    *
-   * @param positions An array of node positions in the form `[x, y]`
+   * @param positions An array of point positions in the form `[x, y]`
    * @param scale An optional scale factor to apply to the transform
    * @param padding Padding around the viewport in percentage
    */
@@ -126,9 +126,9 @@ export class Zoom {
   }
 
   public convertSpaceToScreenRadius (spaceRadius: number): number {
-    const { config: { scaleNodesOnZoom }, store: { maxPointSize }, eventTransform: { k } } = this
+    const { config: { scalePointsOnZoom }, store: { maxPointSize }, eventTransform: { k } } = this
     let size = spaceRadius * 2
-    if (scaleNodesOnZoom) {
+    if (scalePointsOnZoom) {
       size *= k
     } else {
       size *= Math.min(5.0, Math.max(1.0, k * 0.01))
