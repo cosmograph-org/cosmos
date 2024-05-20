@@ -642,9 +642,8 @@ export class Graph {
 
   private update (runSimulation: boolean): void {
     const { graph } = this
-    if (graph.pointsNumber === undefined || graph.linksNumber === undefined) return
-    this.store.pointsTextureSize = Math.ceil(Math.sqrt(graph.pointsNumber))
-    this.store.linksTextureSize = Math.ceil(Math.sqrt(graph.linksNumber * 2))
+    this.store.pointsTextureSize = Math.ceil(Math.sqrt(graph.pointsNumber ?? 0))
+    this.store.linksTextureSize = Math.ceil(Math.sqrt((graph.linksNumber ?? 0) * 2))
     this.destroyParticleSystem()
     this.create()
     this.initPrograms()
