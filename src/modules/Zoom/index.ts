@@ -63,6 +63,15 @@ export class Zoom {
     xExtent[1] = this.store.scaleX(xExtent[1])
     yExtent[0] = this.store.scaleY(yExtent[0])
     yExtent[1] = this.store.scaleY(yExtent[1])
+    // Adjust extent with one screen pixel if one point coordinate is set
+    if (xExtent[0] === xExtent[1]) {
+      xExtent[0] -= 0.5
+      xExtent[1] += 0.5
+    }
+    if (yExtent[0] === yExtent[1]) {
+      yExtent[0] += 0.5
+      yExtent[1] -= 0.5
+    }
 
     const xScale = (width * (1 - padding * 2)) / (xExtent[1] - xExtent[0])
     const yScale = (height * (1 - padding * 2)) / (yExtent[0] - yExtent[1])
