@@ -42,3 +42,7 @@ export function readPixels (reglInstance: regl.Regl, fbo: regl.Framebuffer2D): F
 export function clamp (num: number, min: number, max: number): number {
   return Math.min(Math.max(num, min), max)
 }
+
+export function isNumber (value: number | undefined | null | typeof NaN): boolean {
+  return value !== undefined && value !== null && !Number.isNaN(value)
+}
