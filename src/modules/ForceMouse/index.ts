@@ -15,9 +15,9 @@ export class ForceMouse extends CoreModule {
       framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
       primitive: 'triangle strip',
       count: 4,
-      attributes: { quad: createQuadBuffer(reglInstance) },
+      attributes: { vertexCoord: createQuadBuffer(reglInstance) },
       uniforms: {
-        position: () => points?.previousPositionFbo,
+        positionsTexture: () => points?.previousPositionFbo,
         mousePos: () => store.mousePosition,
         repulsion: () => config.simulation?.repulsionFromMouse,
       },

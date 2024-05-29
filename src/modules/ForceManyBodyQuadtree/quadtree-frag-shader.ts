@@ -1,17 +1,20 @@
+/* The fragment shader calculates the velocity of a point based on its position,
+* the positions of other points in a spatial hierarchy, and random factors.
+**/
 export function forceFrag (startLevel: number, maxLevels: number): string {
   startLevel = Math.min(startLevel, maxLevels)
   const delta = maxLevels - startLevel
-  const calcAdd = `
+  const calculateVelocityAdjustment = `
     float dist = sqrt(l);
     if (dist > 0.0) {
       float c = alpha * repulsion * centermass.b;
-      addVelocity += calcAdd(vec2(x, y), l, c);
+      addVelocity += calculateAdditionalVelocity(vec2(x, y), l, c);
       addVelocity += addVelocity * random.rg;
     }
   `
   function quad (level: number): string {
     if (level >= maxLevels) {
-      return calcAdd
+      return calculateVelocityAdjustment
     } else {
       const groupSize = Math.pow(2, level + 1)
 
@@ -35,7 +38,7 @@ export function forceFrag (startLevel: number, maxLevels: number): string {
           float y = centermass.g / centermass.b - pointPosition.g;
           float l = x * x + y * y;
           if ((width${level + 1} * width${level + 1}) / theta < l) {
-            ${calcAdd}
+            ${calculateVelocityAdjustment}
           } else {
             ${quad(level + 1)}
           }
@@ -49,16 +52,16 @@ export function forceFrag (startLevel: number, maxLevels: number): string {
 precision highp float;
 #endif
 
-uniform sampler2D position;
+uniform sampler2D positionsTexture;
 uniform sampler2D randomValues;
 uniform float spaceSize;
 uniform float repulsion;
 uniform float theta;
 uniform float alpha;
 uniform sampler2D level[${maxLevels}];
-varying vec2 index;
+varying vec2 textureCoords;
 
-vec2 calcAdd(vec2 xy, float l, float c) {
+vec2 calculateAdditionalVelocity(vec2 xy, float l, float c) {
   float distanceMin2 = 1.0;
   if (l < distanceMin2) l = sqrt(distanceMin2 * l);
   float add = c / l;
@@ -66,8 +69,8 @@ vec2 calcAdd(vec2 xy, float l, float c) {
 }
 
 void main() {
-  vec4 pointPosition = texture2D(position, index);
-  vec4 random = texture2D(randomValues, index);
+  vec4 pointPosition = texture2D(positionsTexture, textureCoords);
+  vec4 random = texture2D(randomValues, textureCoords);
 
   float width0 = spaceSize;
 

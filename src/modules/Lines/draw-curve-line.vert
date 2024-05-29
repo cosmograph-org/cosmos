@@ -3,12 +3,11 @@ attribute vec2 position, pointA, pointB;
 attribute vec4 color;
 attribute float width;
 attribute float arrow;
-uniform sampler2D positions;
+uniform sampler2D positionsTexture;
 uniform sampler2D pointGreyoutStatus;
-uniform mat3 transform;
+uniform mat3 transformationMatrix;
 uniform float pointsTextureSize;
 uniform float widthScale;
-// uniform float pointSizeScale;
 uniform float arrowSizeScale;
 uniform float spaceSize;
 uniform vec2 screenSize;
@@ -16,7 +15,6 @@ uniform float ratio;
 uniform vec2 linkVisibilityDistanceRange;
 uniform float linkVisibilityMinTransparency;
 uniform float greyoutOpacity;
-// uniform bool scalePointsOnZoom;
 uniform float curvedWeight;
 uniform float curvedLinkControlPointDistance;
 uniform float curvedLinkSegments;
@@ -47,26 +45,26 @@ void main() {
   vec4 greyoutStatusA = texture2D(pointGreyoutStatus, pointTexturePosA);
   vec4 greyoutStatusB = texture2D(pointGreyoutStatus, pointTexturePosB);
   // Position
-  vec4 pointPositionA = texture2D(positions, pointTexturePosA);
-  vec4 pointPositionB = texture2D(positions, pointTexturePosB);
+  vec4 pointPositionA = texture2D(positionsTexture, pointTexturePosA);
+  vec4 pointPositionB = texture2D(positionsTexture, pointTexturePosB);
   vec2 a = pointPositionA.xy;
   vec2 b = pointPositionB.xy;
   vec2 xBasis = b - a;
   vec2 yBasis = normalize(vec2(-xBasis.y, xBasis.x));
 
-  // Calculate link distance
+  // Calculate link distance and control point for curved link
   float linkDist = length(xBasis);
   float h = curvedLinkControlPointDistance;
   vec2 controlPoint = (a + b) / 2.0 + yBasis * linkDist * h;
 
-  float linkDistPx = linkDist * transform[0][0];
+  float linkDistPx = linkDist * transformationMatrix[0][0];
   
   float linkWidth = width * widthScale;
   float k = 2.0;
   float arrowWidth = max(5.0, linkWidth * k);
   arrowWidth *= arrowSizeScale;
 
-  float arrowWidthPx = arrowWidth / transform[0][0];
+  float arrowWidthPx = arrowWidth / transformationMatrix[0][0];
   arrowLength = min(0.3, (0.866 * arrowWidthPx * 2.0) / linkDist);
 
   float smoothWidth = 2.0;
@@ -79,7 +77,7 @@ void main() {
   smoothWidthRatio = smoothWidth / linkWidth;
   linkWidthArrowWidthRatio = arrowExtraWidth / linkWidth;
 
-  float linkWidthPx = linkWidth / transform[0][0];
+  float linkWidthPx = linkWidth / transformationMatrix[0][0];
 
   // Color
   vec3 rgbColor = color.rgb;
@@ -103,6 +101,6 @@ void main() {
   pointCurr += yBasisCurved * linkWidthPx * position.y;
   vec2 p = 2.0 * pointCurr / spaceSize - 1.0;
   p *= spaceSize / screenSize;
-  vec3 final =  transform * vec3(p, 1);
+  vec3 final =  transformationMatrix * vec3(p, 1);
   gl_Position = vec4(final.rg, 0, 1);
 }

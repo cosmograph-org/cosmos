@@ -1,8 +1,11 @@
+// The fragment shader calculates the velocity of a point based on its position,
+// the positions of other points in a spatial hierarchy, and random factors.
+
 #ifdef GL_ES
 precision highp float;
 #endif
 
-uniform sampler2D position;
+uniform sampler2D positionsTexture;
 uniform sampler2D levelFbo;
 uniform sampler2D randomValues;
 
@@ -10,9 +13,10 @@ uniform float levelTextureSize;
 uniform float repulsion;
 uniform float alpha;
 
-varying vec2 index;
+varying vec2 textureCoords;
 
-vec2 calcAdd (vec2 ij, vec2 pp) {
+// Calculate the additional velocity based on the center of mass
+vec2 calculateAdditionalVelocity (vec2 ij, vec2 pp) {
   vec2 add = vec2(0.0);
   vec4 centermass = texture2D(levelFbo, ij);
   if (centermass.r > 0.0 && centermass.g > 0.0 && centermass.b > 0.0) {
@@ -34,11 +38,14 @@ vec2 calcAdd (vec2 ij, vec2 pp) {
 }
 
 void main() {
-  vec4 pointPosition = texture2D(position, index);
-  vec4 random = texture2D(randomValues, index);
+  vec4 pointPosition = texture2D(positionsTexture, textureCoords);
+  vec4 random = texture2D(randomValues, textureCoords);
 
   vec4 velocity = vec4(0.0);
-  velocity.xy += calcAdd(pointPosition.xy / levelTextureSize, pointPosition.xy);
+
+  // Calculate additional velocity based on the point position
+  velocity.xy += calculateAdditionalVelocity(pointPosition.xy / levelTextureSize, pointPosition.xy);
+  // Apply random factor to the velocity
   velocity.xy += velocity.xy * random.rg;
 
   gl_FragColor = velocity;

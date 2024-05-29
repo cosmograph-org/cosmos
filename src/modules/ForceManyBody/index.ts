@@ -58,7 +58,7 @@ export class ForceManyBody extends CoreModule {
       framebuffer: (_: regl.DefaultContext, props: { levelFbo: regl.Framebuffer2D }) => props.levelFbo,
       primitive: 'triangle strip',
       count: 4,
-      attributes: { quad: createQuadBuffer(reglInstance) },
+      attributes: { vertexCoord: createQuadBuffer(reglInstance) },
     })
     this.calculateLevelsCommand = reglInstance({
       frag: calculateLevelFrag,
@@ -66,9 +66,9 @@ export class ForceManyBody extends CoreModule {
       framebuffer: (_: regl.DefaultContext, props: { levelFbo: regl.Framebuffer2D; levelTextureSize: number; cellSize: number }) => props.levelFbo,
       primitive: 'points',
       count: () => data.pointsNumber ?? 0,
-      attributes: { indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
+      attributes: { pointIndices: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
       uniforms: {
-        position: () => points?.previousPositionFbo,
+        positionsTexture: () => points?.previousPositionFbo,
         pointsTextureSize: () => store.pointsTextureSize,
         levelTextureSize: (_: regl.DefaultContext, props: { levelTextureSize: number }) => props.levelTextureSize,
         cellSize: (_: regl.DefaultContext, props: { cellSize: number }) => props.cellSize,
@@ -94,9 +94,9 @@ export class ForceManyBody extends CoreModule {
       framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
       primitive: 'triangle strip',
       count: 4,
-      attributes: { quad: createQuadBuffer(reglInstance) },
+      attributes: { vertexCoord: createQuadBuffer(reglInstance) },
       uniforms: {
-        position: () => points?.previousPositionFbo,
+        positionsTexture: () => points?.previousPositionFbo,
         level: (_, props: { levelFbo: regl.Framebuffer2D; levelTextureSize: number; level: number }) => props.level,
         levels: this.quadtreeLevels,
         levelFbo: (_, props) => props.levelFbo,
@@ -126,9 +126,9 @@ export class ForceManyBody extends CoreModule {
       framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
       primitive: 'triangle strip',
       count: 4,
-      attributes: { quad: createQuadBuffer(reglInstance) },
+      attributes: { vertexCoord: createQuadBuffer(reglInstance) },
       uniforms: {
-        position: () => points?.previousPositionFbo,
+        positionsTexture: () => points?.previousPositionFbo,
         randomValues: () => this.randomValuesFbo,
         levelFbo: (_, props: { levelFbo: regl.Framebuffer2D; levelTextureSize: number }) => props.levelFbo,
         levelTextureSize: (_, props) => props.levelTextureSize,
@@ -156,7 +156,7 @@ export class ForceManyBody extends CoreModule {
       framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
       primitive: 'triangle strip',
       count: 4,
-      attributes: { quad: createQuadBuffer(reglInstance) },
+      attributes: { vertexCoord: createQuadBuffer(reglInstance) },
     })
   }
 
