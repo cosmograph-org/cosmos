@@ -1,4 +1,4 @@
-import { getRgbaColor } from '@/graph/helper'
+import { getRgbaColor, isNumber } from '@/graph/helper'
 import { GraphConfig } from '@/graph/config'
 export class GraphData {
   public inputPointColors: number[] | undefined
@@ -56,10 +56,10 @@ export class GraphData {
     } else {
       this.pointColors = this.inputPointColors
       for (let i = 0; i < this.pointColors.length / 4; i++) {
-        if (this.pointColors[i * 4] === undefined || this.pointColors[i * 4] === null) this.pointColors[i * 4] = defaultRgba[0]
-        if (this.pointColors[i * 4 + 1] === undefined || this.pointColors[i * 4 + 1] === null) this.pointColors[i * 4 + 1] = defaultRgba[1]
-        if (this.pointColors[i * 4 + 2] === undefined || this.pointColors[i * 4 + 2] === null) this.pointColors[i * 4 + 2] = defaultRgba[2]
-        if (this.pointColors[i * 4 + 3] === undefined || this.pointColors[i * 4 + 3] === null) this.pointColors[i * 4 + 3] = defaultRgba[3]
+        if (!isNumber(this.pointColors[i * 4])) this.pointColors[i * 4] = defaultRgba[0]
+        if (!isNumber(this.pointColors[i * 4 + 1])) this.pointColors[i * 4 + 1] = defaultRgba[1]
+        if (!isNumber(this.pointColors[i * 4 + 2])) this.pointColors[i * 4 + 2] = defaultRgba[2]
+        if (!isNumber(this.pointColors[i * 4 + 3])) this.pointColors[i * 4 + 3] = defaultRgba[3]
       }
     }
   }
@@ -78,6 +78,11 @@ export class GraphData {
       this.pointSizes = new Array(this.pointsNumber).fill(this._config.defaultPointSize)
     } else {
       this.pointSizes = this.inputPointSizes
+      for (let i = 0; i < this.pointSizes.length; i++) {
+        if (!isNumber(this.pointSizes[i])) {
+          this.pointSizes[i] = this._config.defaultPointSize
+        }
+      }
     }
   }
 
@@ -91,17 +96,24 @@ export class GraphData {
     }
 
     // Sets link colors to default values from config if the input is missing or does not match input links number.
+    const defaultRgba = getRgbaColor(this._config.defaultLinkColor)
     if (this.inputLinkColors === undefined || this.inputLinkColors.length / 4 !== this.linksNumber) {
       this.linkColors = new Array(this.linksNumber * 4)
-      const rgba = getRgbaColor(this._config.defaultLinkColor)
+
       for (let i = 0; i < this.linkColors.length / 4; i++) {
-        this.linkColors[i * 4] = rgba[0]
-        this.linkColors[i * 4 + 1] = rgba[1]
-        this.linkColors[i * 4 + 2] = rgba[2]
-        this.linkColors[i * 4 + 3] = rgba[3]
+        this.linkColors[i * 4] = defaultRgba[0]
+        this.linkColors[i * 4 + 1] = defaultRgba[1]
+        this.linkColors[i * 4 + 2] = defaultRgba[2]
+        this.linkColors[i * 4 + 3] = defaultRgba[3]
       }
     } else {
       this.linkColors = this.inputLinkColors
+      for (let i = 0; i < this.linkColors.length / 4; i++) {
+        if (!isNumber(this.linkColors[i * 4])) this.linkColors[i * 4] = defaultRgba[0]
+        if (!isNumber(this.linkColors[i * 4 + 1])) this.linkColors[i * 4 + 1] = defaultRgba[1]
+        if (!isNumber(this.linkColors[i * 4 + 2])) this.linkColors[i * 4 + 2] = defaultRgba[2]
+        if (!isNumber(this.linkColors[i * 4 + 3])) this.linkColors[i * 4 + 3] = defaultRgba[3]
+      }
     }
   }
 
@@ -119,6 +131,11 @@ export class GraphData {
       this.linkWidths = new Array(this.linksNumber).fill(this._config.defaultLinkWidth)
     } else {
       this.linkWidths = this.inputLinkWidths
+      for (let i = 0; i < this.linkWidths.length; i++) {
+        if (!isNumber(this.linkWidths[i])) {
+          this.linkWidths[i] = this._config.defaultLinkWidth
+        }
+      }
     }
   }
 
