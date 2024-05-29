@@ -2,17 +2,17 @@
 precision highp float;
 #endif
 
-uniform sampler2D position;
+uniform sampler2D positionsTexture;
 uniform float pointsTextureSize;
 uniform float levelTextureSize;
 uniform float cellSize;
 
-attribute vec2 indexes;
+attribute vec2 pointIndices;
 
 varying vec4 rgba;
 
 void main() {
-  vec4 pointPosition = texture2D(position, indexes / pointsTextureSize);
+  vec4 pointPosition = texture2D(positionsTexture, pointIndices / pointsTextureSize);
   rgba = vec4(pointPosition.rg, 1.0, 0.0);
 
   float n = floor(pointPosition.x / cellSize);

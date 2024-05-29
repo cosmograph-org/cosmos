@@ -4,27 +4,27 @@ precision highp float;
 
 attribute float size;
 
-uniform sampler2D position;
+uniform sampler2D positionsTexture;
 uniform float pointsTextureSize;
 uniform float sizeScale;
 uniform float spaceSize;
 uniform vec2 screenSize;
 uniform float ratio;
-uniform mat3 transform;
+uniform mat3 transformationMatrix;
 uniform vec2 mousePosition;
 uniform bool scalePointsOnZoom;
 uniform float maxPointSize;
 
-attribute vec2 indexes;
+attribute vec2 pointIndices;
 
 varying vec4 rgba;
 
-float pointSize(float size) {
+float calculatePointSize(float size) {
   float pSize;
   if (scalePointsOnZoom) { 
-    pSize = size * ratio * transform[0][0];
+    pSize = size * ratio * transformationMatrix[0][0];
   } else {
-    pSize = size * ratio * min(5.0, max(1.0, transform[0][0] * 0.01));
+    pSize = size * ratio * min(5.0, max(1.0, transformationMatrix[0][0] * 0.01));
   }
   return min(pSize, maxPointSize * ratio);
 }
@@ -34,19 +34,21 @@ float euclideanDistance (float x1, float x2, float y1, float y2) {
 }
 
 void main() {
-  vec4 pointPosition = texture2D(position, (indexes + 0.5) / pointsTextureSize);
-  vec2 p = 2.0 * pointPosition.rg / spaceSize - 1.0;
-  p *= spaceSize / screenSize;
-  vec3 final = transform * vec3(p, 1);
+  vec4 pointPosition = texture2D(positionsTexture, (pointIndices + 0.5) / pointsTextureSize);
 
-  float pSize = size * sizeScale;
-  float pointRadius = 0.5 * pointSize(pSize);
+  // Transform point position to normalized device coordinates
+  vec2 normalizedPoint = 2.0 * pointPosition.rg / spaceSize - 1.0;
+  normalizedPoint *= spaceSize / screenSize;
+  vec3 finalPosition = transformationMatrix * vec3(normalizedPoint, 1);
 
-  vec2 pointScreenPosition = (final.xy + 1.0) * screenSize / 2.0;
+  float pointRadius = 0.5 * calculatePointSize(size * sizeScale);
+
+  vec2 pointScreenPosition = (finalPosition.xy + 1.0) * screenSize / 2.0;
   rgba = vec4(0.0);
   gl_Position = vec4(0.5, 0.5, 0.0, 1.0);
+  // Check if the mouse is within the point radius
   if (euclideanDistance(pointScreenPosition.x, mousePosition.x, pointScreenPosition.y, mousePosition.y) < pointRadius / ratio) {
-    float index = indexes.g * pointsTextureSize + indexes.r;
+    float index = pointIndices.g * pointsTextureSize + pointIndices.r;
     rgba = vec4(index, size, pointPosition.xy);
     gl_Position = vec4(-0.5, -0.5, 0.0, 1.0);
   }

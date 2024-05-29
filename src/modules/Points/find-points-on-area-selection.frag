@@ -2,36 +2,36 @@
 precision highp float;
 #endif
 
-uniform sampler2D position;
+uniform sampler2D positionsTexture;
 uniform sampler2D pointSize;
 uniform float sizeScale;
 uniform float spaceSize;
 uniform vec2 screenSize;
 uniform float ratio;
-uniform mat3 transform;
+uniform mat3 transformationMatrix;
 uniform vec2 selection[2];
 uniform bool scalePointsOnZoom;
 uniform float maxPointSize;
 
-varying vec2 index;
+varying vec2 textureCoords;
 
 float pointSizeF(float size) {
   float pSize;
   if (scalePointsOnZoom) { 
-    pSize = size * ratio * transform[0][0];
+    pSize = size * ratio * transformationMatrix[0][0];
   } else {
-    pSize = size * ratio * min(5.0, max(1.0, transform[0][0] * 0.01));
+    pSize = size * ratio * min(5.0, max(1.0, transformationMatrix[0][0] * 0.01));
   }
   return min(pSize, maxPointSize * ratio);
 }
 
 void main() {
-  vec4 pointPosition = texture2D(position, index);
+  vec4 pointPosition = texture2D(positionsTexture, textureCoords);
   vec2 p = 2.0 * pointPosition.rg / spaceSize - 1.0;
   p *= spaceSize / screenSize;
-  vec3 final = transform * vec3(p, 1);
+  vec3 final = transformationMatrix * vec3(p, 1);
 
-  vec4 pSize = texture2D(pointSize, index);
+  vec4 pSize = texture2D(pointSize, textureCoords);
   float size = pSize.r * sizeScale;
 
   float left = 2.0 * (selection[0].x - 0.5 * pointSizeF(size)) / screenSize.x - 1.0;
