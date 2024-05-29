@@ -34,7 +34,7 @@ export class ForceCenter extends CoreModule {
       framebuffer: this.centermassFbo,
       primitive: 'triangle strip',
       count: 4,
-      attributes: { quad: createQuadBuffer(reglInstance) },
+      attributes: { vertexCoord: createQuadBuffer(reglInstance) },
     })
     this.calculateCentermassCommand = reglInstance({
       frag: calculateCentermassFrag,
@@ -42,9 +42,9 @@ export class ForceCenter extends CoreModule {
       framebuffer: () => this.centermassFbo as regl.Framebuffer2D,
       primitive: 'points',
       count: () => data.pointsNumber ?? 0,
-      attributes: { indexes: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
+      attributes: { pointIndices: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
       uniforms: {
-        position: () => points?.previousPositionFbo,
+        positionsTexture: () => points?.previousPositionFbo,
         pointsTextureSize: () => store.pointsTextureSize,
       },
       blend: {
@@ -67,11 +67,11 @@ export class ForceCenter extends CoreModule {
       framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
       primitive: 'triangle strip',
       count: 4,
-      attributes: { quad: createQuadBuffer(reglInstance) },
+      attributes: { vertexCoord: createQuadBuffer(reglInstance) },
       uniforms: {
-        position: () => points?.previousPositionFbo,
-        centermass: () => this.centermassFbo,
-        center: () => config.simulation?.center,
+        positionsTexture: () => points?.previousPositionFbo,
+        centermassTexture: () => this.centermassFbo,
+        centerForce: () => config.simulation?.center,
         alpha: () => store.alpha,
       },
     })

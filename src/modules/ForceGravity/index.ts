@@ -15,9 +15,9 @@ export class ForceGravity extends CoreModule {
       framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
       primitive: 'triangle strip',
       count: 4,
-      attributes: { quad: createQuadBuffer(reglInstance) },
+      attributes: { vertexCoord: createQuadBuffer(reglInstance) },
       uniforms: {
-        position: () => points?.previousPositionFbo,
+        positionsTexture: () => points?.previousPositionFbo,
         gravity: () => config.simulation?.gravity,
         spaceSize: () => store.adjustedSpaceSize,
         alpha: () => store.alpha,

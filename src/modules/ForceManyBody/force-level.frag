@@ -1,8 +1,11 @@
+// The fragment shader calculates the velocity of a point based on its position
+// and the positions of other points in different levels of a spatial hierarchy.
+
 #ifdef GL_ES
 precision highp float;
 #endif
 
-uniform sampler2D position;
+uniform sampler2D positionsTexture;
 uniform sampler2D levelFbo;
 
 uniform float level;
@@ -13,11 +16,11 @@ uniform float alpha;
 uniform float spaceSize;
 uniform float theta;
 
-varying vec2 index;
+varying vec2 textureCoords;
 
 const float MAX_LEVELS_NUM = 14.0;
 
-vec2 calcAdd (vec2 ij, vec2 pp) {
+vec2 calculateAdditionalVelocity (vec2 ij, vec2 pp) {
   vec2 add = vec2(0.0);
   vec4 centermass = texture2D(levelFbo, ij);
   if (centermass.r > 0.0 && centermass.g > 0.0 && centermass.b > 0.0) {
@@ -39,7 +42,7 @@ vec2 calcAdd (vec2 ij, vec2 pp) {
 }
 
 void main() {
-  vec4 pointPosition = texture2D(position, index);
+  vec4 pointPosition = texture2D(positionsTexture, textureCoords);
   float x = pointPosition.x;
   float y = pointPosition.y;
 
@@ -55,6 +58,7 @@ void main() {
 
   float cellSize = 0.0;
 
+  // Iterate over levels to adjust the boundaries based on the current level
   for (float i = 0.0; i < MAX_LEVELS_NUM; i += 1.0) {
     if (i <= level) {
       left += cellSize * n_left;
@@ -81,34 +85,35 @@ void main() {
 
   vec4 velocity = vec4(vec2(0.0), 1.0, 0.0);
 
+  // Calculate the additional velocity based on neighboring cells
   for (float i = 0.0; i < 12.0; i += 1.0) {
     for (float j = 0.0; j < 4.0; j += 1.0) {
       float n = left + cellSize * j;
       float m = top + cellSize * n_top + cellSize * i;
 
       if (n < (left + n_left * cellSize) && m < bottom) {
-        velocity.xy += calcAdd(vec2(n / cellSize, m / cellSize) / levelTextureSize, pointPosition.xy);
+        velocity.xy += calculateAdditionalVelocity(vec2(n / cellSize, m / cellSize) / levelTextureSize, pointPosition.xy);
       }
 
       n = left + cellSize * i;
       m = top + cellSize * j;
 
       if (n < (right - n_right * cellSize) && m < (top + n_top * cellSize)) {
-        velocity.xy += calcAdd(vec2(n / cellSize, m / cellSize) / levelTextureSize, pointPosition.xy);
+        velocity.xy += calculateAdditionalVelocity(vec2(n / cellSize, m / cellSize) / levelTextureSize, pointPosition.xy);
       }
 
       n = right - n_right * cellSize + cellSize * j;
       m = top + cellSize * i;
 
       if (n < right && m < (bottom - n_bottom * cellSize)) {
-        velocity.xy += calcAdd(vec2(n / cellSize, m / cellSize) / levelTextureSize, pointPosition.xy);
+        velocity.xy += calculateAdditionalVelocity(vec2(n / cellSize, m / cellSize) / levelTextureSize, pointPosition.xy);
       }
 
       n = left + n_left * cellSize + cellSize * i;
       m = bottom - n_bottom * cellSize + cellSize * j;
 
       if (n < right && m < bottom) {
-        velocity.xy += calcAdd(vec2(n / cellSize, m / cellSize) / levelTextureSize, pointPosition.xy);
+        velocity.xy += calculateAdditionalVelocity(vec2(n / cellSize, m / cellSize) / levelTextureSize, pointPosition.xy);
       }
     }
   }

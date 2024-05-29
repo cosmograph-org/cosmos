@@ -35,13 +35,6 @@ export class Lines extends CoreModule {
           buffer: () => this.curveLineBuffer,
           divisor: 0,
         },
-        // points: {
-        //   buffer: () => this.pointsBuffer,
-        //   divisor: 1,
-        //   offset: Float32Array.BYTES_PER_ELEMENT * 0,
-        //   stride: Float32Array.BYTES_PER_ELEMENT * 2,
-        //   type: 'uint16',
-        // },
         pointA: {
           buffer: () => this.pointsBuffer,
           divisor: 1,
@@ -74,9 +67,9 @@ export class Lines extends CoreModule {
         },
       },
       uniforms: {
-        positions: () => this.points?.currentPositionFbo,
+        positionsTexture: () => this.points?.currentPositionFbo,
         pointGreyoutStatus: () => this.points?.greyoutStatusFbo,
-        transform: () => store.transform,
+        transformationMatrix: () => store.transform,
         pointsTextureSize: () => store.pointsTextureSize,
         pointSizeScale: () => config.pointSizeScale,
         widthScale: () => config.linkWidthScale,
