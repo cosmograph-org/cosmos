@@ -5,6 +5,7 @@ export class GraphData {
   public inputPointSizes: number[] | undefined
   public inputLinkColors: number[] | undefined
   public inputLinkWidths: number[] | undefined
+  public inputLinkStrength: number[] | undefined
 
   public pointPositions: number[] | undefined
   public pointColors: number[] | undefined
@@ -15,9 +16,16 @@ export class GraphData {
   public linkWidths: number[] | undefined
   public linkArrowsBoolean: boolean[] | undefined
   public linkArrows: number[] | undefined
+  public linkStrength: (number | undefined)[] | undefined
 
-  public sourceIndexToTargetIndices: (number[] | undefined)[] | undefined
-  public targetIndexToSourceIndices: (number[] | undefined)[] | undefined
+  /**
+   * Each inner array of `sourceIndexToTargetIndices` and `targetIndexToSourceIndices` contains pairs where:
+   *   - The first value is the target/source index in the node array.
+   *   - The second value is the link index in the array of links.
+  */
+  public sourceIndexToTargetIndices: ([number, number][] | undefined)[] | undefined
+  public targetIndexToSourceIndices: ([number, number][] | undefined)[] | undefined
+
   public degree: number[] | undefined
 
   private _config: GraphConfig
@@ -156,6 +164,18 @@ export class GraphData {
     }
   }
 
+  public updateLinkStrength (): void {
+    if (this.linksNumber === undefined) {
+      this.linkStrength = undefined
+    }
+
+    if (this.inputLinkStrength === undefined || this.inputLinkStrength.length !== this.linksNumber) {
+      this.linkStrength = undefined
+    } else {
+      this.linkStrength = this.inputLinkStrength
+    }
+  }
+
   public update (): void {
     this.updatePointColor()
     this.updatePointSize()
@@ -163,13 +183,14 @@ export class GraphData {
     this.updateLinkColor()
     this.updateLinkWidth()
     this.updateArrows()
+    this.updateLinkStrength()
 
     this._createAdjacencyLists()
     this._calculateDegrees()
   }
 
   public getAdjacentIndices (index: number): number[] | undefined {
-    return [...(this.sourceIndexToTargetIndices?.[index] || []), ...(this.targetIndexToSourceIndices?.[index] || [])]
+    return [...(this.sourceIndexToTargetIndices?.[index]?.[0] || []), ...(this.targetIndexToSourceIndices?.[index]?.[0] || [])]
   }
 
   private _createAdjacencyLists (): void {
@@ -186,10 +207,10 @@ export class GraphData {
       const targetIndex = this.links[i * 2 + 1]
       if (sourceIndex !== undefined && targetIndex !== undefined) {
         if (this.sourceIndexToTargetIndices[sourceIndex] === undefined) this.sourceIndexToTargetIndices[sourceIndex] = []
-        this.sourceIndexToTargetIndices[sourceIndex]?.push(targetIndex)
+        this.sourceIndexToTargetIndices[sourceIndex]?.push([targetIndex, i])
 
         if (this.targetIndexToSourceIndices[targetIndex] === undefined) this.targetIndexToSourceIndices[targetIndex] = []
-        this.targetIndexToSourceIndices[targetIndex]?.push(sourceIndex)
+        this.targetIndexToSourceIndices[targetIndex]?.push([sourceIndex, i])
       }
     }
   }

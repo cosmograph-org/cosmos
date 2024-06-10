@@ -242,6 +242,10 @@ export class Graph {
     this.graph.linkArrowsBoolean = linkArrows
   }
 
+  public setLinkStrength (linkStrength: number[]): void {
+    this.graph.inputLinkStrength = linkStrength
+  }
+
   public render (runSimulation = true): void {
     this.graph.update()
     const { fitViewOnInit, fitViewDelay, fitViewByPointsInRect, initialZoomLevel } = this.config
