@@ -77,6 +77,7 @@ export class Graph {
     this.canvasD3Selection = select<HTMLCanvasElement, undefined>(canvas)
     this.canvasD3Selection
       .on('mouseenter.cosmos', () => { this._isMouseOnCanvas = true })
+      .on('mousemove.cosmos', () => { this._isMouseOnCanvas = true })
       .on('mouseleave.cosmos', () => { this._isMouseOnCanvas = false })
     this.zoomInstance.behavior
       .on('start.detect', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => { this.currentEvent = e })
