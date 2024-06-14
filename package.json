@@ -34,6 +34,7 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@types/d3-array": "^3.0.3",
     "@types/d3-color": "^3.1.0",
+    "@types/d3-drag": "^3.0.7",
     "@types/d3-ease": "^3.0.0",
     "@types/d3-scale": "^4.0.2",
     "@types/d3-selection": "^3.0.2",
@@ -59,6 +60,7 @@
   "dependencies": {
     "d3-array": "^3.2.0",
     "d3-color": "^3.1.0",
+    "d3-drag": "^3.0.0",
     "d3-ease": "^3.0.1",
     "d3-scale": "^4.0.2",
     "d3-selection": "^3.0.0",

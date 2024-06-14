@@ -17,6 +17,7 @@ import updatePositionFrag from '@/graph/modules/Points/update-position.frag'
 import { createIndexesBuffer, createQuadBuffer, destroyBuffer, destroyFramebuffer } from '@/graph/modules/Shared/buffer'
 import { createTrackedIndicesBuffer, createTrackedPositionsBuffer } from '@/graph/modules/Points/tracked-buffer'
 import trackPositionsFrag from '@/graph/modules/Points/track-positions.frag'
+import dragPointFrag from '@/graph/modules/Points/drag-point.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
 import clearFrag from '@/graph/modules/Shared/clear.frag'
 import { readPixels } from '@/graph/helper'
@@ -37,6 +38,7 @@ export class Points extends CoreModule {
   private drawCommand: regl.DrawCommand | undefined
   private drawHighlightedCommand: regl.DrawCommand | undefined
   private updatePositionCommand: regl.DrawCommand | undefined
+  private dragPointCommand: regl.DrawCommand | undefined
   private findPointsOnAreaSelectionCommand: regl.DrawCommand | undefined
   private findHoveredPointCommand: regl.DrawCommand | undefined
   private clearHoveredFboCommand: regl.DrawCommand | undefined
@@ -67,17 +69,17 @@ export class Points extends CoreModule {
       stencil: false,
     })
 
-    if (!this.config.disableSimulation) {
-      this.previousPositionFbo = reglInstance.framebuffer({
-        color: reglInstance.texture({
-          data: initialState,
-          shape: [pointsTextureSize, pointsTextureSize, 4],
-          type: 'float',
-        }),
-        depth: false,
-        stencil: false,
-      })
+    this.previousPositionFbo = reglInstance.framebuffer({
+      color: reglInstance.texture({
+        data: initialState,
+        shape: [pointsTextureSize, pointsTextureSize, 4],
+        type: 'float',
+      }),
+      depth: false,
+      stencil: false,
+    })
 
+    if (!this.config.disableSimulation) {
       // Create velocity buffer
       this.velocityFbo = reglInstance.framebuffer({
         color: reglInstance.texture({
@@ -132,6 +134,22 @@ export class Points extends CoreModule {
         },
       })
     }
+    this.dragPointCommand = reglInstance({
+      frag: dragPointFrag,
+      vert: updateVert,
+      framebuffer: () => this.currentPositionFbo as regl.Framebuffer2D,
+      primitive: 'triangle strip',
+      count: 4,
+      attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+      uniforms: {
+        positionsTexture: () => this.previousPositionFbo,
+        mousePos: () => store.mousePosition,
+        dragPointTextureIndex: () => ([
+          store.draggingPointIndex !== undefined ? (store.draggingPointIndex % store.pointsTextureSize) / store.pointsTextureSize : -1,
+          store.draggingPointIndex !== undefined ? (Math.floor(store.draggingPointIndex / store.pointsTextureSize)) / store.pointsTextureSize : -1,
+        ]),
+      },
+    })
 
     this.drawCommand = reglInstance({
       frag: drawPointsFrag,
@@ -403,6 +421,11 @@ export class Points extends CoreModule {
 
   public updatePosition (): void {
     this.updatePositionCommand?.()
+    this.swapFbo()
+  }
+
+  public drag (): void {
+    this.dragPointCommand?.()
     this.swapFbo()
   }
 
