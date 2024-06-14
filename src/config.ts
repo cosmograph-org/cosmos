@@ -1,4 +1,5 @@
 import { D3ZoomEvent } from 'd3-zoom'
+import { D3DragEvent } from 'd3-drag'
 import {
   defaultPointColor,
   defaultGreyoutPointOpacity,
@@ -10,6 +11,7 @@ import {
   defaultConfigValues,
 } from '@/graph/variables'
 import { isPlainObject } from '@/graph/helper'
+import { type Hovered } from '@/graph/modules/Store'
 
 export interface GraphEvents {
   /**
@@ -37,20 +39,23 @@ export interface GraphEvents {
    * as a result of a mouse event, zooming and panning, or movement of points.
    * The point index will be passed as the first argument, position as the second argument
    * and the corresponding mouse event or D3's zoom event as the third argument:
-   * `(index: number, pointPosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined) => void`.
+   * `(index: number, pointPosition: [number, number], event: MouseEvent | D3DragEvent<HTMLCanvasElement, undefined, Hovered>
+   * | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined) => void`.
    * Default value: `undefined`
    */
   onPointMouseOver?: (
-      index: number, pointPosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined
+      index: number,
+      pointPosition: [number, number],
+      event: MouseEvent | D3DragEvent<HTMLCanvasElement, undefined, Hovered> | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined
     ) => void;
   /**
    * Callback function that will be called when a point is no longer underneath
    * the mouse pointer because of a mouse event, zoom/pan event, or movement of points.
    * The corresponding mouse event or D3's zoom event will be passed as the first argument:
-   * `(event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined) => void`.
+   * `(event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | D3DragEvent<HTMLCanvasElement, undefined, Hovered> | undefined) => void`.
    * Default value: `undefined`
    */
-  onPointMouseOut?: (event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined) => void;
+  onPointMouseOut?: (event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | D3DragEvent<HTMLCanvasElement, undefined, Hovered> | undefined) => void;
   /**
    * Callback function that will be called when zooming or panning starts.
    * First argument is a D3 Zoom Event and second indicates whether
@@ -75,6 +80,27 @@ export interface GraphEvents {
    * Default value: `undefined`
    */
   onZoomEnd?: (e: D3ZoomEvent<HTMLCanvasElement, undefined>, userDriven: boolean) => void;
+  /**
+   * Callback function that will be called when dragging starts.
+   * First argument is a D3 Drag Event:
+   * `(event: D3DragEvent) => void`.
+   * Default value: `undefined`
+   */
+  onDragStart?: (e: D3DragEvent<HTMLCanvasElement, undefined, Hovered>) => void;
+  /**
+   * Callback function that will be called continuously during dragging.
+   * First argument is a D3 Drag Event:
+   * `(event: D3DragEvent) => void`.
+   * Default value: `undefined`
+   */
+  onDrag?: (e: D3DragEvent<HTMLCanvasElement, undefined, Hovered>) => void;
+  /**
+   * Callback function that will be called when dragging ends.
+   * First argument is a D3 Drag Event:
+   * `(event: D3DragEvent) => void`.
+   * Default value: `undefined`
+   */
+  onDragEnd?: (e: D3DragEvent<HTMLCanvasElement, undefined, Hovered>) => void;
 }
 
 export interface GraphSimulationSettings {
@@ -343,6 +369,11 @@ export interface GraphConfigInterface {
    */
   disableZoom?: boolean;
   /**
+   * Disables dragging points.
+   * Default: `false`
+   */
+  disableDrag?: boolean;
+  /**
    * Whether to center and zoom the view to fit all points in the scene on initialization or not.
    * Default: `true`
    */
@@ -429,6 +460,9 @@ export class GraphConfig implements GraphConfigInterface {
     onZoomStart: undefined,
     onZoom: undefined,
     onZoomEnd: undefined,
+    onDragStart: undefined,
+    onDrag: undefined,
+    onDragEnd: undefined,
   }
 
   public showFPSMonitor = defaultConfigValues.showFPSMonitor
@@ -438,6 +472,7 @@ export class GraphConfig implements GraphConfigInterface {
   public scalePointsOnZoom = defaultConfigValues.scalePointsOnZoom
   public initialZoomLevel = undefined
   public disableZoom = defaultConfigValues.disableZoom
+  public disableDrag = defaultConfigValues.disableDrag
   public fitViewOnInit = defaultConfigValues.fitViewOnInit
   public fitViewDelay = defaultConfigValues.fitViewDelay
   public fitViewByPointsInRect = undefined
