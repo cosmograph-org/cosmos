@@ -2,6 +2,7 @@ import { select, Selection } from 'd3-selection'
 import 'd3-transition'
 import { easeQuadInOut, easeQuadIn, easeQuadOut } from 'd3-ease'
 import { D3ZoomEvent } from 'd3-zoom'
+import { D3DragEvent } from 'd3-drag'
 import regl from 'regl'
 import { GraphConfig, GraphConfigInterface } from '@/graph/config'
 import { getRgbaColor, readPixels } from '@/graph/helper'
@@ -15,8 +16,9 @@ import { FPSMonitor } from '@/graph/modules/FPSMonitor'
 import { GraphData } from '@/graph/modules/GraphData'
 import { Lines } from '@/graph/modules/Lines'
 import { Points } from '@/graph/modules/Points'
-import { Store, ALPHA_MIN, MAX_POINT_SIZE } from '@/graph/modules/Store'
+import { Store, ALPHA_MIN, MAX_POINT_SIZE, type Hovered } from '@/graph/modules/Store'
 import { Zoom } from '@/graph/modules/Zoom'
+import { Drag } from '@/graph/modules/Drag'
 import { defaultConfigValues, defaultScaleToZoom } from '@/graph/variables'
 
 export class Graph {
@@ -38,9 +40,11 @@ export class Graph {
   private forceLinkOutgoing: ForceLink | undefined
   private forceMouse: ForceMouse | undefined
   private zoomInstance = new Zoom(this.store, this.config)
+  private dragInstance = new Drag(this.store, this.config)
+
   private fpsMonitor: FPSMonitor | undefined
   private hasParticleSystemDestroyed = false
-  private currentEvent: D3ZoomEvent<HTMLCanvasElement, undefined> | MouseEvent | undefined
+  private currentEvent: D3ZoomEvent<HTMLCanvasElement, undefined> | D3DragEvent<HTMLCanvasElement, undefined, Hovered> | MouseEvent | undefined
   /**
    * The value of `_findHoveredPointExecutionCount` is incremented by 1 on each animation frame.
    * When the counter reaches 2 (or more), it is reset to 0 and the `findHoveredPoint` method is executed.
@@ -87,12 +91,29 @@ export class Graph {
         this.currentEvent = e
       })
       .on('end.detect', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => { this.currentEvent = e })
+    this.dragInstance.behavior
+      .on('start.detect', (e: D3DragEvent<HTMLCanvasElement, undefined, Hovered>) => {
+        this.currentEvent = e
+        this.updateCanvasCursor()
+      })
+      .on('drag.detect', (e: D3DragEvent<HTMLCanvasElement, undefined, Hovered>) => {
+        if (this.dragInstance.isActive) {
+          this.updateMousePosition(e)
+        }
+        this.currentEvent = e
+      })
+      .on('end.detect', (e: D3DragEvent<HTMLCanvasElement, undefined, Hovered>) => {
+        this.currentEvent = e
+        this.updateCanvasCursor()
+      })
     this.canvasD3Selection
+      .call(this.zoomInstance.behavior)
+      .call(this.dragInstance.behavior)
       .call(this.zoomInstance.behavior)
       .on('click', this.onClick.bind(this))
       .on('mousemove', this.onMouseMove.bind(this))
       .on('contextmenu', this.onRightClickMouse.bind(this))
-    if (this.config.disableZoom) this.disableZoom()
+    if (this.config.disableZoom || this.config.disableDrag) this.updateZoomDragBehaviors()
     this.setZoomLevel(this.config.initialZoomLevel ?? 1)
 
     this.reglInstance = regl({
@@ -209,9 +230,8 @@ export class Graph {
       this.store.maxPointSize = (this.reglInstance.limits.pointSizeDims[1] ?? MAX_POINT_SIZE) / this.config.pixelRatio
     }
 
-    if (prevConfig.disableZoom !== this.config.disableZoom) {
-      if (this.config.disableZoom) this.disableZoom()
-      else this.enableZoom()
+    if (prevConfig.disableZoom !== this.config.disableZoom || prevConfig.disableDrag !== this.config.disableDrag) {
+      this.updateZoomDragBehaviors()
     }
   }
 
@@ -680,7 +700,7 @@ export class Graph {
     this.requestAnimationFrameId = window.requestAnimationFrame((now) => {
       this.fpsMonitor?.begin()
       this.resizeCanvas()
-      this.findHoveredPoint()
+      if (!this.dragInstance.isActive) this.findHoveredPoint()
 
       if (!disableSimulation) {
         if (this.isRightClickMouse) {
@@ -722,6 +742,8 @@ export class Graph {
         this.points.trackPoints()
       }
 
+      if (this.dragInstance.isActive) this.points.drag()
+
       // Clear canvas
       this.reglInstance.clear({
         color: this.store.backgroundColor,
@@ -759,10 +781,11 @@ export class Graph {
     )
   }
 
-  private updateMousePosition (event: MouseEvent): void {
-    if (!event || event.offsetX === undefined || event.offsetY === undefined) return
-    const mouseX = event.offsetX
-    const mouseY = event.offsetY
+  private updateMousePosition (event: MouseEvent | D3DragEvent<HTMLCanvasElement, undefined, Hovered>): void {
+    if (!event) return
+    const mouseX = (event as MouseEvent).offsetX ?? (event as D3DragEvent<HTMLCanvasElement, undefined, Hovered>).x
+    const mouseY = (event as MouseEvent).offsetY ?? (event as D3DragEvent<HTMLCanvasElement, undefined, Hovered>).y
+    if (mouseX === undefined || mouseY === undefined) return
     this.store.mousePosition = this.zoomInstance.convertScreenToSpacePosition([mouseX, mouseY])
     this.store.screenMousePosition = [mouseX, (this.store.screenSize[1] - mouseY)]
   }
@@ -813,14 +836,18 @@ export class Graph {
       .call(this.zoomInstance.behavior.transform, transform)
   }
 
-  private disableZoom (): void {
-    this.canvasD3Selection
-      .call(this.zoomInstance.behavior)
-      .on('wheel.zoom', null)
-  }
+  private updateZoomDragBehaviors (): void {
+    if (this.config.disableDrag) {
+      this.canvasD3Selection
+        .call(this.dragInstance.behavior)
+        .on('.drag', null)
+    } else this.canvasD3Selection.call(this.dragInstance.behavior)
 
-  private enableZoom (): void {
-    this.canvasD3Selection.call(this.zoomInstance.behavior)
+    if (this.config.disableZoom) {
+      this.canvasD3Selection
+        .call(this.zoomInstance.behavior)
+        .on('wheel.zoom', null)
+    } else this.canvasD3Selection.call(this.zoomInstance.behavior)
   }
 
   private findHoveredPoint (): void {
@@ -835,14 +862,11 @@ export class Graph {
     let isMouseout = false
     const pixels = readPixels(this.reglInstance, this.points.hoveredFbo as regl.Framebuffer2D)
     const pointSize = pixels[1] as number
-    const position = [0, 0] as [number, number]
     if (pointSize) {
       const hoveredIndex = pixels[0] as number
       if (this.store.hoveredPoint?.index !== hoveredIndex) isMouseover = true
       const pointX = pixels[2] as number
       const pointY = pixels[3] as number
-      position[0] = pointX
-      position[1] = pointY
       this.store.hoveredPoint = {
         index: hoveredIndex,
         position: [pointX, pointY],
@@ -860,6 +884,15 @@ export class Graph {
       )
     }
     if (isMouseout) this.config.events.onPointMouseOut?.(this.currentEvent)
+    this.updateCanvasCursor()
+  }
+
+  private updateCanvasCursor (): void {
+    if (this.dragInstance.isActive) select(this.canvas).style('cursor', 'grabbing')
+    else if (this.store.hoveredPoint) {
+      if (this.config.disableDrag) select(this.canvas).style('cursor', 'pointer')
+      else select(this.canvas).style('cursor', 'grab')
+    } else select(this.canvas).style('cursor', null)
   }
 }
 

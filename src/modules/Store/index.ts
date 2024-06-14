@@ -7,7 +7,7 @@ import { hoveredPointRingOpacity, focusedPointRingOpacity, defaultConfigValues }
 export const ALPHA_MIN = 0.001
 export const MAX_POINT_SIZE = 64
 
-type Hovered = { index: number; position: [ number, number ] }
+export type Hovered = { index: number; position: [ number, number ] }
 type Focused = { index: number }
 
 export class Store {
@@ -26,6 +26,7 @@ export class Store {
   public maxPointSize = MAX_POINT_SIZE
   public hoveredPoint: Hovered | undefined = undefined
   public focusedPoint: Focused | undefined = undefined
+  public draggingPointIndex: number | undefined = undefined
   public adjustedSpaceSize = defaultConfigValues.spaceSize
 
   public hoveredPointRingColor = [1, 1, 1, hoveredPointRingOpacity]
