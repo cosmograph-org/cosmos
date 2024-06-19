@@ -155,6 +155,9 @@ export class Graph {
     if (this.config.randomSeed !== undefined) this.store.addRandomSeed(this.config.randomSeed)
   }
 
+  /**
+   * Returns the current simulation progress
+   */
   public get progress (): number {
     return this.store.simulationProgress
   }
@@ -235,38 +238,99 @@ export class Graph {
     }
   }
 
+  /**
+   * Sets the positions for the graph points.
+   *
+   * @param {number[]} pointPositions - An array representing the positions of points in the format [x1, y1, x2, y2, ..., xn, yn],
+   * where `n` is the index of the point.
+   * Example: `[1, 2, 3, 4, 5, 6]` sets the first point to (1, 2), the second point to (3, 4), and so on.
+   */
   public setPointPositions (pointPositions: number[]): void {
     this.graph.pointPositions = pointPositions
   }
 
+  /**
+   * Sets the colors for the graph points.
+   *
+   * @param {number[]} pointColors - An array representing the colors of points in the format [r1, g1, b1, a1, r2, g2, b2, a2, ..., rn, gn, bn, an],
+   * where each color is represented in RGBA format.
+   * Example: `[255, 0, 0, 1, 0, 255, 0, 1]` sets the first point to red and the second point to green.
+  */
   public setPointColors (pointColors: number[]): void {
     this.graph.inputPointColors = pointColors
   }
 
+  /**
+   * Sets the sizes for the graph points.
+   *
+   * @param {number[]} pointSizes - An array representing the sizes of points in the format [size1, size2, ..., sizen],
+   * where `n` is the index of the point.
+   * Example: `[10, 20, 30]` sets the first point to size 10, the second point to size 20, and the third point to size 30.
+   */
   public setPointSizes (pointSizes: number[]): void {
     this.graph.inputPointSizes = pointSizes
   }
 
+  /**
+   * Sets the links for the graph.
+   *
+   * @param {number[]} links - An array representing the links between points in the format [source1, target1, source2, target2, ..., sourcen, targetn],
+   * where `source` and `target` are the indices of the points being linked.
+   * Example: `[0, 1, 1, 2]` creates a link from point 0 to point 1 and another link from point 1 to point 2.
+   */
   public setLinks (links: number[]): void {
     this.graph.links = links
   }
 
+  /**
+   * Sets the colors for the graph links.
+   *
+   * @param {number[]} linkColors - An array representing the colors of links in the format [r1, g1, b1, a1, r2, g2, b2, a2, ..., rn, gn, bn, an],
+   * where each color is in RGBA format.
+   * Example: `[255, 0, 0, 1, 0, 255, 0, 1]` sets the first link to red and the second link to green.
+   */
   public setLinkColors (linkColors: number[]): void {
     this.graph.inputLinkColors = linkColors
   }
 
+  /**
+   * Sets the widths for the graph links.
+   *
+   * @param {number[]} linkWidths - An array representing the widths of links in the format [width1, width2, ..., widthn],
+   * where `n` is the index of the link.
+   * Example: `[1, 2, 3]` sets the first link to width 1, the second link to width 2, and the third link to width 3.
+   */
   public setLinkWidths (linkWidths: number[]): void {
     this.graph.inputLinkWidths = linkWidths
   }
 
+  /**
+   * Sets the arrows for the graph links.
+   *
+   * @param {boolean[]} linkArrows - An array of booleans indicating whether each link should have an arrow,
+   * in the format [arrow1, arrow2, ..., arrown], where `n` is the index of the link.
+   * Example: `[true, false, true]` sets arrows on the first and third links, but not on the second link.
+   */
   public setLinkArrows (linkArrows: boolean[]): void {
     this.graph.linkArrowsBoolean = linkArrows
   }
 
+  /**
+   * Sets the strength for the graph links.
+   *
+   * @param {number[]} linkStrength - An array representing the strength of each link in the format [strength1, strength2, ..., strengthn],
+   * where `n` is the index of the link.
+   * Example: `[1, 2, 3]` sets the first link to strength 1, the second link to strength 2, and the third link to strength 3.
+   */
   public setLinkStrength (linkStrength: number[]): void {
     this.graph.inputLinkStrength = linkStrength
   }
 
+  /**
+   * Renders the graph.
+   *
+   * @param {boolean} [runSimulation=true] - Optional flag to determine if the simulation should run on render.
+   */
   public render (runSimulation = true): void {
     this.graph.update()
     const { fitViewOnInit, fitViewDelay, fitViewByPointsInRect, initialZoomLevel } = this.config
