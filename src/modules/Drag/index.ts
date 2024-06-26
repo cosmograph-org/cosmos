@@ -7,7 +7,9 @@ export class Drag {
   public readonly config: GraphConfigInterface
   public isActive = false
   public behavior = drag<HTMLCanvasElement, undefined>()
-    .subject((event) => this.store.hoveredPoint ? { x: event.x, y: event.y } : undefined)
+    .subject((event) => {
+      return this.store.hoveredPoint && !this.store.isSpaceKeyPressed ? { x: event.x, y: event.y } : undefined
+    })
     .on('start', (e) => {
       if (this.store.hoveredPoint) {
         this.store.draggingPointIndex = this.store.hoveredPoint.index
