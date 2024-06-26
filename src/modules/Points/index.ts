@@ -56,6 +56,7 @@ export class Points extends CoreModule {
     for (let i = 0; i < data.pointsNumber; ++i) {
       initialState[i * 4 + 0] = data.pointPositions[i * 2 + 0] as number
       initialState[i * 4 + 1] = data.pointPositions[i * 2 + 1] as number
+      initialState[i * 4 + 2] = i
     }
 
     // Create position buffer
@@ -144,10 +145,7 @@ export class Points extends CoreModule {
       uniforms: {
         positionsTexture: () => this.previousPositionFbo,
         mousePos: () => store.mousePosition,
-        dragPointTextureIndex: () => ([
-          store.draggingPointIndex !== undefined ? (store.draggingPointIndex % store.pointsTextureSize) / store.pointsTextureSize : -1,
-          store.draggingPointIndex !== undefined ? (Math.floor(store.draggingPointIndex / store.pointsTextureSize)) / store.pointsTextureSize : -1,
-        ]),
+        index: () => store.hoveredPoint?.index ?? -1,
       },
     })
 

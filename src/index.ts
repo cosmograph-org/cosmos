@@ -83,6 +83,9 @@ export class Graph {
       .on('mouseenter.cosmos', () => { this._isMouseOnCanvas = true })
       .on('mousemove.cosmos', () => { this._isMouseOnCanvas = true })
       .on('mouseleave.cosmos', () => { this._isMouseOnCanvas = false })
+    select(document)
+      .on('keydown.cosmos', (event) => { if (event.code === 'Space') this.store.isSpaceKeyPressed = true })
+      .on('keyup.cosmos', (event) => { if (event.code === 'Space') this.store.isSpaceKeyPressed = false })
     this.zoomInstance.behavior
       .on('start.detect', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => { this.currentEvent = e })
       .on('zoom.detect', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => {
@@ -107,7 +110,6 @@ export class Graph {
         this.updateCanvasCursor()
       })
     this.canvasD3Selection
-      .call(this.zoomInstance.behavior)
       .call(this.dragInstance.behavior)
       .call(this.zoomInstance.behavior)
       .on('click', this.onClick.bind(this))
@@ -806,8 +808,6 @@ export class Graph {
         this.points.trackPoints()
       }
 
-      if (this.dragInstance.isActive) this.points.drag()
-
       // Clear canvas
       this.reglInstance.clear({
         color: this.store.backgroundColor,
@@ -820,6 +820,11 @@ export class Graph {
       }
 
       this.points.draw()
+      if (this.dragInstance.isActive) {
+        // To prevent the dragged point from suddenly jumping, run the drag function twice
+        this.points.drag()
+        this.points.drag()
+      }
       this.fpsMonitor?.end(now)
 
       this.currentEvent = undefined
@@ -954,7 +959,7 @@ export class Graph {
   private updateCanvasCursor (): void {
     if (this.dragInstance.isActive) select(this.canvas).style('cursor', 'grabbing')
     else if (this.store.hoveredPoint) {
-      if (this.config.disableDrag) select(this.canvas).style('cursor', 'pointer')
+      if (this.config.disableDrag || this.store.isSpaceKeyPressed) select(this.canvas).style('cursor', 'pointer')
       else select(this.canvas).style('cursor', 'grab')
     } else select(this.canvas).style('cursor', null)
   }
