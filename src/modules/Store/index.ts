@@ -28,6 +28,7 @@ export class Store {
   public focusedPoint: Focused | undefined = undefined
   public draggingPointIndex: number | undefined = undefined
   public adjustedSpaceSize = defaultConfigValues.spaceSize
+  public isSpaceKeyPressed = false
 
   public hoveredPointRingColor = [1, 1, 1, hoveredPointRingOpacity]
   public focusedPointRingColor = [1, 1, 1, focusedPointRingOpacity]
