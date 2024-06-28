@@ -337,7 +337,9 @@ export class Graph {
     this.graph.update()
     const { fitViewOnInit, fitViewDelay, fitViewByPointsInRect, initialZoomLevel } = this.config
     if (!this.graph.pointsNumber && !this.graph.linksNumber) {
+      this.stopFrames()
       this.destroyParticleSystem()
+      select(this.canvas).style('cursor', null)
       this.reglInstance.clear({
         color: this.store.backgroundColor,
         depth: 1,
@@ -679,6 +681,7 @@ export class Graph {
     window.clearTimeout(this._fitViewOnInitTimeoutID)
     this.stopFrames()
     this.destroyParticleSystem()
+    select(this.canvas).style('cursor', null)
     this.fpsMonitor?.destroy()
     document.getElementById('gl-bench-style')?.remove()
   }
