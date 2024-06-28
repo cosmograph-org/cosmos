@@ -526,7 +526,7 @@ export class Graph {
     } else if (indices.length === 0) {
       this.store.selectedIndices = new Float32Array()
     } else {
-      this.store.selectedIndices = new Float32Array(indices.filter((d): d is number => d !== undefined))
+      this.store.selectedIndices = new Float32Array(indices.filter(d => d !== undefined))
     }
 
     this.points.updateGreyoutStatus()
