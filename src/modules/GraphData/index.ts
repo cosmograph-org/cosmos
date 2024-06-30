@@ -20,7 +20,7 @@ export class GraphData {
 
   /**
    * Each inner array of `sourceIndexToTargetIndices` and `targetIndexToSourceIndices` contains pairs where:
-   *   - The first value is the target/source index in the node array.
+   *   - The first value is the target/source index in the point array.
    *   - The second value is the link index in the array of links.
   */
   public sourceIndexToTargetIndices: ([number, number][] | undefined)[] | undefined
