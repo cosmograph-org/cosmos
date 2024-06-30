@@ -262,7 +262,7 @@ export interface GraphConfigInterface {
    */
   renderLinks?: boolean;
   /**
-   * Link color accessor function or hex value.
+   * The default color hex value to use for links when no link colors are provided or if the color value in the array is `undefined` or `null`.
    * Default value: '#666666'
    */
   defaultLinkColor?: string;
@@ -272,7 +272,7 @@ export interface GraphConfigInterface {
   */
   linkGreyoutOpacity?: number;
   /**
-   * Link width value in pixels.
+   * The default width value to use for links when no link widths are provided or if the width value in the array is `undefined` or `null`.
    * Default value: `1`
   */
   defaultLinkWidth?: number;
@@ -304,7 +304,7 @@ export interface GraphConfigInterface {
    */
   curvedLinkControlPointDistance?: number;
   /**
-   * Link arrow value that controls whether or not to display link arrows.
+   * The default link arrow value that controls whether or not to display link arrows.
    * Default value: `false`
    */
   defaultLinkArrows?: boolean;
