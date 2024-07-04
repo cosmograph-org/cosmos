@@ -240,7 +240,7 @@ export interface GraphConfigInterface {
 
   /**
    * Turns ring rendering around a point on hover on / off
-   * Default value: `true`
+   * Default value: `false`
    */
   renderHoveredPointRing?: boolean;
 
@@ -370,7 +370,7 @@ export interface GraphConfigInterface {
   disableZoom?: boolean;
   /**
    * Disables dragging points.
-   * Default: `false`
+   * Default: `true`
    */
   disableDrag?: boolean;
   /**
@@ -415,7 +415,7 @@ export class GraphConfig implements GraphConfigInterface {
   public pointGreyoutOpacity = defaultGreyoutPointOpacity
   public defaultPointSize = defaultPointSize
   public pointSizeScale = defaultConfigValues.pointSizeScale
-  public renderHoveredPointRing = true
+  public renderHoveredPointRing = defaultConfigValues.renderHoveredPointRing
   public hoveredPointRingColor = defaultConfigValues.hoveredPointRingColor
   public focusedPointRingColor = defaultConfigValues.focusedPointRingColor
   public defaultLinkColor = defaultLinkColor
