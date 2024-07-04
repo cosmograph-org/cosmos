@@ -20,6 +20,7 @@ export const defaultConfigValues = {
   arrowLinks: false,
   linkVisibilityDistanceRange: [50, 150],
   linkVisibilityMinTransparency: 0.25,
+  renderHoveredPointRing: false,
   hoveredPointRingColor: 'white',
   focusedPointRingColor: 'white',
   useQuadtree: false,
