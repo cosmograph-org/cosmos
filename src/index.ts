@@ -741,6 +741,7 @@ export class Graph {
     this.destroyParticleSystem()
     this.create()
     this.initPrograms()
+    this.points.trackPointsByIndices()
     this.store.setFocusedPoint()
     this.store.hoveredPoint = undefined
     if (runSimulation) {
