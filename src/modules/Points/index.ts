@@ -436,15 +436,15 @@ export class Points extends CoreModule {
     this.findHoveredPointCommand?.()
   }
 
-  public trackPointsByIndices (indices: number[]): void {
-    this.trackedIndices = indices
+  public trackPointsByIndices (indices?: number[] | undefined): void {
+    if (indices) this.trackedIndices = indices
     destroyFramebuffer(this.trackedIndicesFbo)
     this.trackedIndicesFbo = undefined
     destroyFramebuffer(this.trackedPositionsFbo)
     this.trackedPositionsFbo = undefined
-    if (indices.length) {
-      this.trackedIndicesFbo = createTrackedIndicesBuffer(indices, this.store.pointsTextureSize, this.reglInstance)
-      this.trackedPositionsFbo = createTrackedPositionsBuffer(indices, this.reglInstance)
+    if (this.trackedIndices?.length) {
+      this.trackedIndicesFbo = createTrackedIndicesBuffer(this.trackedIndices, this.store.pointsTextureSize, this.reglInstance)
+      this.trackedPositionsFbo = createTrackedPositionsBuffer(this.trackedIndices, this.reglInstance)
     }
     this.trackPoints()
   }
