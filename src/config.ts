@@ -215,12 +215,16 @@ export interface GraphConfigInterface {
    * Default value: `4096`
    */
   spaceSize?: number;
+
   /**
-   * The default color hex value to use for points when no point colors are provided or
-   * if the color value in the array is `undefined` or `null`.
+   * The default color to use for points when no point colors are provided,
+   * or if the color value in the array is `undefined` or `null`.
+   * This can be either a hex color string (e.g., '#b3b3b3') or an array of RGBA values
+   * in the format `[red, green, blue, alpha]` where each value is a number between 0 and 255.
    * Default value: '#b3b3b3'
-  */
-  defaultPointColor?: string;
+   */
+  defaultPointColor?: string | [number, number, number, number];
+
   /**
    * Greyed out point opacity value when the selection is active.
    * Default value: `0.1`
@@ -267,11 +271,16 @@ export interface GraphConfigInterface {
    * Default value: `true`
    */
   renderLinks?: boolean;
+
   /**
-   * The default color hex value to use for links when no link colors are provided or if the color value in the array is `undefined` or `null`.
+   * The default color to use for links when no link colors are provided,
+   * or if the color value in the array is `undefined` or `null`.
+   * This can be either a hex color string (e.g., '#666666') or an array of RGBA values
+   * in the format `[red, green, blue, alpha]` where each value is a number between 0 and 255.
    * Default value: '#666666'
    */
-  defaultLinkColor?: string;
+  defaultLinkColor?: string | [number, number, number, number];
+
   /**
    * Greyed out link opacity value when the selection is active.
    * Default value: `0.1`
