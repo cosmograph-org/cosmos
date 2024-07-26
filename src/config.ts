@@ -239,6 +239,12 @@ export interface GraphConfigInterface {
   pointSizeScale?: number;
 
   /**
+   * Cursor style to use when hovering over a point
+   * Default value: `pointer`
+   */
+  hoveredPointCursor?: string;
+
+  /**
    * Turns ring rendering around a point on hover on / off
    * Default value: `false`
    */
@@ -415,6 +421,7 @@ export class GraphConfig implements GraphConfigInterface {
   public pointGreyoutOpacity = defaultGreyoutPointOpacity
   public defaultPointSize = defaultPointSize
   public pointSizeScale = defaultConfigValues.pointSizeScale
+  public hoveredPointCursor = defaultConfigValues.hoveredPointCursor
   public renderHoveredPointRing = defaultConfigValues.renderHoveredPointRing
   public hoveredPointRingColor = defaultConfigValues.hoveredPointRingColor
   public focusedPointRingColor = defaultConfigValues.focusedPointRingColor
