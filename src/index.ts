@@ -961,9 +961,10 @@ export class Graph {
   }
 
   private updateCanvasCursor (): void {
+    const { hoveredPointCursor } = this.config
     if (this.dragInstance.isActive) select(this.canvas).style('cursor', 'grabbing')
     else if (this.store.hoveredPoint) {
-      if (this.config.disableDrag || this.store.isSpaceKeyPressed) select(this.canvas).style('cursor', 'pointer')
+      if (this.config.disableDrag || this.store.isSpaceKeyPressed) select(this.canvas).style('cursor', hoveredPointCursor)
       else select(this.canvas).style('cursor', 'grab')
     } else select(this.canvas).style('cursor', null)
   }
