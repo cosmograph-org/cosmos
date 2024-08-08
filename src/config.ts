@@ -387,10 +387,10 @@ export interface GraphConfigInterface {
    */
   disableZoom?: boolean;
   /**
-   * Disables dragging points.
-   * Default: `true`
+   * Enables or disables dragging of points in the graph.
+   * Default value: `false`
    */
-  disableDrag?: boolean;
+  enableDrag?: boolean;
   /**
    * Whether to center and zoom the view to fit all points in the scene on initialization or not.
    * Default: `true`
@@ -503,7 +503,7 @@ export class GraphConfig implements GraphConfigInterface {
   public scalePointsOnZoom = defaultConfigValues.scalePointsOnZoom
   public initialZoomLevel = undefined
   public disableZoom = defaultConfigValues.disableZoom
-  public disableDrag = defaultConfigValues.disableDrag
+  public enableDrag = defaultConfigValues.enableDrag
   public fitViewOnInit = defaultConfigValues.fitViewOnInit
   public fitViewDelay = defaultConfigValues.fitViewDelay
   public fitViewPadding = defaultConfigValues.fitViewPadding
