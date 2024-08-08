@@ -45,6 +45,8 @@ export const defaultConfigValues = {
   disableDrag: true,
   fitViewOnInit: true,
   fitViewDelay: 250,
+  fitViewPadding: 0.1,
+  fitViewDuration: 250,
   pointSamplingDistance: 150,
 }
 

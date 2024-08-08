@@ -394,11 +394,23 @@ export interface GraphConfigInterface {
    */
   fitViewOnInit?: boolean;
   /**
-   * Delay in milliseconds before fitting the view.
+   * Delay in milliseconds before fitting the view when `fitViewOnInit` is enabled.
    * Useful if you want the layout to stabilize a bit before fitting.
    * Default: `250`
    */
   fitViewDelay?: number;
+  /**
+   * Padding to apply when fitting the view to show all points.
+   * This value is added to the calculated bounding box to provide some extra space around the points.
+   * This is used when the `fitViewOnInit` option is enabled.
+   * Default: `0.1`
+   */
+  fitViewPadding?: number;
+  /**
+   * Duration in milliseconds for fitting the view to show all points when fitViewOnInit is enabled.
+   * Default: `250`
+   */
+  fitViewDuration?: number;
   /**
    * When `fitViewOnInit` is set to `true`, fits the view to show the points within a rectangle
    * defined by its two corner coordinates `[[left, bottom], [right, top]]` in the scene space.
@@ -491,6 +503,8 @@ export class GraphConfig implements GraphConfigInterface {
   public disableDrag = defaultConfigValues.disableDrag
   public fitViewOnInit = defaultConfigValues.fitViewOnInit
   public fitViewDelay = defaultConfigValues.fitViewDelay
+  public fitViewPadding = defaultConfigValues.fitViewPadding
+  public fitViewDuration = defaultConfigValues.fitViewDuration
   public fitViewByPointsInRect = undefined
 
   public randomSeed = undefined
