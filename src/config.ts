@@ -106,12 +106,12 @@ export interface GraphEvents {
 export interface GraphSimulationSettings {
   /**
    * Decay coefficient. Use smaller values if you want the simulation to "cool down" slower.
-   * Default value: `1000`
+   * Default value: `5000`
    */
   decay?: number;
   /**
    * Gravity force coefficient.
-   * Default value: `0`
+   * Default value: `0.25`
    */
   gravity?: number;
   /**
@@ -121,13 +121,13 @@ export interface GraphSimulationSettings {
   center?: number;
   /**
    * Repulsion force coefficient.
-   * Default value: `0.1`
+   * Default value: `1.0`
    */
   repulsion?: number;
   /**
    * Decreases / increases the detalization of the Many-Body force calculations.
    * When `useQuadtree` is set to `true`, this property corresponds to the Barnes–Hut approximation criterion.
-   * Default value: `1.7`
+   * Default value: `1.15`
    */
   repulsionTheta?: number;
   /**
@@ -143,7 +143,7 @@ export interface GraphSimulationSettings {
   linkSpring?: number;
   /**
    * Minimum link distance.
-   * Default value: `2`
+   * Default value: `10`
    */
   linkDistance?: number;
   /**
@@ -245,7 +245,7 @@ export interface GraphConfigInterface {
 
   /**
    * Cursor style to use when hovering over a point
-   * Default value: `pointer`
+   * Default value: `auto`
    */
   hoveredPointCursor?: string;
 
