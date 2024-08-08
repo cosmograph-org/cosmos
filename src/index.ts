@@ -681,6 +681,12 @@ export class Graph {
     window.clearTimeout(this._fitViewOnInitTimeoutID)
     this.stopFrames()
     this.destroyParticleSystem()
+    // Clears the canvas after particle system is destroyed
+    this.reglInstance.clear({
+      color: this.store.backgroundColor,
+      depth: 1,
+      stencil: 0,
+    })
     select(this.canvas).style('cursor', null)
     this.fpsMonitor?.destroy()
     document.getElementById('gl-bench-style')?.remove()
