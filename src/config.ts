@@ -207,9 +207,10 @@ export interface GraphConfigInterface {
   disableSimulation?: boolean;
   /**
    * Canvas background color.
+   * Can be either a hex color string (e.g., '#b3b3b3') or an array of RGBA values.
    * Default value: '#222222'
    */
-  backgroundColor?: string;
+  backgroundColor?: string | [number, number, number, number];
   /**
    * Simulation space size (max 8192).
    * Default value: `4096`
@@ -256,15 +257,17 @@ export interface GraphConfigInterface {
 
   /**
    * Hovered point ring color hex value.
+   * Can be either a hex color string (e.g., '#b3b3b3') or an array of RGBA values.
    * Default value: `white`
    */
-  hoveredPointRingColor?: string;
+  hoveredPointRingColor?: string | [number, number, number, number];
 
   /**
    * Focused point ring color hex value.
+   * Can be either a hex color string (e.g., '#b3b3b3') or an array of RGBA values.
    * Default value: `white`
    */
-  focusedPointRingColor?: string;
+  focusedPointRingColor?: string | [number, number, number, number];
 
   /**
    * Turns link rendering on / off.
