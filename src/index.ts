@@ -335,7 +335,7 @@ export class Graph {
    */
   public render (runSimulation = true): void {
     this.graph.update()
-    const { fitViewOnInit, fitViewDelay, fitViewByPointsInRect, initialZoomLevel } = this.config
+    const { fitViewOnInit, fitViewDelay, fitViewPadding, fitViewDuration, fitViewByPointsInRect, initialZoomLevel } = this.config
     if (!this.graph.pointsNumber && !this.graph.linksNumber) {
       this.stopFrames()
       this.destroyParticleSystem()
@@ -351,8 +351,8 @@ export class Graph {
     // If `initialZoomLevel` is set, we don't need to fit the view
     if (this._isFirstRenderAfterInit && fitViewOnInit && initialZoomLevel === undefined) {
       this._fitViewOnInitTimeoutID = window.setTimeout(() => {
-        if (fitViewByPointsInRect) this.setZoomTransformByPointPositions(fitViewByPointsInRect, undefined, undefined, 0)
-        else this.fitView()
+        if (fitViewByPointsInRect) this.setZoomTransformByPointPositions(fitViewByPointsInRect, fitViewDuration, undefined, fitViewPadding)
+        else this.fitView(fitViewDuration, fitViewPadding)
       }, fitViewDelay)
     }
     this._isFirstRenderAfterInit = false
@@ -452,7 +452,7 @@ export class Graph {
   /**
    * Center and zoom in/out the view to fit all points in the scene.
    * @param duration Duration of the center and zoom in/out animation in milliseconds (`250` by default).
-   * @param padding Padding around the viewport in percentage
+   * @param padding Padding around the viewport in percentage (`0.1` by default).
    */
   public fitView (duration = 250, padding = 0.1): void {
     this.setZoomTransformByPointPositions(this.getPointPositions(), duration, undefined, padding)
