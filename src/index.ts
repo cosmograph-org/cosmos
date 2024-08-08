@@ -115,7 +115,7 @@ export class Graph {
       .on('click', this.onClick.bind(this))
       .on('mousemove', this.onMouseMove.bind(this))
       .on('contextmenu', this.onRightClickMouse.bind(this))
-    if (this.config.disableZoom || this.config.disableDrag) this.updateZoomDragBehaviors()
+    if (this.config.disableZoom || !this.config.enableDrag) this.updateZoomDragBehaviors()
     this.setZoomLevel(this.config.initialZoomLevel ?? 1)
 
     this.reglInstance = regl({
@@ -235,7 +235,7 @@ export class Graph {
       this.store.maxPointSize = (this.reglInstance.limits.pointSizeDims[1] ?? MAX_POINT_SIZE) / this.config.pixelRatio
     }
 
-    if (prevConfig.disableZoom !== this.config.disableZoom || prevConfig.disableDrag !== this.config.disableDrag) {
+    if (prevConfig.disableZoom !== this.config.disableZoom || prevConfig.enableDrag !== this.config.enableDrag) {
       this.updateZoomDragBehaviors()
     }
   }
@@ -916,11 +916,13 @@ export class Graph {
   }
 
   private updateZoomDragBehaviors (): void {
-    if (this.config.disableDrag) {
+    if (this.config.enableDrag) {
+      this.canvasD3Selection.call(this.dragInstance.behavior)
+    } else {
       this.canvasD3Selection
         .call(this.dragInstance.behavior)
         .on('.drag', null)
-    } else this.canvasD3Selection.call(this.dragInstance.behavior)
+    }
 
     if (this.config.disableZoom) {
       this.canvasD3Selection
@@ -970,7 +972,7 @@ export class Graph {
     const { hoveredPointCursor } = this.config
     if (this.dragInstance.isActive) select(this.canvas).style('cursor', 'grabbing')
     else if (this.store.hoveredPoint) {
-      if (this.config.disableDrag || this.store.isSpaceKeyPressed) select(this.canvas).style('cursor', hoveredPointCursor)
+      if (!this.config.enableDrag || this.store.isSpaceKeyPressed) select(this.canvas).style('cursor', hoveredPointCursor)
       else select(this.canvas).style('cursor', 'grab')
     } else select(this.canvas).style('cursor', null)
   }
