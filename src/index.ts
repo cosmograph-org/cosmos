@@ -482,6 +482,27 @@ export class Graph {
     this.setZoomTransformByPointPositions(positions, duration, undefined, padding)
   }
 
+  /**
+   * Get points indices inside a rectangular area.
+   * @param selection - Array of two corner points `[[left, top], [right, bottom]]`.
+   * The `left` and `right` coordinates should be from 0 to the width of the canvas.
+   * The `top` and `bottom` coordinates should be from 0 to the height of the canvas.
+   * @returns A Float32Array containing the indices of points inside a rectangular area.
+   */
+  public getPointsInRange (selection: [[number, number], [number, number]]): Float32Array {
+    const h = this.store.screenSize[1]
+    this.store.selectedArea = [[selection[0][0], (h - selection[1][1])], [selection[1][0], (h - selection[0][1])]]
+    this.points.findPointsOnAreaSelection()
+    const pixels = readPixels(this.reglInstance, this.points.selectedFbo as regl.Framebuffer2D)
+
+    return pixels
+      .map((pixel, i) => {
+        if (i % 4 === 0 && pixel !== 0) return i / 4
+        else return -1
+      })
+      .filter(d => d !== -1)
+  }
+
   /** Select points inside a rectangular area.
    * @param selection - Array of two corner points `[[left, top], [right, bottom]]`.
    * The `left` and `right` coordinates should be from 0 to the width of the canvas.
