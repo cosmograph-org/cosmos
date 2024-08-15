@@ -151,6 +151,9 @@ export class Graph {
     if (this.config.focusedPointRingColor) {
       this.store.setFocusedPointRingColor(this.config.focusedPointRingColor)
     }
+    if (this.config.focusedPointIndex !== undefined) {
+      this.store.setFocusedPoint(this.config.focusedPointIndex)
+    }
 
     if (this.config.showFPSMonitor) this.fpsMonitor = new FPSMonitor(this.canvas)
 
@@ -216,6 +219,9 @@ export class Graph {
     }
     if (prevConfig.focusedPointRingColor !== this.config.focusedPointRingColor) {
       this.store.setFocusedPointRingColor(this.config.focusedPointRingColor)
+    }
+    if (prevConfig.focusedPointIndex !== this.config.focusedPointIndex) {
+      this.store.setFocusedPoint(this.config.focusedPointIndex)
     }
     if (prevConfig.spaceSize !== this.config.spaceSize ||
       prevConfig.simulation.repulsionQuadtreeLevels !== this.config.simulation.repulsionQuadtreeLevels) {
@@ -584,9 +590,12 @@ export class Graph {
   /**
    * Set focus on a point by index. A ring will be highlighted around the focused point.
    * If no index is specified, the focus will be reset.
+   * If `focusedPointIndex` is specified in the config, this method will have no effect.
    * @param index The index of the point in the array of points.
    */
   public setFocusedPointByIndex (index?: number): void {
+    // Config `focusedPointIndex` parameter has higher priority than this method.
+    if (this.config.focusedPointIndex !== undefined) return
     if (index === undefined) {
       this.store.setFocusedPoint()
     } else {
@@ -769,7 +778,7 @@ export class Graph {
     this.create()
     this.initPrograms()
     this.points.trackPointsByIndices()
-    this.store.setFocusedPoint()
+    this.store.setFocusedPoint(this.config.focusedPointIndex)
     this.store.hoveredPoint = undefined
     if (runSimulation) {
       this.start()
