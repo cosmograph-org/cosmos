@@ -24,6 +24,7 @@ export const defaultConfigValues = {
   renderHoveredPointRing: false,
   hoveredPointRingColor: 'white',
   focusedPointRingColor: 'white',
+  focusedPointIndex: undefined,
   useQuadtree: false,
   simulation: {
     decay: 5000,

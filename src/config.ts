@@ -270,6 +270,14 @@ export interface GraphConfigInterface {
   focusedPointRingColor?: string | [number, number, number, number];
 
   /**
+   * Set focus on a point by index.  A ring will be highlighted around the focused point.
+   * Has priority over the `setFocusedPointByIndex` method.
+   * When set to `undefined`, no point is focused.
+   * Default value: `undefined`
+   */
+  focusedPointIndex?: number;
+
+  /**
    * Turns link rendering on / off.
    * Default value: `true`
    */
@@ -449,6 +457,7 @@ export class GraphConfig implements GraphConfigInterface {
   public renderHoveredPointRing = defaultConfigValues.renderHoveredPointRing
   public hoveredPointRingColor = defaultConfigValues.hoveredPointRingColor
   public focusedPointRingColor = defaultConfigValues.focusedPointRingColor
+  public focusedPointIndex = defaultConfigValues.focusedPointIndex
   public defaultLinkColor = defaultLinkColor
   public linkGreyoutOpacity = defaultGreyoutLinkOpacity
   public defaultLinkWidth = defaultLinkWidth
