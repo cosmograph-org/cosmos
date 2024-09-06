@@ -19,6 +19,10 @@ export class ForceManyBodyQuadtree extends CoreModule {
     const { reglInstance, store } = this
     if (!store.pointsTextureSize) return
     this.quadtreeLevels = Math.log2(store.adjustedSpaceSize)
+    this.levelsFbos.forEach(fbo => {
+      destroyFramebuffer(fbo)
+    })
+    this.levelsFbos.clear()
     for (let i = 0; i < this.quadtreeLevels; i += 1) {
       const levelTextureSize = Math.pow(2, i + 1)
       this.levelsFbos.set(`level[${i}]`, reglInstance.framebuffer({
@@ -39,6 +43,7 @@ export class ForceManyBodyQuadtree extends CoreModule {
       randomValuesState[i * 4 + 1] = store.getRandomFloat(-1, 1) * 0.00001
     }
 
+    destroyFramebuffer(this.randomValuesFbo)
     this.randomValuesFbo = reglInstance.framebuffer({
       color: reglInstance.texture({
         data: randomValuesState,
@@ -120,13 +125,5 @@ export class ForceManyBodyQuadtree extends CoreModule {
       })
     }
     this.quadtreeCommand?.()
-  }
-
-  public destroy (): void {
-    destroyFramebuffer(this.randomValuesFbo)
-    this.levelsFbos.forEach(fbo => {
-      destroyFramebuffer(fbo)
-    })
-    this.levelsFbos.clear()
   }
 }

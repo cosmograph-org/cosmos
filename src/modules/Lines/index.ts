@@ -15,14 +15,6 @@ export class Lines extends CoreModule {
   private curveLineGeometry: number[][] | undefined
   private curveLineBuffer: regl.Buffer | undefined
 
-  public create (): void {
-    this.updatePointsBuffer()
-    this.updateColor()
-    this.updateWidth()
-    this.updateArrow()
-    this.updateCurveLineGeometry()
-  }
-
   public initPrograms (): void {
     const { reglInstance, config, store } = this
 
@@ -131,6 +123,7 @@ export class Lines extends CoreModule {
       instancePoints[i * 2] = [fromX, fromY]
       instancePoints[i * 2 + 1] = [toX, toY]
     }
+    destroyBuffer(this.pointsBuffer)
     this.pointsBuffer = reglInstance.buffer(instancePoints)
   }
 
@@ -155,14 +148,7 @@ export class Lines extends CoreModule {
   public updateCurveLineGeometry (): void {
     const { reglInstance, config: { curvedLinks, curvedLinkSegments } } = this
     this.curveLineGeometry = getCurveLineGeometry(curvedLinks ? curvedLinkSegments ?? defaultConfigValues.curvedLinkSegments : 1)
-    this.curveLineBuffer = reglInstance.buffer(this.curveLineGeometry)
-  }
-
-  public destroy (): void {
-    destroyBuffer(this.pointsBuffer)
-    destroyBuffer(this.colorBuffer)
-    destroyBuffer(this.widthBuffer)
-    destroyBuffer(this.arrowBuffer)
     destroyBuffer(this.curveLineBuffer)
+    this.curveLineBuffer = reglInstance.buffer(this.curveLineGeometry)
   }
 }

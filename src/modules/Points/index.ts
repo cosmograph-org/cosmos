@@ -47,10 +47,11 @@ export class Points extends CoreModule {
   private trackPointsCommand: regl.DrawCommand | undefined
   private trackedIndices: number[] | undefined
 
-  public create (): void {
+  public updatePositions (): void {
     const { reglInstance, store, data } = this
     const { pointsTextureSize } = store
     if (!pointsTextureSize || !data.pointPositions || data.pointsNumber === undefined) return
+
     const initialState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
     // if (!config.disableSimulation) this.rescaleInitialNodePositions() // TODO ⁉️
     for (let i = 0; i < data.pointsNumber; ++i) {
@@ -60,6 +61,7 @@ export class Points extends CoreModule {
     }
 
     // Create position buffer
+    destroyFramebuffer(this.currentPositionFbo)
     this.currentPositionFbo = reglInstance.framebuffer({
       color: reglInstance.texture({
         data: initialState,
@@ -70,6 +72,7 @@ export class Points extends CoreModule {
       stencil: false,
     })
 
+    destroyFramebuffer(this.previousPositionFbo)
     this.previousPositionFbo = reglInstance.framebuffer({
       color: reglInstance.texture({
         data: initialState,
@@ -82,6 +85,7 @@ export class Points extends CoreModule {
 
     if (!this.config.disableSimulation) {
       // Create velocity buffer
+      destroyFramebuffer(this.velocityFbo)
       this.velocityFbo = reglInstance.framebuffer({
         color: reglInstance.texture({
           data: new Float32Array(pointsTextureSize * pointsTextureSize * 4).fill(0),
@@ -94,6 +98,7 @@ export class Points extends CoreModule {
     }
 
     // Create selected points buffer
+    destroyFramebuffer(this.selectedFbo)
     this.selectedFbo = reglInstance.framebuffer({
       color: reglInstance.texture({
         data: initialState,
@@ -104,6 +109,7 @@ export class Points extends CoreModule {
       stencil: false,
     })
 
+    destroyFramebuffer(this.hoveredFbo)
     this.hoveredFbo = reglInstance.framebuffer({
       shape: [2, 2],
       colorType: 'float',
@@ -111,8 +117,6 @@ export class Points extends CoreModule {
       stencil: false,
     })
 
-    this.updateSize()
-    this.updateColor()
     this.updateGreyoutStatus()
     this.updateSampledPointsGrid()
   }
@@ -348,6 +352,7 @@ export class Points extends CoreModule {
 
   public updateGreyoutStatus (): void {
     const { reglInstance, store } = this
+    destroyFramebuffer(this.greyoutStatusFbo)
     this.greyoutStatusFbo = createGreyoutStatusBuffer(store.selectedIndices, reglInstance, store.pointsTextureSize)
   }
 
@@ -481,19 +486,6 @@ export class Points extends CoreModule {
       }
     }
     return positions
-  }
-
-  public destroy (): void {
-    destroyFramebuffer(this.currentPositionFbo)
-    destroyFramebuffer(this.previousPositionFbo)
-    destroyFramebuffer(this.velocityFbo)
-    destroyFramebuffer(this.selectedFbo)
-    destroyBuffer(this.colorBuffer)
-    destroyBuffer(this.sizeBuffer)
-    destroyFramebuffer(this.greyoutStatusFbo)
-    destroyFramebuffer(this.hoveredFbo)
-    destroyFramebuffer(this.trackedIndicesFbo)
-    destroyFramebuffer(this.trackedPositionsFbo)
   }
 
   private swapFbo (): void {

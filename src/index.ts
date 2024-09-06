@@ -43,7 +43,7 @@ export class Graph {
   private dragInstance = new Drag(this.store, this.config)
 
   private fpsMonitor: FPSMonitor | undefined
-  private hasParticleSystemDestroyed = false
+
   private currentEvent: D3ZoomEvent<HTMLCanvasElement, undefined> | D3DragEvent<HTMLCanvasElement, undefined, Hovered> | MouseEvent | undefined
   /**
    * The value of `_findHoveredPointExecutionCount` is incremented by 1 on each animation frame.
@@ -59,6 +59,14 @@ export class Graph {
    * */
   private _isFirstRenderAfterInit = true
   private _fitViewOnInitTimeoutID: number | undefined
+
+  private _hasPointPositionsChanged = false
+  private _hasPointColorsChanged = false
+  private _hasPointSizesChanged = false
+  private _hasLinksChanged = false
+  private _hasLinkColorsChanged = false
+  private _hasLinkWidthsChanged = false
+  private _hasLinkArrowsChanged = false
 
   public constructor (canvas: HTMLCanvasElement, config?: GraphConfigInterface) {
     if (config) this.config.init(config)
@@ -255,6 +263,7 @@ export class Graph {
    */
   public setPointPositions (pointPositions: number[]): void {
     this.graph.pointPositions = pointPositions
+    this._hasPointPositionsChanged = true
   }
 
   /**
@@ -266,6 +275,7 @@ export class Graph {
   */
   public setPointColors (pointColors: number[]): void {
     this.graph.inputPointColors = pointColors
+    this._hasPointColorsChanged = true
   }
 
   /**
@@ -277,6 +287,7 @@ export class Graph {
    */
   public setPointSizes (pointSizes: number[]): void {
     this.graph.inputPointSizes = pointSizes
+    this._hasPointSizesChanged = true
   }
 
   /**
@@ -288,6 +299,7 @@ export class Graph {
    */
   public setLinks (links: number[]): void {
     this.graph.links = links
+    this._hasLinksChanged = true
   }
 
   /**
@@ -299,6 +311,7 @@ export class Graph {
    */
   public setLinkColors (linkColors: number[]): void {
     this.graph.inputLinkColors = linkColors
+    this._hasLinkColorsChanged = true
   }
 
   /**
@@ -310,6 +323,7 @@ export class Graph {
    */
   public setLinkWidths (linkWidths: number[]): void {
     this.graph.inputLinkWidths = linkWidths
+    this._hasLinkWidthsChanged = true
   }
 
   /**
@@ -321,6 +335,7 @@ export class Graph {
    */
   public setLinkArrows (linkArrows: boolean[]): void {
     this.graph.linkArrowsBoolean = linkArrows
+    this._hasLinkArrowsChanged = true
   }
 
   /**
@@ -344,7 +359,6 @@ export class Graph {
     const { fitViewOnInit, fitViewDelay, fitViewPadding, fitViewDuration, fitViewByPointsInRect, initialZoomLevel } = this.config
     if (!this.graph.pointsNumber && !this.graph.linksNumber) {
       this.stopFrames()
-      this.destroyParticleSystem()
       select(this.canvas).style('cursor', null)
       this.reglInstance.clear({
         color: this.store.backgroundColor,
@@ -441,7 +455,6 @@ export class Graph {
   public getPointPositions (): number[] {
     if (this.graph.pointsNumber === undefined) return []
     const positions: number[] = []
-    if (this.hasParticleSystemDestroyed) return []
     const pointPositionsPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
     positions.length = this.graph.pointsNumber * 2
     for (let i = 0; i < this.graph.pointsNumber; i += 1) {
@@ -710,7 +723,7 @@ export class Graph {
   public destroy (): void {
     window.clearTimeout(this._fitViewOnInitTimeoutID)
     this.stopFrames()
-    this.destroyParticleSystem()
+    this.reglInstance.destroy()
     // Clears the canvas after particle system is destroyed
     this.reglInstance.clear({
       color: this.store.backgroundColor,
@@ -726,13 +739,40 @@ export class Graph {
    * Create new Cosmos instance.
    */
   public create (): void {
-    this.points.create()
-    this.lines.create()
+    if (this._hasPointPositionsChanged) {
+      this.points.updatePositions()
+      this._hasPointPositionsChanged = false
+    }
+    if (this._hasPointColorsChanged) {
+      this.points.updateColor()
+      this._hasPointColorsChanged = false
+    }
+    if (this._hasPointSizesChanged) {
+      this.points.updateSize()
+      this._hasPointSizesChanged = false
+    }
+    if (this._hasLinksChanged) {
+      this.lines.updatePointsBuffer()
+      this._hasLinksChanged = false
+    }
+    if (this._hasLinkColorsChanged) {
+      this.lines.updateColor()
+      this._hasLinkColorsChanged = false
+    }
+    if (this._hasLinkWidthsChanged) {
+      this.lines.updateWidth()
+      this._hasLinkWidthsChanged = false
+    }
+    if (this._hasLinkArrowsChanged) {
+      this.lines.updateArrow()
+      this._hasLinkArrowsChanged = false
+    }
+    this.lines.updateCurveLineGeometry()
+
     this.forceManyBody?.create()
     this.forceLinkIncoming?.create(LinkDirection.INCOMING)
     this.forceLinkOutgoing?.create(LinkDirection.OUTGOING)
     this.forceCenter?.create()
-    this.hasParticleSystemDestroyed = false
   }
 
   /**
@@ -758,30 +798,17 @@ export class Graph {
     return arr
   }
 
-  private destroyParticleSystem (): void {
-    if (this.hasParticleSystemDestroyed) return
-    this.points.destroy()
-    this.lines.destroy()
-    this.forceCenter?.destroy()
-    this.forceLinkIncoming?.destroy()
-    this.forceLinkOutgoing?.destroy()
-    this.forceManyBody?.destroy()
-    this.reglInstance.destroy()
-    this.hasParticleSystemDestroyed = true
-  }
-
   private update (runSimulation: boolean): void {
     const { graph } = this
     this.store.pointsTextureSize = Math.ceil(Math.sqrt(graph.pointsNumber ?? 0))
     this.store.linksTextureSize = Math.ceil(Math.sqrt((graph.linksNumber ?? 0) * 2))
-    this.destroyParticleSystem()
     this.create()
     this.initPrograms()
     this.points.trackPointsByIndices()
     this.store.setFocusedPoint(this.config.focusedPointIndex)
     this.store.hoveredPoint = undefined
     if (runSimulation) {
-      this.start()
+      this.start(this.store.alpha)
     } else {
       this.step()
     }
