@@ -55,6 +55,7 @@ export class ForceLink extends CoreModule {
       }
     })
 
+    destroyFramebuffer(this.linkFirstIndicesAndAmountFbo)
     this.linkFirstIndicesAndAmountFbo = reglInstance.framebuffer({
       color: reglInstance.texture({
         data: this.linkFirstIndicesAndAmount,
@@ -64,6 +65,7 @@ export class ForceLink extends CoreModule {
       depth: false,
       stencil: false,
     })
+    destroyFramebuffer(this.indicesFbo)
     this.indicesFbo = reglInstance.framebuffer({
       color: reglInstance.texture({
         data: this.indices,
@@ -73,6 +75,7 @@ export class ForceLink extends CoreModule {
       depth: false,
       stencil: false,
     })
+    destroyFramebuffer(this.biasAndStrengthFbo)
     this.biasAndStrengthFbo = reglInstance.framebuffer({
       color: reglInstance.texture({
         data: linkBiasAndStrengthState,
@@ -82,6 +85,7 @@ export class ForceLink extends CoreModule {
       depth: false,
       stencil: false,
     })
+    destroyFramebuffer(this.randomDistanceFbo)
     this.randomDistanceFbo = reglInstance.framebuffer({
       color: reglInstance.texture({
         data: linkDistanceState,
@@ -120,12 +124,5 @@ export class ForceLink extends CoreModule {
 
   public run (): void {
     this.runCommand?.()
-  }
-
-  public destroy (): void {
-    destroyFramebuffer(this.linkFirstIndicesAndAmountFbo)
-    destroyFramebuffer(this.indicesFbo)
-    destroyFramebuffer(this.biasAndStrengthFbo)
-    destroyFramebuffer(this.randomDistanceFbo)
   }
 }
