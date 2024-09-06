@@ -15,6 +15,7 @@ export class ForceCenter extends CoreModule {
 
   public create (): void {
     const { reglInstance } = this
+    destroyFramebuffer(this.centermassFbo)
     this.centermassFbo = reglInstance.framebuffer({
       color: reglInstance.texture({
         data: new Float32Array(4).fill(0),
@@ -81,9 +82,5 @@ export class ForceCenter extends CoreModule {
     this.clearCentermassCommand?.()
     this.calculateCentermassCommand?.()
     this.runCommand?.()
-  }
-
-  public destroy (): void {
-    destroyFramebuffer(this.centermassFbo)
   }
 }
