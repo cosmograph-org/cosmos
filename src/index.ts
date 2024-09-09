@@ -739,40 +739,28 @@ export class Graph {
    * Create new Cosmos instance.
    */
   public create (): void {
-    if (this._hasPointPositionsChanged) {
-      this.points.updatePositions()
-      this._hasPointPositionsChanged = false
-    }
-    if (this._hasPointColorsChanged) {
-      this.points.updateColor()
-      this._hasPointColorsChanged = false
-    }
-    if (this._hasPointSizesChanged) {
-      this.points.updateSize()
-      this._hasPointSizesChanged = false
-    }
-    if (this._hasLinksChanged) {
-      this.lines.updatePointsBuffer()
-      this._hasLinksChanged = false
-    }
-    if (this._hasLinkColorsChanged) {
-      this.lines.updateColor()
-      this._hasLinkColorsChanged = false
-    }
-    if (this._hasLinkWidthsChanged) {
-      this.lines.updateWidth()
-      this._hasLinkWidthsChanged = false
-    }
-    if (this._hasLinkArrowsChanged) {
-      this.lines.updateArrow()
-      this._hasLinkArrowsChanged = false
-    }
+    if (this._hasPointPositionsChanged) this.points.updatePositions()
+    if (this._hasPointColorsChanged) this.points.updateColor()
+    if (this._hasPointSizesChanged) this.points.updateSize()
+
+    if (this._hasLinksChanged || this._hasPointPositionsChanged) this.lines.updatePointsBuffer()
+    if (this._hasLinkColorsChanged) this.lines.updateColor()
+    if (this._hasLinkWidthsChanged) this.lines.updateWidth()
+    if (this._hasLinkArrowsChanged) this.lines.updateArrow()
     this.lines.updateCurveLineGeometry()
 
     this.forceManyBody?.create()
     this.forceLinkIncoming?.create(LinkDirection.INCOMING)
     this.forceLinkOutgoing?.create(LinkDirection.OUTGOING)
     this.forceCenter?.create()
+
+    this._hasPointPositionsChanged = false
+    this._hasPointColorsChanged = false
+    this._hasPointSizesChanged = false
+    this._hasLinksChanged = false
+    this._hasLinkColorsChanged = false
+    this._hasLinkWidthsChanged = false
+    this._hasLinkArrowsChanged = false
   }
 
   /**
