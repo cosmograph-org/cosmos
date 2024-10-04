@@ -3,39 +3,49 @@ import { CoreModule } from '@/graph/modules/core-module'
 import calculateLevelFrag from '@/graph/modules/ForceManyBody/calculate-level.frag'
 import calculateLevelVert from '@/graph/modules/ForceManyBody/calculate-level.vert'
 import { forceFrag } from '@/graph/modules/ForceManyBody/quadtree-frag-shader'
-import { createIndexesBuffer, createQuadBuffer, destroyFramebuffer } from '@/graph/modules/Shared/buffer'
+import { createIndexesForBuffer, createQuadBuffer } from '@/graph/modules/Shared/buffer'
 import clearFrag from '@/graph/modules/Shared/clear.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
 
 export class ForceManyBodyQuadtree extends CoreModule {
   private randomValuesFbo: regl.Framebuffer2D | undefined
+  private levelsTextures = new Map<string, regl.Texture2D>()
   private levelsFbos = new Map<string, regl.Framebuffer2D>()
   private clearLevelsCommand: regl.DrawCommand | undefined
   private calculateLevelsCommand: regl.DrawCommand | undefined
   private quadtreeCommand: regl.DrawCommand | undefined
   private quadtreeLevels = 0
+  private randomValuesTexture: regl.Texture2D | undefined
+  private pointIndices: regl.Buffer | undefined
 
   public create (): void {
     const { reglInstance, store } = this
     if (!store.pointsTextureSize) return
     this.quadtreeLevels = Math.log2(store.adjustedSpaceSize)
-    this.levelsFbos.forEach(fbo => {
-      destroyFramebuffer(fbo)
-    })
-    this.levelsFbos.clear()
     for (let i = 0; i < this.quadtreeLevels; i += 1) {
       const levelTextureSize = Math.pow(2, i + 1)
-      this.levelsFbos.set(`level[${i}]`, reglInstance.framebuffer({
-        color: reglInstance.texture({
+      const levelKey = `level[${i}]`
+      if (!this.levelsTextures.has(levelKey)) {
+        this.levelsTextures.set(levelKey, reglInstance.texture())
+      }
+      const texture = this.levelsTextures.get(levelKey)
+      if (texture) {
+        texture({
           data: new Float32Array(levelTextureSize * levelTextureSize * 4),
           shape: [levelTextureSize, levelTextureSize, 4],
           type: 'float',
-        }),
-        depth: false,
-        stencil: false,
-      })
-      )
+        })
+      }
+
+      if (!this.levelsFbos.has(levelKey)) {
+        this.levelsFbos.set(levelKey, reglInstance.framebuffer({
+          color: this.levelsTextures.get(levelKey),
+          depth: false,
+          stencil: false,
+        }))
+      }
     }
+
     // Create random number to prevent point to stick together in one coordinate
     const randomValuesState = new Float32Array(store.pointsTextureSize * store.pointsTextureSize * 4)
     for (let i = 0; i < store.pointsTextureSize * store.pointsTextureSize; ++i) {
@@ -43,55 +53,71 @@ export class ForceManyBodyQuadtree extends CoreModule {
       randomValuesState[i * 4 + 1] = store.getRandomFloat(-1, 1) * 0.00001
     }
 
-    destroyFramebuffer(this.randomValuesFbo)
-    this.randomValuesFbo = reglInstance.framebuffer({
-      color: reglInstance.texture({
-        data: randomValuesState,
-        shape: [store.pointsTextureSize, store.pointsTextureSize, 4],
-        type: 'float',
-      }),
-      depth: false,
-      stencil: false,
+    if (!this.randomValuesTexture) this.randomValuesTexture = reglInstance.texture()
+    this.randomValuesTexture({
+      data: randomValuesState,
+      shape: [store.pointsTextureSize, store.pointsTextureSize, 4],
+      type: 'float',
     })
+    if (!this.randomValuesFbo) {
+      this.randomValuesFbo = reglInstance.framebuffer({
+        color: this.randomValuesTexture,
+        depth: false,
+        stencil: false,
+      })
+    }
+
+    if (!this.pointIndices) this.pointIndices = reglInstance.buffer(0)
+    this.pointIndices(createIndexesForBuffer(store.pointsTextureSize))
   }
 
   public initPrograms (): void {
     const { reglInstance, config, store, data, points } = this
-    this.clearLevelsCommand = reglInstance({
-      frag: clearFrag,
-      vert: updateVert,
-      framebuffer: (_: regl.DefaultContext, props: { levelFbo: regl.Framebuffer2D }) => props.levelFbo,
-      primitive: 'triangle strip',
-      count: 4,
-      attributes: { vertexCoord: createQuadBuffer(reglInstance) },
-    })
-    this.calculateLevelsCommand = reglInstance({
-      frag: calculateLevelFrag,
-      vert: calculateLevelVert,
-      framebuffer: (_: regl.DefaultContext, props: { levelFbo: regl.Framebuffer2D; levelTextureSize: number; cellSize: number }) => props.levelFbo,
-      primitive: 'points',
-      count: () => data.pointsNumber ?? 0,
-      attributes: { pointIndices: createIndexesBuffer(reglInstance, store.pointsTextureSize) },
-      uniforms: {
-        positionsTexture: () => points?.previousPositionFbo,
-        pointsTextureSize: () => store.pointsTextureSize,
-        levelTextureSize: (_: regl.DefaultContext, props: { levelTextureSize: number }) => props.levelTextureSize,
-        cellSize: (_: regl.DefaultContext, props: { cellSize: number }) => props.cellSize,
-      },
-      blend: {
-        enable: true,
-        func: {
-          src: 'one',
-          dst: 'one',
+    if (!this.clearLevelsCommand) {
+      this.clearLevelsCommand = reglInstance({
+        frag: clearFrag,
+        vert: updateVert,
+        framebuffer: (_: regl.DefaultContext, props: { levelFbo: regl.Framebuffer2D }) => props.levelFbo,
+        primitive: 'triangle strip',
+        count: 4,
+        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+      })
+    }
+
+    if (!this.calculateLevelsCommand) {
+      this.calculateLevelsCommand = reglInstance({
+        frag: calculateLevelFrag,
+        vert: calculateLevelVert,
+        framebuffer: (_: regl.DefaultContext, props: { levelFbo: regl.Framebuffer2D; levelTextureSize: number; cellSize: number }) => props.levelFbo,
+        primitive: 'points',
+        count: () => data.pointsNumber ?? 0,
+        attributes: {
+          pointIndices: {
+            buffer: this.pointIndices,
+            size: 2,
+          },
         },
-        equation: {
-          rgb: 'add',
-          alpha: 'add',
+        uniforms: {
+          positionsTexture: () => points?.previousPositionFbo,
+          pointsTextureSize: () => store.pointsTextureSize,
+          levelTextureSize: (_: regl.DefaultContext, props: { levelTextureSize: number }) => props.levelTextureSize,
+          cellSize: (_: regl.DefaultContext, props: { cellSize: number }) => props.cellSize,
         },
-      },
-      depth: { enable: false, mask: false },
-      stencil: { enable: false },
-    })
+        blend: {
+          enable: true,
+          func: {
+            src: 'one',
+            dst: 'one',
+          },
+          equation: {
+            rgb: 'add',
+            alpha: 'add',
+          },
+        },
+        depth: { enable: false, mask: false },
+        stencil: { enable: false },
+      })
+    }
 
     this.quadtreeCommand = reglInstance({
       frag: forceFrag(config.simulation?.repulsionQuadtreeLevels ?? this.quadtreeLevels, this.quadtreeLevels),
