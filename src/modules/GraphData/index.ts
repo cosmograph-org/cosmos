@@ -202,7 +202,7 @@ export class GraphData {
   }
 
   public getAdjacentIndices (index: number): number[] | undefined {
-    return [...(this.sourceIndexToTargetIndices?.[index]?.[0] || []), ...(this.targetIndexToSourceIndices?.[index]?.[0] || [])]
+    return [...(this.sourceIndexToTargetIndices?.[index]?.map(d => d[0]) || []), ...(this.targetIndexToSourceIndices?.[index]?.map(d => d[0]) || [])]
   }
 
   private _createAdjacencyLists (): void {
