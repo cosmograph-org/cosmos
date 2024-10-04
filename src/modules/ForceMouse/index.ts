@@ -9,19 +9,21 @@ export class ForceMouse extends CoreModule {
 
   public initPrograms (): void {
     const { reglInstance, config, store, points } = this
-    this.runCommand = reglInstance({
-      frag: forceFrag,
-      vert: updateVert,
-      framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
-      primitive: 'triangle strip',
-      count: 4,
-      attributes: { vertexCoord: createQuadBuffer(reglInstance) },
-      uniforms: {
-        positionsTexture: () => points?.previousPositionFbo,
-        mousePos: () => store.mousePosition,
-        repulsion: () => config.simulation?.repulsionFromMouse,
-      },
-    })
+    if (!this.runCommand) {
+      this.runCommand = reglInstance({
+        frag: forceFrag,
+        vert: updateVert,
+        framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
+        primitive: 'triangle strip',
+        count: 4,
+        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+        uniforms: {
+          positionsTexture: () => points?.previousPositionFbo,
+          mousePos: () => store.mousePosition,
+          repulsion: () => config.simulation?.repulsionFromMouse,
+        },
+      })
+    }
   }
 
   public run (): void {

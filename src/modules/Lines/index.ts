@@ -3,7 +3,6 @@ import { CoreModule } from '@/graph/modules/core-module'
 import drawLineFrag from '@/graph/modules/Lines/draw-curve-line.frag'
 import drawLineVert from '@/graph/modules/Lines/draw-curve-line.vert'
 import { defaultConfigValues } from '@/graph/variables'
-import { destroyBuffer } from '@/graph/modules/Shared/buffer'
 import { getCurveLineGeometry } from '@/graph/modules/Lines/geometry'
 
 export class Lines extends CoreModule {
@@ -18,90 +17,92 @@ export class Lines extends CoreModule {
   public initPrograms (): void {
     const { reglInstance, config, store } = this
 
-    this.drawCurveCommand = reglInstance({
-      vert: drawLineVert,
-      frag: drawLineFrag,
+    if (!this.drawCurveCommand) {
+      this.drawCurveCommand = reglInstance({
+        vert: drawLineVert,
+        frag: drawLineFrag,
 
-      attributes: {
-        position: {
-          buffer: () => this.curveLineBuffer,
-          divisor: 0,
+        attributes: {
+          position: {
+            buffer: () => this.curveLineBuffer,
+            divisor: 0,
+          },
+          pointA: {
+            buffer: () => this.pointsBuffer,
+            divisor: 1,
+            offset: Float32Array.BYTES_PER_ELEMENT * 0,
+            stride: Float32Array.BYTES_PER_ELEMENT * 4,
+          },
+          pointB: {
+            buffer: () => this.pointsBuffer,
+            divisor: 1,
+            offset: Float32Array.BYTES_PER_ELEMENT * 2,
+            stride: Float32Array.BYTES_PER_ELEMENT * 4,
+          },
+          color: {
+            buffer: () => this.colorBuffer,
+            divisor: 1,
+            offset: Float32Array.BYTES_PER_ELEMENT * 0,
+            stride: Float32Array.BYTES_PER_ELEMENT * 4,
+          },
+          width: {
+            buffer: () => this.widthBuffer,
+            divisor: 1,
+            offset: Float32Array.BYTES_PER_ELEMENT * 0,
+            stride: Float32Array.BYTES_PER_ELEMENT * 1,
+          },
+          arrow: {
+            buffer: () => this.arrowBuffer,
+            divisor: 1,
+            offset: Float32Array.BYTES_PER_ELEMENT * 0,
+            stride: Float32Array.BYTES_PER_ELEMENT * 1,
+          },
         },
-        pointA: {
-          buffer: () => this.pointsBuffer,
-          divisor: 1,
-          offset: Float32Array.BYTES_PER_ELEMENT * 0,
-          stride: Float32Array.BYTES_PER_ELEMENT * 4,
+        uniforms: {
+          positionsTexture: () => this.points?.currentPositionFbo,
+          pointGreyoutStatus: () => this.points?.greyoutStatusFbo,
+          transformationMatrix: () => store.transform,
+          pointsTextureSize: () => store.pointsTextureSize,
+          pointSizeScale: () => config.pointSizeScale,
+          widthScale: () => config.linkWidthScale,
+          arrowSizeScale: () => config.linkArrowsSizeScale,
+          spaceSize: () => store.adjustedSpaceSize,
+          screenSize: () => store.screenSize,
+          ratio: () => config.pixelRatio,
+          linkVisibilityDistanceRange: () => config.linkVisibilityDistanceRange,
+          linkVisibilityMinTransparency: () => config.linkVisibilityMinTransparency,
+          greyoutOpacity: () => config.linkGreyoutOpacity,
+          scalePointsOnZoom: () => config.scalePointsOnZoom,
+          curvedWeight: () => config.curvedLinkWeight,
+          curvedLinkControlPointDistance: () => config.curvedLinkControlPointDistance,
+          curvedLinkSegments: () => config.curvedLinks ? config.curvedLinkSegments ?? defaultConfigValues.curvedLinkSegments : 1,
         },
-        pointB: {
-          buffer: () => this.pointsBuffer,
-          divisor: 1,
-          offset: Float32Array.BYTES_PER_ELEMENT * 2,
-          stride: Float32Array.BYTES_PER_ELEMENT * 4,
+        cull: {
+          enable: true,
+          face: 'back',
         },
-        color: {
-          buffer: () => this.colorBuffer,
-          divisor: 1,
-          offset: Float32Array.BYTES_PER_ELEMENT * 0,
-          stride: Float32Array.BYTES_PER_ELEMENT * 4,
+        blend: {
+          enable: true,
+          func: {
+            dstRGB: 'one minus src alpha',
+            srcRGB: 'src alpha',
+            dstAlpha: 'one minus src alpha',
+            srcAlpha: 'one',
+          },
+          equation: {
+            rgb: 'add',
+            alpha: 'add',
+          },
         },
-        width: {
-          buffer: () => this.widthBuffer,
-          divisor: 1,
-          offset: Float32Array.BYTES_PER_ELEMENT * 0,
-          stride: Float32Array.BYTES_PER_ELEMENT * 1,
+        depth: {
+          enable: false,
+          mask: false,
         },
-        arrow: {
-          buffer: () => this.arrowBuffer,
-          divisor: 1,
-          offset: Float32Array.BYTES_PER_ELEMENT * 0,
-          stride: Float32Array.BYTES_PER_ELEMENT * 1,
-        },
-      },
-      uniforms: {
-        positionsTexture: () => this.points?.currentPositionFbo,
-        pointGreyoutStatus: () => this.points?.greyoutStatusFbo,
-        transformationMatrix: () => store.transform,
-        pointsTextureSize: () => store.pointsTextureSize,
-        pointSizeScale: () => config.pointSizeScale,
-        widthScale: () => config.linkWidthScale,
-        arrowSizeScale: () => config.linkArrowsSizeScale,
-        spaceSize: () => store.adjustedSpaceSize,
-        screenSize: () => store.screenSize,
-        ratio: () => config.pixelRatio,
-        linkVisibilityDistanceRange: () => config.linkVisibilityDistanceRange,
-        linkVisibilityMinTransparency: () => config.linkVisibilityMinTransparency,
-        greyoutOpacity: () => config.linkGreyoutOpacity,
-        scalePointsOnZoom: () => config.scalePointsOnZoom,
-        curvedWeight: () => config.curvedLinkWeight,
-        curvedLinkControlPointDistance: () => config.curvedLinkControlPointDistance,
-        curvedLinkSegments: () => config.curvedLinks ? config.curvedLinkSegments ?? defaultConfigValues.curvedLinkSegments : 1,
-      },
-      cull: {
-        enable: true,
-        face: 'back',
-      },
-      blend: {
-        enable: true,
-        func: {
-          dstRGB: 'one minus src alpha',
-          srcRGB: 'src alpha',
-          dstAlpha: 'one minus src alpha',
-          srcAlpha: 'one',
-        },
-        equation: {
-          rgb: 'add',
-          alpha: 'add',
-        },
-      },
-      depth: {
-        enable: false,
-        mask: false,
-      },
-      count: () => this.curveLineGeometry?.length ?? 0,
-      instances: () => this.data.linksNumber ?? 0,
-      primitive: 'triangle strip',
-    })
+        count: () => this.curveLineGeometry?.length ?? 0,
+        instances: () => this.data.linksNumber ?? 0,
+        primitive: 'triangle strip',
+      })
+    }
   }
 
   public draw (): void {
@@ -123,32 +124,33 @@ export class Lines extends CoreModule {
       instancePoints[i * 2] = [fromX, fromY]
       instancePoints[i * 2 + 1] = [toX, toY]
     }
-    destroyBuffer(this.pointsBuffer)
-    this.pointsBuffer = reglInstance.buffer(instancePoints)
+
+    if (!this.pointsBuffer) this.pointsBuffer = reglInstance.buffer(0)
+    this.pointsBuffer(instancePoints)
   }
 
   public updateColor (): void {
     const { reglInstance, data } = this
-    destroyBuffer(this.colorBuffer)
-    this.colorBuffer = reglInstance.buffer(data.linkColors ?? [])
+    if (!this.colorBuffer) this.colorBuffer = reglInstance.buffer(0)
+    this.colorBuffer(data.linkColors ?? [])
   }
 
   public updateWidth (): void {
     const { reglInstance, data } = this
-    destroyBuffer(this.widthBuffer)
-    this.widthBuffer = reglInstance.buffer(data.linkWidths ?? [])
+    if (!this.widthBuffer) this.widthBuffer = reglInstance.buffer(0)
+    this.widthBuffer(data.linkWidths ?? [])
   }
 
   public updateArrow (): void {
     const { reglInstance, data } = this
-    destroyBuffer(this.arrowBuffer)
-    this.arrowBuffer = reglInstance.buffer(data.linkArrows ?? [])
+    if (!this.arrowBuffer) this.arrowBuffer = reglInstance.buffer(0)
+    this.arrowBuffer(data.linkArrows ?? [])
   }
 
   public updateCurveLineGeometry (): void {
     const { reglInstance, config: { curvedLinks, curvedLinkSegments } } = this
     this.curveLineGeometry = getCurveLineGeometry(curvedLinks ? curvedLinkSegments ?? defaultConfigValues.curvedLinkSegments : 1)
-    destroyBuffer(this.curveLineBuffer)
-    this.curveLineBuffer = reglInstance.buffer(this.curveLineGeometry)
+    if (!this.curveLineBuffer) this.curveLineBuffer = reglInstance.buffer(0)
+    this.curveLineBuffer(this.curveLineGeometry)
   }
 }

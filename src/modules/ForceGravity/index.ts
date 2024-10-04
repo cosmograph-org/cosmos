@@ -9,20 +9,22 @@ export class ForceGravity extends CoreModule {
 
   public initPrograms (): void {
     const { reglInstance, config, store, points } = this
-    this.runCommand = reglInstance({
-      frag: forceFrag,
-      vert: updateVert,
-      framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
-      primitive: 'triangle strip',
-      count: 4,
-      attributes: { vertexCoord: createQuadBuffer(reglInstance) },
-      uniforms: {
-        positionsTexture: () => points?.previousPositionFbo,
-        gravity: () => config.simulation?.gravity,
-        spaceSize: () => store.adjustedSpaceSize,
-        alpha: () => store.alpha,
-      },
-    })
+    if (!this.runCommand) {
+      this.runCommand = reglInstance({
+        frag: forceFrag,
+        vert: updateVert,
+        framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
+        primitive: 'triangle strip',
+        count: 4,
+        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+        uniforms: {
+          positionsTexture: () => points?.previousPositionFbo,
+          gravity: () => config.simulation?.gravity,
+          spaceSize: () => store.adjustedSpaceSize,
+          alpha: () => store.alpha,
+        },
+      })
+    }
   }
 
   public run (): void {
