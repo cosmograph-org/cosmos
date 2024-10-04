@@ -1,7 +1,7 @@
 import regl from 'regl'
 import { CoreModule } from '@/graph/modules/core-module'
 import { forceFrag } from '@/graph/modules/ForceLink/force-spring'
-import { createQuadBuffer, destroyFramebuffer } from '@/graph/modules/Shared/buffer'
+import { createQuadBuffer } from '@/graph/modules/Shared/buffer'
 import updateVert from '@/graph/modules/Shared/quad.vert'
 
 export enum LinkDirection {
@@ -10,14 +10,18 @@ export enum LinkDirection {
 }
 
 export class ForceLink extends CoreModule {
-  public linkFirstIndicesAndAmountFbo: regl.Framebuffer2D | undefined
-  public indicesFbo: regl.Framebuffer2D | undefined
-  public biasAndStrengthFbo: regl.Framebuffer2D | undefined
-  public randomDistanceFbo: regl.Framebuffer2D | undefined
-  public linkFirstIndicesAndAmount: Float32Array = new Float32Array()
-  public indices: Float32Array = new Float32Array()
-  public maxPointDegree = 0
+  private linkFirstIndicesAndAmountFbo: regl.Framebuffer2D | undefined
+  private indicesFbo: regl.Framebuffer2D | undefined
+  private biasAndStrengthFbo: regl.Framebuffer2D | undefined
+  private randomDistanceFbo: regl.Framebuffer2D | undefined
+  private linkFirstIndicesAndAmount: Float32Array = new Float32Array()
+  private indices: Float32Array = new Float32Array()
+  private maxPointDegree = 0
   private runCommand: regl.DrawCommand | undefined
+  private linkFirstIndicesAndAmountTexture: regl.Texture2D | undefined
+  private indicesTexture: regl.Texture2D | undefined
+  private biasAndStrengthTexture: regl.Texture2D | undefined
+  private randomDistanceTexture: regl.Texture2D | undefined
 
   public create (direction: LinkDirection): void {
     const { reglInstance, store: { pointsTextureSize, linksTextureSize }, data } = this
@@ -55,71 +59,88 @@ export class ForceLink extends CoreModule {
       }
     })
 
-    destroyFramebuffer(this.linkFirstIndicesAndAmountFbo)
-    this.linkFirstIndicesAndAmountFbo = reglInstance.framebuffer({
-      color: reglInstance.texture({
-        data: this.linkFirstIndicesAndAmount,
-        shape: [pointsTextureSize, pointsTextureSize, 4],
-        type: 'float',
-      }),
-      depth: false,
-      stencil: false,
+    if (!this.linkFirstIndicesAndAmountTexture) this.linkFirstIndicesAndAmountTexture = reglInstance.texture()
+    this.linkFirstIndicesAndAmountTexture({
+      data: this.linkFirstIndicesAndAmount,
+      shape: [pointsTextureSize, pointsTextureSize, 4],
+      type: 'float',
     })
-    destroyFramebuffer(this.indicesFbo)
-    this.indicesFbo = reglInstance.framebuffer({
-      color: reglInstance.texture({
-        data: this.indices,
-        shape: [linksTextureSize, linksTextureSize, 4],
-        type: 'float',
-      }),
-      depth: false,
-      stencil: false,
+    if (!this.linkFirstIndicesAndAmountFbo) {
+      this.linkFirstIndicesAndAmountFbo = reglInstance.framebuffer({
+        color: this.linkFirstIndicesAndAmountTexture,
+        depth: false,
+        stencil: false,
+      })
+    }
+
+    if (!this.indicesTexture) this.indicesTexture = reglInstance.texture()
+    this.indicesTexture({
+      data: this.indices,
+      shape: [linksTextureSize, linksTextureSize, 4],
+      type: 'float',
     })
-    destroyFramebuffer(this.biasAndStrengthFbo)
-    this.biasAndStrengthFbo = reglInstance.framebuffer({
-      color: reglInstance.texture({
-        data: linkBiasAndStrengthState,
-        shape: [linksTextureSize, linksTextureSize, 4],
-        type: 'float',
-      }),
-      depth: false,
-      stencil: false,
+    if (!this.indicesFbo) {
+      this.indicesFbo = reglInstance.framebuffer({
+        color: this.indicesTexture,
+        depth: false,
+        stencil: false,
+      })
+    }
+
+    if (!this.biasAndStrengthTexture) this.biasAndStrengthTexture = reglInstance.texture()
+    this.biasAndStrengthTexture({
+      data: linkBiasAndStrengthState,
+      shape: [linksTextureSize, linksTextureSize, 4],
+      type: 'float',
     })
-    destroyFramebuffer(this.randomDistanceFbo)
-    this.randomDistanceFbo = reglInstance.framebuffer({
-      color: reglInstance.texture({
-        data: linkDistanceState,
-        shape: [linksTextureSize, linksTextureSize, 4],
-        type: 'float',
-      }),
-      depth: false,
-      stencil: false,
+    if (!this.biasAndStrengthFbo) {
+      this.biasAndStrengthFbo = reglInstance.framebuffer({
+        color: this.biasAndStrengthTexture,
+        depth: false,
+        stencil: false,
+      })
+    }
+
+    if (!this.randomDistanceTexture) this.randomDistanceTexture = reglInstance.texture()
+    this.randomDistanceTexture({
+      data: linkDistanceState,
+      shape: [linksTextureSize, linksTextureSize, 4],
+      type: 'float',
     })
+    if (!this.randomDistanceFbo) {
+      this.randomDistanceFbo = reglInstance.framebuffer({
+        color: this.randomDistanceTexture,
+        depth: false,
+        stencil: false,
+      })
+    }
   }
 
   public initPrograms (): void {
     const { reglInstance, config, store, points } = this
-    this.runCommand = reglInstance({
-      frag: () => forceFrag(this.maxPointDegree),
-      vert: updateVert,
-      framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
-      primitive: 'triangle strip',
-      count: 4,
-      attributes: { vertexCoord: createQuadBuffer(reglInstance) },
-      uniforms: {
-        positionsTexture: () => points?.previousPositionFbo,
-        linkSpring: () => config.simulation?.linkSpring,
-        linkDistance: () => config.simulation?.linkDistance,
-        linkDistRandomVariationRange: () => config.simulation?.linkDistRandomVariationRange,
-        linkInfoTexture: () => this.linkFirstIndicesAndAmountFbo,
-        linkIndicesTexture: () => this.indicesFbo,
-        linkPropertiesTexture: () => this.biasAndStrengthFbo,
-        linkRandomDistanceTexture: () => this.randomDistanceFbo,
-        pointsTextureSize: () => store.pointsTextureSize,
-        linksTextureSize: () => store.linksTextureSize,
-        alpha: () => store.alpha,
-      },
-    })
+    if (!this.runCommand) {
+      this.runCommand = reglInstance({
+        frag: () => forceFrag(this.maxPointDegree),
+        vert: updateVert,
+        framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
+        primitive: 'triangle strip',
+        count: 4,
+        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+        uniforms: {
+          positionsTexture: () => points?.previousPositionFbo,
+          linkSpring: () => config.simulation?.linkSpring,
+          linkDistance: () => config.simulation?.linkDistance,
+          linkDistRandomVariationRange: () => config.simulation?.linkDistRandomVariationRange,
+          linkInfoTexture: () => this.linkFirstIndicesAndAmountFbo,
+          linkIndicesTexture: () => this.indicesFbo,
+          linkPropertiesTexture: () => this.biasAndStrengthFbo,
+          linkRandomDistanceTexture: () => this.randomDistanceFbo,
+          pointsTextureSize: () => store.pointsTextureSize,
+          linksTextureSize: () => store.linksTextureSize,
+          alpha: () => store.alpha,
+        },
+      })
+    }
   }
 
   public run (): void {
