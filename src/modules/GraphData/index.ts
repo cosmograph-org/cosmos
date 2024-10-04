@@ -1,6 +1,7 @@
 import { getRgbaColor, isNumber } from '@/graph/helper'
 import { GraphConfig } from '@/graph/config'
 export class GraphData {
+  public inputPointPositions: number[] | undefined
   public inputPointColors: number[] | undefined
   public inputPointSizes: number[] | undefined
   public inputLinkColors: number[] | undefined
@@ -11,6 +12,7 @@ export class GraphData {
   public pointColors: number[] | undefined
   public pointSizes: number[] | undefined
 
+  public inputLinks: number[] | undefined
   public links: number[] | undefined
   public linkColors: number[] | undefined
   public linkWidths: number[] | undefined
@@ -40,6 +42,10 @@ export class GraphData {
 
   public get linksNumber (): number | undefined {
     return this.links && this.links.length / 2
+  }
+
+  public updatePoints (): void {
+    this.pointPositions = this.inputPointPositions
   }
 
   /**
@@ -92,6 +98,10 @@ export class GraphData {
         }
       }
     }
+  }
+
+  public updateLinks (): void {
+    this.links = this.inputLinks
   }
 
   /**
@@ -177,9 +187,11 @@ export class GraphData {
   }
 
   public update (): void {
+    this.updatePoints()
     this.updatePointColor()
     this.updatePointSize()
 
+    this.updateLinks()
     this.updateLinkColor()
     this.updateLinkWidth()
     this.updateArrows()

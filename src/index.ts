@@ -262,7 +262,7 @@ export class Graph {
    * Example: `[1, 2, 3, 4, 5, 6]` sets the first point to (1, 2), the second point to (3, 4), and so on.
    */
   public setPointPositions (pointPositions: number[]): void {
-    this.graph.pointPositions = pointPositions
+    this.graph.inputPointPositions = pointPositions
     this._hasPointPositionsChanged = true
   }
 
@@ -298,7 +298,7 @@ export class Graph {
    * Example: `[0, 1, 1, 2]` creates a link from point 0 to point 1 and another link from point 1 to point 2.
    */
   public setLinks (links: number[]): void {
-    this.graph.links = links
+    this.graph.inputLinks = links
     this._hasLinksChanged = true
   }
 
