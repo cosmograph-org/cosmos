@@ -235,7 +235,7 @@ export class Graph {
       prevConfig.simulation.repulsionQuadtreeLevels !== this.config.simulation.repulsionQuadtreeLevels) {
       this.store.adjustSpaceSize(this.config.spaceSize, this.reglInstance.limits.maxTextureSize)
       this.resizeCanvas(true)
-      this.update(this.store.isSimulationRunning)
+      this.update(this.store.isSimulationRunning ? this.store.alpha : 0)
     }
     if (prevConfig.showFPSMonitor !== this.config.showFPSMonitor) {
       if (this.config.showFPSMonitor) {
@@ -352,9 +352,11 @@ export class Graph {
   /**
    * Renders the graph.
    *
-   * @param {boolean} [runSimulation=true] - Optional flag to determine if the simulation should run on render.
+   * @param {number} [simulationAlpha] - Optional value between 0 and 1
+   * that controls the initial energy of the simulation.The higher the value,
+   * the more initial energy the simulation will get. Zero value stops the simulation.
    */
-  public render (runSimulation = true): void {
+  public render (simulationAlpha?: number): void {
     this.graph.update()
     const { fitViewOnInit, fitViewDelay, fitViewPadding, fitViewDuration, fitViewByPointsInRect, initialZoomLevel } = this.config
     if (!this.graph.pointsNumber && !this.graph.linksNumber) {
@@ -377,7 +379,7 @@ export class Graph {
     }
     this._isFirstRenderAfterInit = false
 
-    this.update(runSimulation)
+    this.update(simulationAlpha)
   }
 
   /**
@@ -786,7 +788,7 @@ export class Graph {
     return arr
   }
 
-  private update (runSimulation: boolean): void {
+  private update (simulationAlpha = this.store.alpha): void {
     const { graph } = this
     this.store.pointsTextureSize = Math.ceil(Math.sqrt(graph.pointsNumber ?? 0))
     this.store.linksTextureSize = Math.ceil(Math.sqrt((graph.linksNumber ?? 0) * 2))
@@ -795,11 +797,7 @@ export class Graph {
     this.points.trackPointsByIndices()
     this.store.setFocusedPoint(this.config.focusedPointIndex)
     this.store.hoveredPoint = undefined
-    if (runSimulation) {
-      this.start(this.store.alpha)
-    } else {
-      this.step()
-    }
+    this.start(simulationAlpha)
   }
 
   private initPrograms (): void {
