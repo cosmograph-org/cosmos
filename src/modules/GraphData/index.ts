@@ -1,150 +1,240 @@
-import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
+import { getRgbaColor, isNumber } from '@/graph/helper'
+import { GraphConfig } from '@/graph/config'
+export class GraphData {
+  public inputPointPositions: number[] | undefined
+  public inputPointColors: number[] | undefined
+  public inputPointSizes: number[] | undefined
+  public inputLinkColors: number[] | undefined
+  public inputLinkWidths: number[] | undefined
+  public inputLinkStrength: number[] | undefined
 
-export class GraphData <N extends CosmosInputNode, L extends CosmosInputLink> {
-  /** Links that have existing source and target nodes  */
-  public completeLinks: Set<L> = new Set()
-  public degree: number[] = []
-  /** Mapping the source node index to a `Set` of target node indices connected to that node */
-  public groupedSourceToTargetLinks: Map<number, Set<number>> = new Map()
-  /** Mapping the target node index to a `Set` of source node indices connected to that node */
-  public groupedTargetToSourceLinks: Map<number, Set<number>> = new Map()
-  private _nodes: N[] = []
-  private _links: L[] = []
-  /** Mapping the original id to the original node */
-  private idToNodeMap: Map<string, N> = new Map()
+  public pointPositions: number[] | undefined
+  public pointColors: number[] | undefined
+  public pointSizes: number[] | undefined
 
-  /** We want to display more important nodes (i.e. with the biggest number of connections)
-   * on top of the other. To render them in the right order,
-   * we create an array of node indices sorted by degree (number of connections)
-   * and and we store multiple maps that help us referencing the right data objects
-   * and other properties by original node index, sorted index, and id 👇. */
+  public inputLinks: number[] | undefined
+  public links: number[] | undefined
+  public linkColors: number[] | undefined
+  public linkWidths: number[] | undefined
+  public linkArrowsBoolean: boolean[] | undefined
+  public linkArrows: number[] | undefined
+  public linkStrength: (number | undefined)[] | undefined
 
-  /** Mapping the sorted index to the original index */
-  private sortedIndexToInputIndexMap: Map<number, number> = new Map()
-  /** Mapping the original index to the sorted index of the node */
-  private inputIndexToSortedIndexMap: Map<number, number> = new Map()
-  /** Mapping the original id to the sorted index of the node */
-  private idToSortedIndexMap: Map<string, number> = new Map()
-  /** Mapping the original index to the original id of the node */
-  private inputIndexToIdMap: Map<number, string> = new Map()
-  /** Mapping the original id to the indegree value of the node */
-  private idToIndegreeMap: Map<string, number> = new Map()
-  /** Mapping the original id to the outdegree value of the node */
-  private idToOutdegreeMap: Map<string, number> = new Map()
+  /**
+   * Each inner array of `sourceIndexToTargetIndices` and `targetIndexToSourceIndices` contains pairs where:
+   *   - The first value is the target/source index in the point array.
+   *   - The second value is the link index in the array of links.
+  */
+  public sourceIndexToTargetIndices: ([number, number][] | undefined)[] | undefined
+  public targetIndexToSourceIndices: ([number, number][] | undefined)[] | undefined
 
-  public get nodes (): N[] {
-    return this._nodes
+  public degree: number[] | undefined
+
+  private _config: GraphConfig
+
+  public constructor (config: GraphConfig) {
+    this._config = config
   }
 
-  public get links (): L[] {
-    return this._links
+  public get pointsNumber (): number | undefined {
+    return this.pointPositions && this.pointPositions.length / 2
   }
 
-  public get linksNumber (): number {
-    return this.completeLinks.size
+  public get linksNumber (): number | undefined {
+    return this.links && this.links.length / 2
   }
 
-  public setData (inputNodes: N[], inputLinks: L[]): void {
-    this.idToNodeMap.clear()
-    this.idToSortedIndexMap.clear()
-    this.inputIndexToIdMap.clear()
-    this.idToIndegreeMap.clear()
-    this.idToOutdegreeMap.clear()
+  public updatePoints (): void {
+    this.pointPositions = this.inputPointPositions
+  }
 
-    inputNodes.forEach((n, i) => {
-      this.idToNodeMap.set(n.id, n)
-      this.inputIndexToIdMap.set(i, n.id)
-      this.idToIndegreeMap.set(n.id, 0)
-      this.idToOutdegreeMap.set(n.id, 0)
-    })
+  /**
+   * Updates the point colors based on the input data or default config value.
+   */
+  public updatePointColor (): void {
+    if (this.pointsNumber === undefined) {
+      this.pointColors = undefined
+      return
+    }
 
-    // Calculate node outdegree/indegree values
-    // And filter links if source/target node does not exist
-    this.completeLinks.clear()
-    inputLinks.forEach(l => {
-      const sourceNode = this.idToNodeMap.get(l.source)
-      const targetNode = this.idToNodeMap.get(l.target)
-      if (sourceNode !== undefined && targetNode !== undefined) {
-        this.completeLinks.add(l)
-        const outdegree = this.idToOutdegreeMap.get(sourceNode.id)
-        if (outdegree !== undefined) this.idToOutdegreeMap.set(sourceNode.id, outdegree + 1)
-        const indegree = this.idToIndegreeMap.get(targetNode.id)
-        if (indegree !== undefined) this.idToIndegreeMap.set(targetNode.id, indegree + 1)
+    // Sets point colors to default values from config if the input is missing or does not match input points number.
+    const defaultRgba = getRgbaColor(this._config.defaultPointColor)
+    if (this.inputPointColors === undefined || this.inputPointColors.length / 4 !== this.pointsNumber) {
+      this.pointColors = new Array(this.pointsNumber * 4)
+      for (let i = 0; i < this.pointColors.length / 4; i++) {
+        this.pointColors[i * 4] = defaultRgba[0]
+        this.pointColors[i * 4 + 1] = defaultRgba[1]
+        this.pointColors[i * 4 + 2] = defaultRgba[2]
+        this.pointColors[i * 4 + 3] = defaultRgba[3]
       }
-    })
+    } else {
+      this.pointColors = this.inputPointColors
+      for (let i = 0; i < this.pointColors.length / 4; i++) {
+        if (!isNumber(this.pointColors[i * 4])) this.pointColors[i * 4] = defaultRgba[0]
+        if (!isNumber(this.pointColors[i * 4 + 1])) this.pointColors[i * 4 + 1] = defaultRgba[1]
+        if (!isNumber(this.pointColors[i * 4 + 2])) this.pointColors[i * 4 + 2] = defaultRgba[2]
+        if (!isNumber(this.pointColors[i * 4 + 3])) this.pointColors[i * 4 + 3] = defaultRgba[3]
+      }
+    }
+  }
 
-    // Calculate node degree value
-    this.degree = new Array<number>(inputNodes.length)
-    inputNodes.forEach((n, i) => {
-      const outdegree = this.idToOutdegreeMap.get(n.id)
-      const indegree = this.idToIndegreeMap.get(n.id)
-      this.degree[i] = (outdegree ?? 0) + (indegree ?? 0)
-    })
+  /**
+   * Updates the point sizes based on the input data or default config value.
+   */
+  public updatePointSize (): void {
+    if (this.pointsNumber === undefined) {
+      this.pointSizes = undefined
+      return
+    }
 
-    // Sort nodes by degree value
-    this.sortedIndexToInputIndexMap.clear()
-    this.inputIndexToSortedIndexMap.clear()
-    const sortedDegrees = Object.entries(this.degree).sort((a, b) => a[1] - b[1])
-    sortedDegrees.forEach(([inputStringedIndex], sortedIndex) => {
-      const inputIndex = +inputStringedIndex
-      this.sortedIndexToInputIndexMap.set(sortedIndex, inputIndex)
-      this.inputIndexToSortedIndexMap.set(inputIndex, sortedIndex)
-      this.idToSortedIndexMap.set(this.inputIndexToIdMap.get(inputIndex) as string, sortedIndex)
-    })
+    // Sets point sizes to default values from config if the input is missing or does not match input points number.
+    if (this.inputPointSizes === undefined || this.inputPointSizes.length !== this.pointsNumber) {
+      this.pointSizes = new Array(this.pointsNumber).fill(this._config.defaultPointSize)
+    } else {
+      this.pointSizes = this.inputPointSizes
+      for (let i = 0; i < this.pointSizes.length; i++) {
+        if (!isNumber(this.pointSizes[i])) {
+          this.pointSizes[i] = this._config.defaultPointSize
+        }
+      }
+    }
+  }
 
-    this.groupedSourceToTargetLinks.clear()
-    this.groupedTargetToSourceLinks.clear()
-    inputLinks.forEach((l) => {
-      const sourceIndex = this.idToSortedIndexMap.get(l.source)
-      const targetIndex = this.idToSortedIndexMap.get(l.target)
+  public updateLinks (): void {
+    this.links = this.inputLinks
+  }
+
+  /**
+   * Updates the link colors based on the input data or default config value.
+   */
+  public updateLinkColor (): void {
+    if (this.linksNumber === undefined) {
+      this.linkColors = undefined
+      return
+    }
+
+    // Sets link colors to default values from config if the input is missing or does not match input links number.
+    const defaultRgba = getRgbaColor(this._config.defaultLinkColor)
+    if (this.inputLinkColors === undefined || this.inputLinkColors.length / 4 !== this.linksNumber) {
+      this.linkColors = new Array(this.linksNumber * 4)
+
+      for (let i = 0; i < this.linkColors.length / 4; i++) {
+        this.linkColors[i * 4] = defaultRgba[0]
+        this.linkColors[i * 4 + 1] = defaultRgba[1]
+        this.linkColors[i * 4 + 2] = defaultRgba[2]
+        this.linkColors[i * 4 + 3] = defaultRgba[3]
+      }
+    } else {
+      this.linkColors = this.inputLinkColors
+      for (let i = 0; i < this.linkColors.length / 4; i++) {
+        if (!isNumber(this.linkColors[i * 4])) this.linkColors[i * 4] = defaultRgba[0]
+        if (!isNumber(this.linkColors[i * 4 + 1])) this.linkColors[i * 4 + 1] = defaultRgba[1]
+        if (!isNumber(this.linkColors[i * 4 + 2])) this.linkColors[i * 4 + 2] = defaultRgba[2]
+        if (!isNumber(this.linkColors[i * 4 + 3])) this.linkColors[i * 4 + 3] = defaultRgba[3]
+      }
+    }
+  }
+
+  /**
+   * Updates the link width based on the input data or default config value.
+   */
+  public updateLinkWidth (): void {
+    if (this.linksNumber === undefined) {
+      this.linkWidths = undefined
+      return
+    }
+
+    // Sets link widths to default values from config if the input is missing or does not match input links number.
+    if (this.inputLinkWidths === undefined || this.inputLinkWidths.length !== this.linksNumber) {
+      this.linkWidths = new Array(this.linksNumber).fill(this._config.defaultLinkWidth)
+    } else {
+      this.linkWidths = this.inputLinkWidths
+      for (let i = 0; i < this.linkWidths.length; i++) {
+        if (!isNumber(this.linkWidths[i])) {
+          this.linkWidths[i] = this._config.defaultLinkWidth
+        }
+      }
+    }
+  }
+
+  /**
+   * Updates the link arrows based on the input data or default config value.
+   */
+  public updateArrows (): void {
+    if (this.linksNumber === undefined) {
+      this.linkArrows = undefined
+      return
+    }
+
+    // Sets link arrows to default values from config if the input is missing or does not match input links number.
+    if (this.linkArrowsBoolean === undefined || this.linkArrowsBoolean.length !== this.linksNumber) {
+      this.linkArrows = new Array(this.linksNumber).fill(+this._config.defaultLinkArrows)
+    } else {
+      this.linkArrows = this.linkArrowsBoolean.map(d => +d)
+    }
+  }
+
+  public updateLinkStrength (): void {
+    if (this.linksNumber === undefined) {
+      this.linkStrength = undefined
+    }
+
+    if (this.inputLinkStrength === undefined || this.inputLinkStrength.length !== this.linksNumber) {
+      this.linkStrength = undefined
+    } else {
+      this.linkStrength = this.inputLinkStrength
+    }
+  }
+
+  public update (): void {
+    this.updatePoints()
+    this.updatePointColor()
+    this.updatePointSize()
+
+    this.updateLinks()
+    this.updateLinkColor()
+    this.updateLinkWidth()
+    this.updateArrows()
+    this.updateLinkStrength()
+
+    this._createAdjacencyLists()
+    this._calculateDegrees()
+  }
+
+  public getAdjacentIndices (index: number): number[] | undefined {
+    return [...(this.sourceIndexToTargetIndices?.[index]?.map(d => d[0]) || []), ...(this.targetIndexToSourceIndices?.[index]?.map(d => d[0]) || [])]
+  }
+
+  private _createAdjacencyLists (): void {
+    if (this.linksNumber === undefined || this.links === undefined) {
+      this.sourceIndexToTargetIndices = undefined
+      this.targetIndexToSourceIndices = undefined
+      return
+    }
+
+    this.sourceIndexToTargetIndices = new Array(this.pointsNumber).fill(undefined)
+    this.targetIndexToSourceIndices = new Array(this.pointsNumber).fill(undefined)
+    for (let i = 0; i < this.linksNumber; i++) {
+      const sourceIndex = this.links[i * 2]
+      const targetIndex = this.links[i * 2 + 1]
       if (sourceIndex !== undefined && targetIndex !== undefined) {
-        if (this.groupedSourceToTargetLinks.get(sourceIndex) === undefined) this.groupedSourceToTargetLinks.set(sourceIndex, new Set())
-        const targets = this.groupedSourceToTargetLinks.get(sourceIndex)
-        targets?.add(targetIndex)
+        if (this.sourceIndexToTargetIndices[sourceIndex] === undefined) this.sourceIndexToTargetIndices[sourceIndex] = []
+        this.sourceIndexToTargetIndices[sourceIndex]?.push([targetIndex, i])
 
-        if (this.groupedTargetToSourceLinks.get(targetIndex) === undefined) this.groupedTargetToSourceLinks.set(targetIndex, new Set())
-        const sources = this.groupedTargetToSourceLinks.get(targetIndex)
-        sources?.add(sourceIndex)
+        if (this.targetIndexToSourceIndices[targetIndex] === undefined) this.targetIndexToSourceIndices[targetIndex] = []
+        this.targetIndexToSourceIndices[targetIndex]?.push([sourceIndex, i])
       }
-    })
-
-    this._nodes = inputNodes
-    this._links = inputLinks
+    }
   }
 
-  public getNodeById (id: string): N | undefined {
-    return this.idToNodeMap.get(id)
-  }
-
-  public getNodeByIndex (index: number): N | undefined {
-    return this._nodes[index]
-  }
-
-  public getSortedIndexByInputIndex (index: number): number | undefined {
-    return this.inputIndexToSortedIndexMap.get(index)
-  }
-
-  public getInputIndexBySortedIndex (index: number): number | undefined {
-    return this.sortedIndexToInputIndexMap.get(index)
-  }
-
-  public getSortedIndexById (id: string | undefined): number | undefined {
-    return id !== undefined ? this.idToSortedIndexMap.get(id) : undefined
-  }
-
-  public getInputIndexById (id: string | undefined): number | undefined {
-    if (id === undefined) return undefined
-    const sortedIndex = this.getSortedIndexById(id)
-    if (sortedIndex === undefined) return undefined
-    return this.getInputIndexBySortedIndex(sortedIndex)
-  }
-
-  public getAdjacentNodes (id: string): N[] | undefined {
-    const index = this.getSortedIndexById(id)
-    if (index === undefined) return undefined
-    const outgoingSet = this.groupedSourceToTargetLinks.get(index) ?? []
-    const incomingSet = this.groupedTargetToSourceLinks.get(index) ?? []
-    return [...new Set([...outgoingSet, ...incomingSet])]
-      .map(index => this.getNodeByIndex(this.getInputIndexBySortedIndex(index) as number) as N)
+  private _calculateDegrees (): void {
+    if (this.pointsNumber === undefined) {
+      this.degree = undefined
+      return
+    }
+    this.degree = new Array(this.pointsNumber).fill(0)
+    for (let i = 0; i < this.pointsNumber; i++) {
+      this.degree[i] = (this.sourceIndexToTargetIndices?.[i]?.length ?? 0) + (this.targetIndexToSourceIndices?.[i]?.length ?? 0)
+    }
   }
 }

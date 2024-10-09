@@ -49,14 +49,14 @@ export function forceFrag (startLevel: number, maxLevels: number): string {
 precision highp float;
 #endif
 
-uniform sampler2D position;
+uniform sampler2D positionsTexture;
 uniform sampler2D randomValues;
 uniform float spaceSize;
 uniform float repulsion;
 uniform float theta;
 uniform float alpha;
 uniform sampler2D level[${maxLevels}];
-varying vec2 index;
+varying vec2 textureCoords;
 
 vec2 calcAdd(vec2 xy, float l, float c) {
   float distanceMin2 = 1.0;
@@ -66,8 +66,8 @@ vec2 calcAdd(vec2 xy, float l, float c) {
 }
 
 void main() {
-  vec4 pointPosition = texture2D(position, index);
-  vec4 random = texture2D(randomValues, index);
+  vec4 pointPosition = texture2D(positionsTexture, textureCoords);
+  vec4 random = texture2D(randomValues, textureCoords);
 
   float width0 = spaceSize;
 
