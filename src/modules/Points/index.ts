@@ -468,9 +468,8 @@ export class Points extends CoreModule {
     const dist = pointSamplingDistance ?? Math.min(...screenSize) / 2
     const w = Math.ceil(screenSize[0] / dist)
     const h = Math.ceil(screenSize[1] / dist)
-
-    if (!this.sampledPointsFbo) this.sampledPointsFbo = reglInstance.framebuffer()
-    this.sampledPointsFbo({
+    destroyFramebuffer(this.sampledPointsFbo)
+    this.sampledPointsFbo = reglInstance.framebuffer({
       shape: [w, h],
       depth: false,
       stencil: false,
