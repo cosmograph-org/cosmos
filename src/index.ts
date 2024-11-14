@@ -358,6 +358,13 @@ export class Graph {
    */
   public render (simulationAlpha?: number): void {
     this.graph.update()
+    this._hasPointPositionsChanged = true
+    this._hasPointColorsChanged = true
+    this._hasPointSizesChanged = true
+    this._hasLinksChanged = true
+    this._hasLinkColorsChanged = true
+    this._hasLinkWidthsChanged = true
+    this._hasLinkArrowsChanged = true
     const { fitViewOnInit, fitViewDelay, fitViewPadding, fitViewDuration, fitViewByPointsInRect, initialZoomLevel } = this.config
     if (!this.graph.pointsNumber && !this.graph.linksNumber) {
       this.stopFrames()
