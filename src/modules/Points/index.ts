@@ -135,8 +135,6 @@ export class Points extends CoreModule {
     if (!this.sampledPointIndices) this.sampledPointIndices = reglInstance.buffer(0)
     this.sampledPointIndices(createIndexesForBuffer(store.pointsTextureSize))
 
-    this.updateSize()
-    this.updateColor()
     this.updateGreyoutStatus()
     this.updateSampledPointsGrid()
   }
