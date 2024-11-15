@@ -12,6 +12,7 @@ import { ForceLink, LinkDirection } from '@/graph/modules/ForceLink'
 import { ForceManyBody } from '@/graph/modules/ForceManyBody'
 import { ForceManyBodyQuadtree } from '@/graph/modules/ForceManyBodyQuadtree'
 import { ForceMouse } from '@/graph/modules/ForceMouse'
+import { Clusters } from '@/graph/modules/Clusters'
 import { FPSMonitor } from '@/graph/modules/FPSMonitor'
 import { GraphData } from '@/graph/modules/GraphData'
 import { Lines } from '@/graph/modules/Lines'
@@ -39,6 +40,7 @@ export class Graph {
   private forceLinkIncoming: ForceLink | undefined
   private forceLinkOutgoing: ForceLink | undefined
   private forceMouse: ForceMouse | undefined
+  private clusters: Clusters | undefined
   private zoomInstance = new Zoom(this.store, this.config)
   private dragInstance = new Drag(this.store, this.config)
 
@@ -67,6 +69,7 @@ export class Graph {
   private _hasLinkColorsChanged = false
   private _hasLinkWidthsChanged = false
   private _hasLinkArrowsChanged = false
+  private _hasClustersChanged = false
 
   public constructor (canvas: HTMLCanvasElement, config?: GraphConfigInterface) {
     if (config) this.config.init(config)
@@ -150,6 +153,7 @@ export class Graph {
       this.forceLinkIncoming = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
       this.forceLinkOutgoing = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
       this.forceMouse = new ForceMouse(this.reglInstance, this.config, this.store, this.graph, this.points)
+      this.clusters = new Clusters(this.reglInstance, this.config, this.store, this.graph, this.points)
     }
 
     this.store.backgroundColor = getRgbaColor(this.config.backgroundColor)
@@ -349,6 +353,11 @@ export class Graph {
     this.graph.inputLinkStrength = linkStrength
   }
 
+  public setClusters (clusters: number[]): void {
+    this.graph.inputClusters = clusters
+    this._hasClustersChanged = true
+  }
+
   /**
    * Renders the graph.
    *
@@ -365,6 +374,7 @@ export class Graph {
     this._hasLinkColorsChanged = true
     this._hasLinkWidthsChanged = true
     this._hasLinkArrowsChanged = true
+    this._hasClustersChanged = true
     const { fitViewOnInit, fitViewDelay, fitViewPadding, fitViewDuration, fitViewByPointsInRect, initialZoomLevel } = this.config
     if (!this.graph.pointsNumber && !this.graph.linksNumber) {
       this.stopFrames()
@@ -762,6 +772,7 @@ export class Graph {
     this.forceLinkIncoming?.create(LinkDirection.INCOMING)
     this.forceLinkOutgoing?.create(LinkDirection.OUTGOING)
     this.forceCenter?.create()
+    if (this._hasClustersChanged) this.clusters?.create()
 
     this._hasPointPositionsChanged = false
     this._hasPointColorsChanged = false
@@ -816,6 +827,7 @@ export class Graph {
     this.forceMouse?.initPrograms()
     this.forceManyBody?.initPrograms()
     this.forceCenter?.initPrograms()
+    this.clusters?.initPrograms()
   }
 
   private frame (): void {
@@ -852,6 +864,11 @@ export class Graph {
             this.forceLinkIncoming?.run()
             this.points.updatePosition()
             this.forceLinkOutgoing?.run()
+            this.points.updatePosition()
+          }
+
+          if (this.graph.clusters) {
+            this.clusters?.run()
             this.points.updatePosition()
           }
 
