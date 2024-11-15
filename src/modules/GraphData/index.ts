@@ -7,6 +7,7 @@ export class GraphData {
   public inputLinkColors: number[] | undefined
   public inputLinkWidths: number[] | undefined
   public inputLinkStrength: number[] | undefined
+  public inputClusters: number[] | undefined
 
   public pointPositions: number[] | undefined
   public pointColors: number[] | undefined
@@ -19,6 +20,7 @@ export class GraphData {
   public linkArrowsBoolean: boolean[] | undefined
   public linkArrows: number[] | undefined
   public linkStrength: (number | undefined)[] | undefined
+  public clusters: number[] | undefined
 
   /**
    * Each inner array of `sourceIndexToTargetIndices` and `targetIndexToSourceIndices` contains pairs where:
@@ -186,6 +188,18 @@ export class GraphData {
     }
   }
 
+  public updateClusters (): void {
+    if (this.pointsNumber === undefined) {
+      this.clusters = undefined
+      return
+    }
+    if (this.inputClusters === undefined || this.inputClusters.length !== this.pointsNumber) {
+      this.clusters = undefined
+    } else {
+      this.clusters = this.inputClusters
+    }
+  }
+
   public update (): void {
     this.updatePoints()
     this.updatePointColor()
@@ -196,6 +210,8 @@ export class GraphData {
     this.updateLinkWidth()
     this.updateArrows()
     this.updateLinkStrength()
+
+    this.updateClusters()
 
     this._createAdjacencyLists()
     this._calculateDegrees()
