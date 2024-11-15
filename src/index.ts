@@ -19,6 +19,7 @@ import { Store, ALPHA_MIN, MAX_POINT_SIZE } from '@/graph/modules/Store'
 import { Zoom } from '@/graph/modules/Zoom'
 import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 import { defaultConfigValues, defaultScaleToZoom } from '@/graph/variables'
+import { reglCachedCode } from '@/graph/regl-cached-code'
 
 export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
   public config = new GraphConfig<N, L>()
@@ -102,6 +103,9 @@ export class Graph<N extends CosmosInputNode, L extends CosmosInputLink> {
         preserveDrawingBuffer: true,
       },
       extensions: ['OES_texture_float', 'ANGLE_instanced_arrays'],
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      cachedCode: reglCachedCode,
     })
 
     this.store.maxPointSize = (this.reglInstance.limits.pointSizeDims[1] ?? MAX_POINT_SIZE) / this.config.pixelRatio

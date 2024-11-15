@@ -67,7 +67,7 @@
     "gl-bench": "^1.0.42",
     "gl-matrix": "^3.4.3",
     "random": "^4.1.0",
-    "regl": "^2.1.0"
+    "regl": "npm:@plotly/regl@^2.1.2"
   },
   "pre-commit": "lint:staged",
   "lint-staged": {
