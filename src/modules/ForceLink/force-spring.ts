@@ -4,32 +4,32 @@ export function forceFrag (maxLinks: number): string {
 precision highp float;
 #endif
 
-uniform sampler2D position;
+uniform sampler2D positionsTexture;
 uniform float linkSpring;
 uniform float linkDistance;
 uniform vec2 linkDistRandomVariationRange;
 
-uniform sampler2D linkFirstIndicesAndAmount;
-uniform sampler2D linkIndices;
-uniform sampler2D linkBiasAndStrength;
-uniform sampler2D linkRandomDistanceFbo;
+uniform sampler2D linkInfoTexture; // Texture storing first link indices and amount
+uniform sampler2D linkIndicesTexture;
+uniform sampler2D linkPropertiesTexture; // Texture storing link bias and strength
+uniform sampler2D linkRandomDistanceTexture;
 
 uniform float pointsTextureSize;
 uniform float linksTextureSize;
 uniform float alpha;
 
-varying vec2 index;
+varying vec2 textureCoords;
 
 const float MAX_LINKS = ${maxLinks}.0;
 
 void main() {
-  vec4 pointPosition = texture2D(position, index);
+  vec4 pointPosition = texture2D(positionsTexture, textureCoords);
   vec4 velocity = vec4(0.0);
 
-  vec4 linkFirstIJAndAmount = texture2D(linkFirstIndicesAndAmount, index);
-  float iCount = linkFirstIJAndAmount.r;
-  float jCount = linkFirstIJAndAmount.g;
-  float linkAmount = linkFirstIJAndAmount.b;
+  vec4 linkInfo = texture2D(linkInfoTexture, textureCoords);
+  float iCount = linkInfo.r;
+  float jCount = linkInfo.g;
+  float linkAmount = linkInfo.b;
   if (linkAmount > 0.0) {
     for (float i = 0.0; i < MAX_LINKS; i += 1.0) {
       if (i < linkAmount) {
@@ -38,9 +38,9 @@ void main() {
           jCount += 1.0;
         }
         vec2 linkTextureIndex = (vec2(iCount, jCount) + 0.5) / linksTextureSize;
-        vec4 connectedPointIndex = texture2D(linkIndices, linkTextureIndex);
-        vec4 biasAndStrength = texture2D(linkBiasAndStrength, linkTextureIndex);
-        vec4 randomMinDistance = texture2D(linkRandomDistanceFbo, linkTextureIndex);
+        vec4 connectedPointIndex = texture2D(linkIndicesTexture, linkTextureIndex);
+        vec4 biasAndStrength = texture2D(linkPropertiesTexture, linkTextureIndex);
+        vec4 randomMinDistance = texture2D(linkRandomDistanceTexture, linkTextureIndex);
         float bias = biasAndStrength.r;
         float strength = biasAndStrength.g;
         float randomMinLinkDist = randomMinDistance.r * (linkDistRandomVariationRange.g - linkDistRandomVariationRange.r) + linkDistRandomVariationRange.r;
@@ -48,10 +48,12 @@ void main() {
 
         iCount += 1.0;
 
-        vec4 connectedPointPosition = texture2D(position, (connectedPointIndex.rg + 0.5) / pointsTextureSize);
+        vec4 connectedPointPosition = texture2D(positionsTexture, (connectedPointIndex.rg + 0.5) / pointsTextureSize);
         float x = connectedPointPosition.x - (pointPosition.x + velocity.x);
         float y = connectedPointPosition.y - (pointPosition.y + velocity.y);
         float l = sqrt(x * x + y * y);
+
+        // Apply the link force
         l = max(l, randomMinLinkDist * 0.99);
         l = (l - randomMinLinkDist) / l;
         l *= linkSpring * alpha;

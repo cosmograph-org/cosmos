@@ -1,9 +1,9 @@
 import { D3ZoomEvent } from 'd3-zoom'
-import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
+import { D3DragEvent } from 'd3-drag'
 import {
-  defaultNodeColor,
-  defaultGreyoutNodeOpacity,
-  defaultNodeSize,
+  defaultPointColor,
+  defaultGreyoutPointOpacity,
+  defaultPointSize,
   defaultLinkColor,
   defaultGreyoutLinkOpacity,
   defaultLinkWidth,
@@ -11,55 +11,51 @@ import {
   defaultConfigValues,
 } from '@/graph/variables'
 import { isPlainObject } from '@/graph/helper'
+import { type Hovered } from '@/graph/modules/Store'
 
-export type NumericAccessor<Datum> = ((d: Datum, i: number, ...rest: unknown[]) => number | null) | number | null | undefined
-export type ColorAccessor<Datum> = ((d: Datum, i: number, ...rest: unknown[]) => string | [number, number, number, number] | null)
-  | string | [number, number, number, number] | null | undefined
-export type BooleanAccessor<Datum> = ((d: Datum, i: number, ...rest: unknown[]) => boolean | null) | boolean | null | undefined
-
-export interface GraphEvents <N extends CosmosInputNode> {
+export interface GraphEvents {
   /**
    * Callback function that will be called on every canvas click.
-   * If clicked on a node, its data will be passed as the first argument,
-   * index as the second argument, position as the third argument
-   * and the corresponding mouse event as the forth argument:
-   * `(node: Node | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void`.
+   * If clicked on a point, its index will be passed as the first argument,
+   * position as the second argument and the corresponding mouse event as the third argument:
+   * `(index: number | undefined, pointPosition: [number, number] | undefined, event: MouseEvent) => void`.
    * Default value: `undefined`
    */
   onClick?: (
-      clickedNode: N | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent
+      index: number | undefined, pointPosition: [number, number] | undefined, event: MouseEvent
     ) => void;
   /**
    * Callback function that will be called when mouse movement happens.
-   * If the mouse moves over a node, its data will be passed as the first argument,
-   * index as the second argument, position as the third argument
-   * and the corresponding mouse event as the forth argument:
-   * `(node: Node | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent) => void`.
+   * If the mouse moves over a point, its index will be passed as the first argument,
+   * position as the second argument and the corresponding mouse event as the third argument:
+   * `(index: number | undefined, pointPosition: [number, number] | undefined, event: MouseEvent) => void`.
    * Default value: `undefined`
    */
   onMouseMove?: (
-      hoveredNode: N | undefined, index: number | undefined, nodePosition: [number, number] | undefined, event: MouseEvent
+      index: number | undefined, pointPosition: [number, number] | undefined, event: MouseEvent
     ) => void;
   /**
-   * Callback function that will be called when a node appears under the mouse
-   * as a result of a mouse event, zooming and panning, or movement of nodes.
-   * The node data will be passed as the first argument,
-   * index as the second argument, position as the third argument
-   * and the corresponding mouse event or D3's zoom event as the forth argument:
-   * `(node: Node, index: number, nodePosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined) => void`.
+   * Callback function that will be called when a point appears under the mouse
+   * as a result of a mouse event, zooming and panning, or movement of points.
+   * The point index will be passed as the first argument, position as the second argument
+   * and the corresponding mouse event or D3's zoom event as the third argument:
+   * `(index: number, pointPosition: [number, number], event: MouseEvent | D3DragEvent<HTMLCanvasElement, undefined, Hovered>
+   * | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined) => void`.
    * Default value: `undefined`
    */
-  onNodeMouseOver?: (
-      hoveredNode: N, index: number, nodePosition: [number, number], event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined
+  onPointMouseOver?: (
+      index: number,
+      pointPosition: [number, number],
+      event: MouseEvent | D3DragEvent<HTMLCanvasElement, undefined, Hovered> | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined
     ) => void;
   /**
-   * Callback function that will be called when a node is no longer underneath
-   * the mouse pointer because of a mouse event, zoom/pan event, or movement of nodes.
+   * Callback function that will be called when a point is no longer underneath
+   * the mouse pointer because of a mouse event, zoom/pan event, or movement of points.
    * The corresponding mouse event or D3's zoom event will be passed as the first argument:
-   * `(event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined) => void`.
+   * `(event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | D3DragEvent<HTMLCanvasElement, undefined, Hovered> | undefined) => void`.
    * Default value: `undefined`
    */
-  onNodeMouseOut?: (event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined) => void;
+  onPointMouseOut?: (event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | D3DragEvent<HTMLCanvasElement, undefined, Hovered> | undefined) => void;
   /**
    * Callback function that will be called when zooming or panning starts.
    * First argument is a D3 Zoom Event and second indicates whether
@@ -84,17 +80,38 @@ export interface GraphEvents <N extends CosmosInputNode> {
    * Default value: `undefined`
    */
   onZoomEnd?: (e: D3ZoomEvent<HTMLCanvasElement, undefined>, userDriven: boolean) => void;
+  /**
+   * Callback function that will be called when dragging starts.
+   * First argument is a D3 Drag Event:
+   * `(event: D3DragEvent) => void`.
+   * Default value: `undefined`
+   */
+  onDragStart?: (e: D3DragEvent<HTMLCanvasElement, undefined, Hovered>) => void;
+  /**
+   * Callback function that will be called continuously during dragging.
+   * First argument is a D3 Drag Event:
+   * `(event: D3DragEvent) => void`.
+   * Default value: `undefined`
+   */
+  onDrag?: (e: D3DragEvent<HTMLCanvasElement, undefined, Hovered>) => void;
+  /**
+   * Callback function that will be called when dragging ends.
+   * First argument is a D3 Drag Event:
+   * `(event: D3DragEvent) => void`.
+   * Default value: `undefined`
+   */
+  onDragEnd?: (e: D3DragEvent<HTMLCanvasElement, undefined, Hovered>) => void;
 }
 
-export interface GraphSimulationSettings<N> {
+export interface GraphSimulationSettings {
   /**
    * Decay coefficient. Use smaller values if you want the simulation to "cool down" slower.
-   * Default value: `1000`
+   * Default value: `5000`
    */
   decay?: number;
   /**
    * Gravity force coefficient.
-   * Default value: `0`
+   * Default value: `0.25`
    */
   gravity?: number;
   /**
@@ -104,13 +121,13 @@ export interface GraphSimulationSettings<N> {
   center?: number;
   /**
    * Repulsion force coefficient.
-   * Default value: `0.1`
+   * Default value: `1.0`
    */
   repulsion?: number;
   /**
    * Decreases / increases the detalization of the Many-Body force calculations.
    * When `useQuadtree` is set to `true`, this property corresponds to the Barnes–Hut approximation criterion.
-   * Default value: `1.7`
+   * Default value: `1.15`
    */
   repulsionTheta?: number;
   /**
@@ -126,7 +143,7 @@ export interface GraphSimulationSettings<N> {
   linkSpring?: number;
   /**
    * Minimum link distance.
-   * Default value: `2`
+   * Default value: `10`
    */
   linkDistance?: number;
   /**
@@ -153,13 +170,13 @@ export interface GraphSimulationSettings<N> {
   /**
    * Callback function that will be called on every simulation tick.
    * The value of the first argument `alpha` will decrease over time as the simulation "cools down".
-   * If there's a node under the mouse pointer, its datum will be passed as the second argument,
-   * index as the third argument and position as the forth argument:
-   * `(alpha: number, node: Node | undefined, index: number | undefined, nodePosition: [number, number] | undefined) => void`.
+   * If there's a point under the mouse pointer, its index will be passed as the second argument
+   * and position as the third argument:
+   * `(alpha: number, hoveredIndex: number | undefined, pointPosition: [number, number] | undefined) => void`.
    * Default value: `undefined`
    */
   onTick?: (
-    alpha: number, hoveredNode?: N, index?: number, nodePosition?: [number, number]
+    alpha: number, hoveredIndex?: number, pointPosition?: [number, number]
     ) => void;
   /**
    * Callback function that will be called when the simulation stops.
@@ -177,11 +194,12 @@ export interface GraphSimulationSettings<N> {
    */
   onRestart?: () => void;
 }
-export interface GraphConfigInterface<N extends CosmosInputNode, L extends CosmosInputLink> {
+export interface GraphConfigInterface {
   /**
+   * TODO: rethink the logic of `disableSimulation` param 👇.
    * Do not run the simulation, just render the graph.
-   * Cosmos uses the x and y values of the nodes’ data to determine their position in the graph.
-   * If x and y values are not specified, the position of the nodes will be assigned randomly.
+   * Cosmos uses the x and y values of the points’ data to determine their position in the graph.
+   * If x and y values are not specified, the position of the points will be assigned randomly.
    * This property will be applied only on component initialization and it
    * can't be changed using the `setConfig` method.
    * Default value: `false`
@@ -189,89 +207,101 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
   disableSimulation?: boolean;
   /**
    * Canvas background color.
+   * Can be either a hex color string (e.g., '#b3b3b3') or an array of RGBA values.
    * Default value: '#222222'
    */
-  backgroundColor?: string;
+  backgroundColor?: string | [number, number, number, number];
   /**
    * Simulation space size (max 8192).
    * Default value: `4096`
    */
   spaceSize?: number;
+
   /**
-   * Node color accessor function or hex value.
+   * The default color to use for points when no point colors are provided,
+   * or if the color value in the array is `undefined` or `null`.
+   * This can be either a hex color string (e.g., '#b3b3b3') or an array of RGBA values
+   * in the format `[red, green, blue, alpha]` where each value is a number between 0 and 255.
    * Default value: '#b3b3b3'
-  */
-  nodeColor?: ColorAccessor<N>;
+   */
+  defaultPointColor?: string | [number, number, number, number];
+
   /**
-   * Greyed out node opacity value when the selection is active.
+   * Greyed out point opacity value when the selection is active.
    * Default value: `0.1`
   */
-  nodeGreyoutOpacity?: number;
+  pointGreyoutOpacity?: number;
   /**
-   * Node size accessor function or value in pixels.
+   * The default size value to use for points when no point sizes are provided or
+   * if the size value in the array is `undefined` or `null`.
    * Default value: `4`
   */
-  nodeSize?: NumericAccessor<N>;
+  defaultPointSize?: number;
   /**
-   * Scale factor for the node size.
+   * Scale factor for the point size.
    * Default value: `1`
    */
-  nodeSizeScale?: number;
+  pointSizeScale?: number;
 
   /**
-   * Turns the node highlight on hover on / off.
-   * @deprecated Will be removed from version 2.0. Use property `renderHoveredNodeRing` instead.
-   * @todo Remove deprecated type `InputNode` in version 2.0.
-   * Default value: `true`
+   * Cursor style to use when hovering over a point
+   * Default value: `auto`
    */
-  renderHighlightedNodeRing?: boolean;
+  hoveredPointCursor?: string;
 
   /**
-   * Turns ring rendering around a node on hover on / off
-   * Default value: `true`
+   * Turns ring rendering around a point on hover on / off
+   * Default value: `false`
    */
-  renderHoveredNodeRing?: boolean;
+  renderHoveredPointRing?: boolean;
 
   /**
-   * Highlighted node ring color hex value.
-   * @deprecated Will be removed from version 2.0. Use property `hoveredNodeRingColor` or `focusedNodeRingColor` instead.
-   * @todo Remove deprecated type `InputNode` in version 2.0.
-   * Default value: undefined
-   */
-  highlightedNodeRingColor?: string;
-
-  /**
-   * Hovered node ring color hex value.
+   * Hovered point ring color hex value.
+   * Can be either a hex color string (e.g., '#b3b3b3') or an array of RGBA values.
    * Default value: `white`
    */
-  hoveredNodeRingColor?: string;
+  hoveredPointRingColor?: string | [number, number, number, number];
 
   /**
-   * Focused node ring color hex value.
+   * Focused point ring color hex value.
+   * Can be either a hex color string (e.g., '#b3b3b3') or an array of RGBA values.
    * Default value: `white`
    */
-  focusedNodeRingColor?: string;
+  focusedPointRingColor?: string | [number, number, number, number];
+
+  /**
+   * Set focus on a point by index.  A ring will be highlighted around the focused point.
+   * Has priority over the `setFocusedPointByIndex` method.
+   * When set to `undefined`, no point is focused.
+   * Default value: `undefined`
+   */
+  focusedPointIndex?: number;
 
   /**
    * Turns link rendering on / off.
    * Default value: `true`
    */
   renderLinks?: boolean;
+
   /**
-   * Link color accessor function or hex value.
+   * The default color to use for links when no link colors are provided,
+   * or if the color value in the array is `undefined` or `null`.
+   * This can be either a hex color string (e.g., '#666666') or an array of RGBA values
+   * in the format `[red, green, blue, alpha]` where each value is a number between 0 and 255.
    * Default value: '#666666'
    */
-  linkColor?: ColorAccessor<L>;
+  defaultLinkColor?: string | [number, number, number, number];
+
   /**
    * Greyed out link opacity value when the selection is active.
    * Default value: `0.1`
   */
   linkGreyoutOpacity?: number;
   /**
-   * Link width accessor function or value in pixels.
+   * The default width value to use for links when no link widths are provided or if the width value in the array is `undefined` or `null`.
    * Default value: `1`
   */
-  linkWidth?: NumericAccessor<L>;
+  defaultLinkWidth?: number;
   /**
    * Scale factor for the link width.
    * Default value: `1`
@@ -300,10 +330,10 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    */
   curvedLinkControlPointDistance?: number;
   /**
-   * Link arrow accessor function or value that controls whether or not to display link arrows.
-   * Default value: `true`
+   * The default link arrow value that controls whether or not to display link arrows.
+   * Default value: `false`
    */
-  linkArrows?: BooleanAccessor<L>;
+  defaultLinkArrows?: boolean;
   /**
    * Scale factor for the link arrows size.
    * Default value: `1`
@@ -333,11 +363,11 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    */
   useQuadtree?: boolean;
   /** Simulation parameters and event listeners */
-  simulation?: GraphSimulationSettings<N>;
+  simulation?: GraphSimulationSettings;
   /**
    * Events
    */
-  events?: GraphEvents<N>;
+  events?: GraphEvents;
 
   /**
    * Show WebGL performance monitor.
@@ -350,10 +380,10 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    */
   pixelRatio?: number;
   /**
-   * Increase or decrease the size of the nodes when zooming in or out.
+   * Increase or decrease the size of the points when zooming in or out.
    * Default value: true
    */
-  scaleNodesOnZoom?: boolean;
+  scalePointsOnZoom?: boolean;
   /**
    * Initial zoom level. Can be set once during graph initialization.
    * Default value: `undefined`
@@ -365,22 +395,39 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    */
   disableZoom?: boolean;
   /**
-   * Whether to center and zoom the view to fit all nodes in the scene on initialization or not.
+   * Enables or disables dragging of points in the graph.
+   * Default value: `false`
+   */
+  enableDrag?: boolean;
+  /**
+   * Whether to center and zoom the view to fit all points in the scene on initialization or not.
    * Default: `true`
    */
   fitViewOnInit?: boolean;
   /**
-   * Delay in milliseconds before fitting the view.
+   * Delay in milliseconds before fitting the view when `fitViewOnInit` is enabled.
    * Useful if you want the layout to stabilize a bit before fitting.
    * Default: `250`
    */
   fitViewDelay?: number;
   /**
-   * When `fitViewOnInit` is set to `true`, fits the view to show the nodes within a rectangle
+   * Padding to apply when fitting the view to show all points.
+   * This value is added to the calculated bounding box to provide some extra space around the points.
+   * This is used when the `fitViewOnInit` option is enabled.
+   * Default: `0.1`
+   */
+  fitViewPadding?: number;
+  /**
+   * Duration in milliseconds for fitting the view to show all points when fitViewOnInit is enabled.
+   * Default: `250`
+   */
+  fitViewDuration?: number;
+  /**
+   * When `fitViewOnInit` is set to `true`, fits the view to show the points within a rectangle
    * defined by its two corner coordinates `[[left, bottom], [right, top]]` in the scene space.
    * Default: `undefined`
    */
-  fitViewByNodesInRect?: [[number, number], [number, number]] | [number, number][];
+  fitViewByPointsInRect?: [[number, number], [number, number]] | [number, number][];
   /**
    * Providing a `randomSeed` value allows you to control
    * the randomness of the layout across different simulation runs.
@@ -391,42 +438,42 @@ export interface GraphConfigInterface<N extends CosmosInputNode, L extends Cosmo
    */
   randomSeed?: number | string;
   /**
-   * Node sampling distance in pixels between neighboring nodes when calling the `getSampledNodePositionsMap` method.
-   * This parameter determines how many nodes will be included in the sample.
+   * Point sampling distance in pixels between neighboring points when calling the `getSampledPointPositionsMap` method.
+   * This parameter determines how many points will be included in the sample.
    * Default value: `150`
   */
-  nodeSamplingDistance?: number;
+  pointSamplingDistance?: number;
 }
 
-export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> implements GraphConfigInterface<N, L> {
+export class GraphConfig implements GraphConfigInterface {
   public disableSimulation = defaultConfigValues.disableSimulation
   public backgroundColor = defaultBackgroundColor
   public spaceSize = defaultConfigValues.spaceSize
-  public nodeColor = defaultNodeColor
-  public nodeGreyoutOpacity = defaultGreyoutNodeOpacity
-  public nodeSize = defaultNodeSize
-  public nodeSizeScale = defaultConfigValues.nodeSizeScale
-  public renderHighlightedNodeRing = true
-  public highlightedNodeRingColor = undefined
-  public renderHoveredNodeRing = true
-  public hoveredNodeRingColor = defaultConfigValues.hoveredNodeRingColor
-  public focusedNodeRingColor = defaultConfigValues.focusedNodeRingColor
-  public linkColor = defaultLinkColor
+  public defaultPointColor = defaultPointColor
+  public pointGreyoutOpacity = defaultGreyoutPointOpacity
+  public defaultPointSize = defaultPointSize
+  public pointSizeScale = defaultConfigValues.pointSizeScale
+  public hoveredPointCursor = defaultConfigValues.hoveredPointCursor
+  public renderHoveredPointRing = defaultConfigValues.renderHoveredPointRing
+  public hoveredPointRingColor = defaultConfigValues.hoveredPointRingColor
+  public focusedPointRingColor = defaultConfigValues.focusedPointRingColor
+  public focusedPointIndex = defaultConfigValues.focusedPointIndex
+  public defaultLinkColor = defaultLinkColor
   public linkGreyoutOpacity = defaultGreyoutLinkOpacity
-  public linkWidth = defaultLinkWidth
+  public defaultLinkWidth = defaultLinkWidth
   public linkWidthScale = defaultConfigValues.linkWidthScale
   public renderLinks = defaultConfigValues.renderLinks
   public curvedLinks = defaultConfigValues.curvedLinks
   public curvedLinkSegments = defaultConfigValues.curvedLinkSegments
   public curvedLinkWeight = defaultConfigValues.curvedLinkWeight
   public curvedLinkControlPointDistance = defaultConfigValues.curvedLinkControlPointDistance
-  public linkArrows = defaultConfigValues.arrowLinks
+  public defaultLinkArrows = defaultConfigValues.arrowLinks
   public linkArrowsSizeScale = defaultConfigValues.arrowSizeScale
   public linkVisibilityDistanceRange = defaultConfigValues.linkVisibilityDistanceRange
   public linkVisibilityMinTransparency = defaultConfigValues.linkVisibilityMinTransparency
   public useQuadtree = defaultConfigValues.useQuadtree
 
-  public simulation: GraphSimulationSettings<N> = {
+  public simulation: GraphSimulationSettings = {
     decay: defaultConfigValues.simulation.decay,
     gravity: defaultConfigValues.simulation.gravity,
     center: defaultConfigValues.simulation.center,
@@ -445,32 +492,38 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
     onRestart: undefined,
   }
 
-  public events: GraphEvents<N> = {
+  public events: GraphEvents = {
     onClick: undefined,
     onMouseMove: undefined,
-    onNodeMouseOver: undefined,
-    onNodeMouseOut: undefined,
+    onPointMouseOver: undefined,
+    onPointMouseOut: undefined,
     onZoomStart: undefined,
     onZoom: undefined,
     onZoomEnd: undefined,
+    onDragStart: undefined,
+    onDrag: undefined,
+    onDragEnd: undefined,
   }
 
   public showFPSMonitor = defaultConfigValues.showFPSMonitor
 
   public pixelRatio = defaultConfigValues.pixelRatio
 
-  public scaleNodesOnZoom = defaultConfigValues.scaleNodesOnZoom
+  public scalePointsOnZoom = defaultConfigValues.scalePointsOnZoom
   public initialZoomLevel = undefined
   public disableZoom = defaultConfigValues.disableZoom
+  public enableDrag = defaultConfigValues.enableDrag
   public fitViewOnInit = defaultConfigValues.fitViewOnInit
   public fitViewDelay = defaultConfigValues.fitViewDelay
-  public fitViewByNodesInRect = undefined
+  public fitViewPadding = defaultConfigValues.fitViewPadding
+  public fitViewDuration = defaultConfigValues.fitViewDuration
+  public fitViewByPointsInRect = undefined
 
   public randomSeed = undefined
-  public nodeSamplingDistance = defaultConfigValues.nodeSamplingDistance
+  public pointSamplingDistance = defaultConfigValues.pointSamplingDistance
 
-  public init (config: GraphConfigInterface<N, L>): void {
-    (Object.keys(config) as (keyof GraphConfigInterface<N, L>)[])
+  public init (config: GraphConfigInterface): void {
+    (Object.keys(config) as (keyof GraphConfigInterface)[])
       .forEach(configParameter => {
         this.deepMergeConfig(this.getConfig(), config, configParameter)
       })
@@ -486,7 +539,7 @@ export class GraphConfig<N extends CosmosInputNode, L extends CosmosInputLink> i
     } else current[key] = next[key]
   }
 
-  private getConfig (): GraphConfigInterface<N, L> {
+  private getConfig (): GraphConfigInterface {
     return this
   }
 }
