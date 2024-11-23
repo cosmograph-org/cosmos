@@ -4,3 +4,4 @@ node_modules
 dist
 yarn.lock
 .eslintcache
+*storybook.log
