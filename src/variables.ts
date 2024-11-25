@@ -38,6 +38,7 @@ export const defaultConfigValues = {
     linkDistRandomVariationRange: [1, 1.2],
     repulsionFromMouse: 2,
     friction: 0.85,
+    cluster: 0.1,
   },
   showFPSMonitor: false,
   pixelRatio: 2,

@@ -7,7 +7,8 @@ export class GraphData {
   public inputLinkColors: number[] | undefined
   public inputLinkWidths: number[] | undefined
   public inputLinkStrength: number[] | undefined
-  public inputClusters: number[] | undefined
+  public inputPointClusters: (number | undefined)[] | undefined
+  public inputClusterPositions: (number | undefined)[] | undefined
 
   public pointPositions: number[] | undefined
   public pointColors: number[] | undefined
@@ -20,7 +21,9 @@ export class GraphData {
   public linkArrowsBoolean: boolean[] | undefined
   public linkArrows: number[] | undefined
   public linkStrength: (number | undefined)[] | undefined
-  public clusters: number[] | undefined
+
+  public pointClusters: (number | undefined)[] | undefined
+  public clusterPositions: (number | undefined)[] | undefined
 
   /**
    * Each inner array of `sourceIndexToTargetIndices` and `targetIndexToSourceIndices` contains pairs where:
@@ -190,13 +193,19 @@ export class GraphData {
 
   public updateClusters (): void {
     if (this.pointsNumber === undefined) {
-      this.clusters = undefined
+      this.pointClusters = undefined
+      this.clusterPositions = undefined
       return
     }
-    if (this.inputClusters === undefined || this.inputClusters.length !== this.pointsNumber) {
-      this.clusters = undefined
+    if (this.inputPointClusters === undefined || this.inputPointClusters.length !== this.pointsNumber) {
+      this.pointClusters = undefined
     } else {
-      this.clusters = this.inputClusters
+      this.pointClusters = this.inputPointClusters
+    }
+    if (this.inputClusterPositions === undefined) {
+      this.clusterPositions = undefined
+    } else {
+      this.clusterPositions = this.inputClusterPositions
     }
   }
 
