@@ -163,6 +163,11 @@ export interface GraphSimulationSettings {
    */
   friction?: number;
   /**
+   * Cluster coefficient.
+   * Default value: `0.1`
+   */
+  cluster?: number;
+  /**
    * Callback function that will be called when the simulation starts.
    * Default value: `undefined`
    */
@@ -485,6 +490,7 @@ export class GraphConfig implements GraphConfigInterface {
     linkDistRandomVariationRange: defaultConfigValues.simulation.linkDistRandomVariationRange,
     repulsionFromMouse: defaultConfigValues.simulation.repulsionFromMouse,
     friction: defaultConfigValues.simulation.friction,
+    cluster: defaultConfigValues.simulation.cluster,
     onStart: undefined,
     onTick: undefined,
     onEnd: undefined,

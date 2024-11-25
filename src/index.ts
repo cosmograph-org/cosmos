@@ -69,7 +69,8 @@ export class Graph {
   private _hasLinkColorsChanged = false
   private _hasLinkWidthsChanged = false
   private _hasLinkArrowsChanged = false
-  private _hasClustersChanged = false
+  private _hasPointClustersChanged = false
+  private _hasClusterPositionsChanged = false
 
   public constructor (canvas: HTMLCanvasElement, config?: GraphConfigInterface) {
     if (config) this.config.init(config)
@@ -353,9 +354,35 @@ export class Graph {
     this.graph.inputLinkStrength = linkStrength
   }
 
-  public setClusters (clusters: number[]): void {
-    this.graph.inputClusters = clusters
-    this._hasClustersChanged = true
+  /**
+   * Sets the point clusters for the graph.
+   *
+   * @param {(number | undefined)[]} pointClusters - Array of cluster indices for each point in the graph.
+   *   - Index: Each index corresponds to a point.
+   *   - Values: Integers starting from 0; `undefined` indicates that a point does not belong to any cluster and will not be affected by cluster forces.
+   * @example
+   *   `[0, 1, 0, 2, undefined, 1]` maps points to clusters: point 0 and 2 to cluster 0, point 1 to cluster 1, and point 3 to cluster 2.
+   * Points 4 is unclustered.
+   * @note Clusters without specified positions via `setClusterPositions` will be positioned at their centermass by default.
+   */
+  public setPointClusters (pointClusters: (number | undefined)[]): void {
+    this.graph.inputPointClusters = pointClusters
+    this._hasPointClustersChanged = true
+  }
+
+  /**
+   * Sets the positions of the point clusters for the graph.
+   *
+   * @param {(number | undefined)[]} clusterPositions - Array of cluster positions.
+   *   - Every two elements represent the x and y coordinates for a cluster position.
+   *   - `undefined` means the cluster's position is not defined and will use centermass positioning instead.
+   * @example
+   *   `[10, 20, 30, 40, undefined, undefined]` places the first cluster at (10, 20) and the second at (30, 40);
+   * the third cluster will be positioned at its centermass automatically.
+   */
+  public setClusterPositions (clusterPositions: (number | undefined)[]): void {
+    this.graph.inputClusterPositions = clusterPositions
+    this._hasClusterPositionsChanged = true
   }
 
   /**
@@ -374,7 +401,8 @@ export class Graph {
     this._hasLinkColorsChanged = true
     this._hasLinkWidthsChanged = true
     this._hasLinkArrowsChanged = true
-    this._hasClustersChanged = true
+    this._hasPointClustersChanged = true
+    this._hasClusterPositionsChanged = true
     const { fitViewOnInit, fitViewDelay, fitViewPadding, fitViewDuration, fitViewByPointsInRect, initialZoomLevel } = this.config
     if (!this.graph.pointsNumber && !this.graph.linksNumber) {
       this.stopFrames()
@@ -772,7 +800,7 @@ export class Graph {
     this.forceLinkIncoming?.create(LinkDirection.INCOMING)
     this.forceLinkOutgoing?.create(LinkDirection.OUTGOING)
     this.forceCenter?.create()
-    if (this._hasClustersChanged) this.clusters?.create()
+    if (this._hasPointClustersChanged || this._hasClusterPositionsChanged) this.clusters?.create()
 
     this._hasPointPositionsChanged = false
     this._hasPointColorsChanged = false
@@ -867,7 +895,7 @@ export class Graph {
             this.points.updatePosition()
           }
 
-          if (this.graph.clusters) {
+          if (this.graph.pointClusters || this.graph.clusterPositions) {
             this.clusters?.run()
             this.points.updatePosition()
           }
