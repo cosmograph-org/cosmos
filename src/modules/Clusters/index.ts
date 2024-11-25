@@ -9,11 +9,13 @@ import updateVert from '@/graph/modules/Shared/quad.vert'
 
 export class Clusters extends CoreModule {
   private clusterFbo: regl.Framebuffer2D | undefined
+  private clusterPositionsFbo: regl.Framebuffer2D | undefined
   private centermassFbo: regl.Framebuffer2D | undefined
   private clearCentermassCommand: regl.DrawCommand | undefined
   private calculateCentermassCommand: regl.DrawCommand | undefined
   private applyForcesCommand: regl.DrawCommand | undefined
   private clusterTexture: regl.Texture2D | undefined
+  private clusterPositionsTexture: regl.Texture2D | undefined
   private centermassTexture: regl.Texture2D | undefined
   private pointIndices: regl.Buffer | undefined
   private clustersTextureSize: number | undefined
@@ -21,17 +23,38 @@ export class Clusters extends CoreModule {
   public create (): void {
     const { reglInstance, store, data } = this
     const { pointsTextureSize } = store
-    if (data.pointsNumber === undefined || !data.clusters) return
-    const clusterNumber = data.clusters.reduce((max, clusterIndex) => Math.max(max, clusterIndex), 0) + 1
+    if (data.pointsNumber === undefined || (!data.pointClusters && !data.clusterPositions)) return
+
+    // Find the highest cluster index in the array and add 1 (since cluster indices start at 0).
+    const clusterNumber = (data.pointClusters ?? []).reduce<number>((max, clusterIndex) => {
+      if (clusterIndex === undefined) return max
+      return Math.max(max, clusterIndex)
+    }, 0) + 1
+
     this.clustersTextureSize = Math.ceil(Math.sqrt(clusterNumber))
 
     if (!this.clusterTexture) this.clusterTexture = reglInstance.texture()
+
+    if (!this.clusterPositionsTexture) this.clusterPositionsTexture = reglInstance.texture()
     const clusterState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
+    const clusterPositions = new Float32Array(this.clustersTextureSize * this.clustersTextureSize * 4).fill(-1)
+    if (data.clusterPositions) {
+      for (let cluster = 0; cluster < clusterNumber; ++cluster) {
+        clusterPositions[cluster * 4 + 0] = data.clusterPositions[cluster * 2 + 0] ?? -1
+        clusterPositions[cluster * 4 + 1] = data.clusterPositions[cluster * 2 + 1] ?? -1
+      }
+    }
+
     for (let i = 0; i < data.pointsNumber; ++i) {
-      const clusterIndex = data.clusters[i]
-      if (clusterIndex === undefined) continue
-      clusterState[i * 4 + 0] = clusterIndex % this.clustersTextureSize
-      clusterState[i * 4 + 1] = Math.floor(clusterIndex / this.clustersTextureSize)
+      const clusterIndex = data.pointClusters?.[i]
+      if (clusterIndex === undefined) {
+        // no cluster, so no forces
+        clusterState[i * 4 + 0] = -1
+        clusterState[i * 4 + 1] = -1
+      } else {
+        clusterState[i * 4 + 0] = clusterIndex % this.clustersTextureSize
+        clusterState[i * 4 + 1] = Math.floor(clusterIndex / this.clustersTextureSize)
+      }
     }
     this.clusterTexture({
       data: clusterState,
@@ -46,7 +69,21 @@ export class Clusters extends CoreModule {
       })
     }
 
+    this.clusterPositionsTexture({
+      data: clusterPositions,
+      shape: [this.clustersTextureSize, this.clustersTextureSize, 4],
+      type: 'float',
+    })
+    if (!this.clusterPositionsFbo) {
+      this.clusterPositionsFbo = reglInstance.framebuffer({
+        color: this.clusterPositionsTexture,
+        depth: false,
+        stencil: false,
+      })
+    }
+
     if (!this.centermassTexture) this.centermassTexture = reglInstance.texture()
+
     this.centermassTexture({
       data: new Float32Array(this.clustersTextureSize * this.clustersTextureSize * 4).fill(0),
       shape: [this.clustersTextureSize, this.clustersTextureSize, 4],
@@ -66,7 +103,7 @@ export class Clusters extends CoreModule {
 
   public initPrograms (): void {
     const { reglInstance, store, data, points } = this
-    if (!data.clusters) return
+    if (data.pointClusters === undefined) return
 
     if (!this.clearCentermassCommand) {
       this.clearCentermassCommand = reglInstance({
@@ -124,16 +161,17 @@ export class Clusters extends CoreModule {
           positionsTexture: () => points?.previousPositionFbo,
           clusterTexture: () => this.clusterFbo,
           centermassTexture: () => this.centermassFbo,
+          clusterPositionsTexture: () => this.clusterPositionsFbo,
           alpha: () => store.alpha,
           clustersTextureSize: () => this.clustersTextureSize,
+          clusterCoefficient: () => this.config.simulation?.cluster,
         },
       })
     }
   }
 
   public run (): void {
-    if (!this.data.clusters) return
-
+    if (!this.data.pointClusters && !this.data.clusterPositions) return
     this.clearCentermassCommand?.()
     this.calculateCentermassCommand?.()
     this.applyForcesCommand?.()
