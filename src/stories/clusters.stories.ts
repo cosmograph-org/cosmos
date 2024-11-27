@@ -37,6 +37,17 @@ export const worm: Story = {
   },
 }
 
+const radialData = generateMeshData(100, 100, 100, 1.0)
+export const radial: Story = {
+  args: {
+    pointPositions: radialData.pointPositions,
+    pointColors: radialData.pointColors,
+    pointClusters: radialData.clusters,
+    clusterPositions: radialData.clusterPositions,
+    links: radialData.links,
+  },
+}
+
 const withoutLinksData = generateMeshData(100, 100, 15, 1.0)
 export const withoutLinks: Story = {
   args: {
