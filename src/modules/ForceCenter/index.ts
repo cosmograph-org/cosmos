@@ -1,4 +1,5 @@
-import regl from 'regl'
+import {Framebuffer} from '@luma.gl/core'
+import {Model} from '@luma.gl/engine'
 import { CoreModule } from '@/graph/modules/core-module'
 import calculateCentermassFrag from '@/graph/modules/ForceCenter/calculate-centermass.frag'
 import calculateCentermassVert from '@/graph/modules/ForceCenter/calculate-centermass.vert'
@@ -8,50 +9,50 @@ import clearFrag from '@/graph/modules/Shared/clear.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
 
 export class ForceCenter extends CoreModule {
-  private centermassFbo: regl.Framebuffer2D | undefined
-  private clearCentermassCommand: regl.DrawCommand | undefined
-  private calculateCentermassCommand: regl.DrawCommand | undefined
-  private runCommand: regl.DrawCommand | undefined
-  private centermassTexture: regl.Texture2D | undefined
-  private pointIndices: regl.Buffer | undefined
+  private centermassFbo: Framebuffer | undefined
+  private clearCentermassCommand: Model | undefined
+  private calculateCentermassCommand: Model | undefined
+  private runCommand: Model | undefined
+  private centermassTexture: Texture | undefined
+  private pointIndices: Buffer | undefined
 
   public create (): void {
-    const { reglInstance, store } = this
-    if (!this.centermassTexture) this.centermassTexture = reglInstance.texture()
+    const { device, store } = this
+    if (!this.centermassTexture) this.centermassTexture = device.createTexture()
     this.centermassTexture({
       data: new Float32Array(4).fill(0),
       shape: [1, 1, 4],
       type: 'float',
     })
     if (!this.centermassFbo) {
-      this.centermassFbo = reglInstance.framebuffer({
+      this.centermassFbo = device.createFramebuffer({
         color: this.centermassTexture,
         depth: false,
         stencil: false,
       })
     }
 
-    if (!this.pointIndices) this.pointIndices = reglInstance.buffer(0)
+    if (!this.pointIndices) this.pointIndices = device.buffer(0)
     this.pointIndices(createIndexesForBuffer(store.pointsTextureSize))
   }
 
   public initPrograms (): void {
-    const { reglInstance, config, store, data, points } = this
+    const { device, config, store, data, points } = this
     if (!this.clearCentermassCommand) {
-      this.clearCentermassCommand = reglInstance({
+      this.clearCentermassCommand = new Model(device, {
         frag: clearFrag,
         vert: updateVert,
-        framebuffer: () => this.centermassFbo as regl.Framebuffer2D,
+        framebuffer: () => this.centermassFbo as Framebuffer,
         primitive: 'triangle strip',
         count: 4,
-        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+        attributes: { vertexCoord: createQuadBuffer(device) },
       })
     }
     if (!this.calculateCentermassCommand) {
-      this.calculateCentermassCommand = reglInstance({
+      this.calculateCentermassCommand = new Model(device, {
         frag: calculateCentermassFrag,
         vert: calculateCentermassVert,
-        framebuffer: () => this.centermassFbo as regl.Framebuffer2D,
+        framebuffer: () => this.centermassFbo as Framebuffer,
         primitive: 'points',
         count: () => data.pointsNumber ?? 0,
         attributes: {
@@ -80,13 +81,13 @@ export class ForceCenter extends CoreModule {
       })
     }
     if (!this.runCommand) {
-      this.runCommand = reglInstance({
+      this.runCommand = device({
         frag: forceFrag,
         vert: updateVert,
-        framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
+        framebuffer: () => points?.velocityFbo as Framebuffer,
         primitive: 'triangle strip',
         count: 4,
-        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+        attributes: { vertexCoord: createQuadBuffer(device) },
         uniforms: {
           positionsTexture: () => points?.previousPositionFbo,
           centermassTexture: () => this.centermassFbo,
