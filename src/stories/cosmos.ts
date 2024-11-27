@@ -5,6 +5,8 @@ export type CosmosStoryProps = GraphConfigInterface & {
   pointPositions: number[];
   links: number[];
   pointColors: number[];
+  pointClusters: number[];
+  clusterPositions: number[];
 }
 
 export const createCosmos = (props: CosmosStoryProps): HTMLCanvasElement => {
@@ -46,6 +48,9 @@ export const createCosmos = (props: CosmosStoryProps): HTMLCanvasElement => {
     graph.setPointColors(props.pointColors)
 
     graph.setLinks(props.links)
+
+    graph.setPointClusters(props.pointClusters)
+    graph.setClusterPositions(props.clusterPositions)
 
     graph.zoom(0.9)
     graph.render()
