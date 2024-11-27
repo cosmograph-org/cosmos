@@ -1,4 +1,6 @@
-import regl from 'regl'
+import {Device, Buffer, Texture, Framebuffer} from '@luma.gl/core'
+import {Model} from '@luma.gl/engine'
+
 // import { scaleLinear } from 'd3-scale'
 // import { extent } from 'd3-array'
 import { CoreModule } from '@/graph/modules/core-module'
@@ -21,39 +23,39 @@ import clearFrag from '@/graph/modules/Shared/clear.frag'
 import { readPixels } from '@/graph/helper'
 
 export class Points extends CoreModule {
-  public currentPositionFbo: regl.Framebuffer2D | undefined
-  public previousPositionFbo: regl.Framebuffer2D | undefined
-  public velocityFbo: regl.Framebuffer2D | undefined
-  public selectedFbo: regl.Framebuffer2D | undefined
-  public hoveredFbo: regl.Framebuffer2D | undefined
-  public greyoutStatusFbo: regl.Framebuffer2D | undefined
-  private colorBuffer: regl.Buffer | undefined
-  private sizeFbo: regl.Framebuffer2D | undefined
-  private sizeBuffer: regl.Buffer | undefined
-  private trackedIndicesFbo: regl.Framebuffer2D | undefined
-  private trackedPositionsFbo: regl.Framebuffer2D | undefined
-  private sampledPointsFbo: regl.Framebuffer2D | undefined
-  private drawCommand: regl.DrawCommand | undefined
-  private drawHighlightedCommand: regl.DrawCommand | undefined
-  private updatePositionCommand: regl.DrawCommand | undefined
-  private dragPointCommand: regl.DrawCommand | undefined
-  private findPointsOnAreaSelectionCommand: regl.DrawCommand | undefined
-  private findHoveredPointCommand: regl.DrawCommand | undefined
-  private clearHoveredFboCommand: regl.DrawCommand | undefined
-  private clearSampledPointsFboCommand: regl.DrawCommand | undefined
-  private fillSampledPointsFboCommand: regl.DrawCommand | undefined
-  private trackPointsCommand: regl.DrawCommand | undefined
+  public currentPositionFbo: Framebuffer | undefined
+  public previousPositionFbo: Framebuffer | undefined
+  public velocityFbo: Framebuffer | undefined
+  public selectedFbo: Framebuffer | undefined
+  public hoveredFbo: Framebuffer | undefined
+  public greyoutStatusFbo: Framebuffer | undefined
+  private colorBuffer: Buffer | undefined
+  private sizeFbo: Framebuffer | undefined
+  private sizeBuffer: Buffer | undefined
+  private trackedIndicesFbo: Framebuffer | undefined
+  private trackedPositionsFbo: Framebuffer | undefined
+  private sampledPointsFbo: Framebuffer | undefined
+  private drawCommand: Model | undefined
+  private drawHighlightedCommand: Model | undefined
+  private updatePositionCommand: Model | undefined
+  private dragPointCommand: Model | undefined
+  private findPointsOnAreaSelectionCommand: Model | undefined
+  private findHoveredPointCommand: Model | undefined
+  private clearHoveredFboCommand: Model | undefined
+  private clearSampledPointsFboCommand: Model | undefined
+  private fillSampledPointsFboCommand: Model | undefined
+  private trackPointsCommand: Model | undefined
   private trackedIndices: number[] | undefined
-  private selectedTexture: regl.Texture2D | undefined
-  private greyoutStatusTexture: regl.Texture2D | undefined
-  private sizeTexture: regl.Texture2D | undefined
-  private trackedIndicesTexture: regl.Texture2D | undefined
-  private drawPointIndices: regl.Buffer | undefined
-  private hoveredPointIndices: regl.Buffer | undefined
-  private sampledPointIndices: regl.Buffer | undefined
+  private selectedTexture: Texture | undefined
+  private greyoutStatusTexture: Texture | undefined
+  private sizeTexture: Texture | undefined
+  private trackedIndicesTexture: Texture | undefined
+  private drawPointIndices: Buffer | undefined
+  private hoveredPointIndices: Buffer | undefined
+  private sampledPointIndices: Buffer | undefined
 
   public updatePositions (): void {
-    const { reglInstance, store, data } = this
+    const { device, store, data } = this
     const { pointsTextureSize } = store
     if (!pointsTextureSize || !data.pointPositions || data.pointsNumber === undefined) return
 
@@ -67,8 +69,8 @@ export class Points extends CoreModule {
 
     // Create position buffer
     destroyFramebuffer(this.currentPositionFbo)
-    this.currentPositionFbo = reglInstance.framebuffer({
-      color: reglInstance.texture({
+    this.currentPositionFbo = device.createFramebuffer({
+      color: device.createTexture({
         data: initialState,
         shape: [pointsTextureSize, pointsTextureSize, 4],
         type: 'float',
@@ -78,8 +80,8 @@ export class Points extends CoreModule {
     })
 
     destroyFramebuffer(this.previousPositionFbo)
-    this.previousPositionFbo = reglInstance.framebuffer({
-      color: reglInstance.texture({
+    this.previousPositionFbo = device.createFramebuffer({
+      color: device.createTexture({
         data: initialState,
         shape: [pointsTextureSize, pointsTextureSize, 4],
         type: 'float',
@@ -91,8 +93,8 @@ export class Points extends CoreModule {
     if (!this.config.disableSimulation) {
       // Create velocity buffer
       destroyFramebuffer(this.velocityFbo)
-      this.velocityFbo = reglInstance.framebuffer({
-        color: reglInstance.texture({
+      this.velocityFbo = device.createFramebuffer({
+        color: device.createTexture({
           data: new Float32Array(pointsTextureSize * pointsTextureSize * 4).fill(0),
           shape: [pointsTextureSize, pointsTextureSize, 4],
           type: 'float',
@@ -103,14 +105,14 @@ export class Points extends CoreModule {
     }
 
     // Create selected points buffer
-    if (!this.selectedTexture) this.selectedTexture = reglInstance.texture()
+    if (!this.selectedTexture) this.selectedTexture = device.createTexture()
     this.selectedTexture({
       data: initialState,
       shape: [pointsTextureSize, pointsTextureSize, 4],
       type: 'float',
     })
     if (!this.selectedFbo) {
-      this.selectedFbo = reglInstance.framebuffer({
+      this.selectedFbo = device.createFramebuffer({
         color: this.selectedTexture,
         depth: false,
         stencil: false,
@@ -118,7 +120,7 @@ export class Points extends CoreModule {
     }
 
     if (!this.hoveredFbo) {
-      this.hoveredFbo = reglInstance.framebuffer({
+      this.hoveredFbo = device.createFramebuffer({
         shape: [2, 2],
         colorType: 'float',
         depth: false,
@@ -126,13 +128,13 @@ export class Points extends CoreModule {
       })
     }
 
-    if (!this.drawPointIndices) this.drawPointIndices = reglInstance.buffer(0)
+    if (!this.drawPointIndices) this.drawPointIndices = device.createBuffer(0)
     this.drawPointIndices(createIndexesForBuffer(store.pointsTextureSize))
 
-    if (!this.hoveredPointIndices) this.hoveredPointIndices = reglInstance.buffer(0)
+    if (!this.hoveredPointIndices) this.hoveredPointIndices = device.createBuffer(0)
     this.hoveredPointIndices(createIndexesForBuffer(store.pointsTextureSize))
 
-    if (!this.sampledPointIndices) this.sampledPointIndices = reglInstance.buffer(0)
+    if (!this.sampledPointIndices) this.sampledPointIndices = device.createBuffer(0)
     this.sampledPointIndices(createIndexesForBuffer(store.pointsTextureSize))
 
     this.updateGreyoutStatus()
@@ -140,16 +142,16 @@ export class Points extends CoreModule {
   }
 
   public initPrograms (): void {
-    const { reglInstance, config, store, data } = this
+    const { device, config, store, data } = this
     if (!config.disableSimulation) {
       if (!this.updatePositionCommand) {
-        this.updatePositionCommand = reglInstance({
+        this.updatePositionCommand = new Model(device, {
           frag: updatePositionFrag,
           vert: updateVert,
-          framebuffer: () => this.currentPositionFbo as regl.Framebuffer2D,
+          framebuffer: () => this.currentPositionFbo as Framebuffer,
           primitive: 'triangle strip',
           count: 4,
-          attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+          attributes: { vertexCoord: createQuadBuffer(device) },
           uniforms: {
             positionsTexture: () => this.previousPositionFbo,
             velocity: () => this.velocityFbo,
@@ -160,13 +162,13 @@ export class Points extends CoreModule {
       }
     }
     if (!this.dragPointCommand) {
-      this.dragPointCommand = reglInstance({
+      this.dragPointCommand = new Model(device, {
         frag: dragPointFrag,
         vert: updateVert,
-        framebuffer: () => this.currentPositionFbo as regl.Framebuffer2D,
+        framebuffer: () => this.currentPositionFbo as Framebuffer,
         primitive: 'triangle strip',
         count: 4,
-        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+        attributes: { vertexCoord: createQuadBuffer(device) },
         uniforms: {
           positionsTexture: () => this.previousPositionFbo,
           mousePos: () => store.mousePosition,
@@ -176,7 +178,7 @@ export class Points extends CoreModule {
     }
 
     if (!this.drawCommand) {
-      this.drawCommand = reglInstance({
+      this.drawCommand = new Model(device, {
         frag: drawPointsFrag,
         vert: drawPointsVert,
         primitive: 'points',
@@ -229,14 +231,14 @@ export class Points extends CoreModule {
     }
 
     if (!this.findPointsOnAreaSelectionCommand) {
-      this.findPointsOnAreaSelectionCommand = reglInstance({
+      this.findPointsOnAreaSelectionCommand = new Model(device, {
         frag: findPointsOnAreaSelectionFrag,
         vert: updateVert,
-        framebuffer: () => this.selectedFbo as regl.Framebuffer2D,
+        framebuffer: () => this.selectedFbo as Framebuffer,
         primitive: 'triangle strip',
         count: 4,
         attributes: {
-          vertexCoord: createQuadBuffer(reglInstance),
+          vertexCoord: createQuadBuffer(device),
         },
         uniforms: {
           positionsTexture: () => this.currentPositionFbo,
@@ -255,23 +257,23 @@ export class Points extends CoreModule {
     }
 
     if (!this.clearHoveredFboCommand) {
-      this.clearHoveredFboCommand = reglInstance({
+      this.clearHoveredFboCommand = new Model(device, {
         frag: clearFrag,
         vert: updateVert,
-        framebuffer: this.hoveredFbo as regl.Framebuffer2D,
+        framebuffer: this.hoveredFbo as Framebuffer,
         primitive: 'triangle strip',
         count: 4,
-        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+        attributes: { vertexCoord: createQuadBuffer(device) },
       })
     }
 
     if (!this.findHoveredPointCommand) {
-      this.findHoveredPointCommand = reglInstance({
+      this.findHoveredPointCommand = new Model(device, {
         frag: findHoveredPointFrag,
         vert: findHoveredPointVert,
         primitive: 'points',
         count: () => data.pointsNumber ?? 0,
-        framebuffer: () => this.hoveredFbo as regl.Framebuffer2D,
+        framebuffer: () => this.hoveredFbo as Framebuffer,
         attributes: {
           pointIndices: {
             buffer: this.hoveredPointIndices,
@@ -302,23 +304,23 @@ export class Points extends CoreModule {
     }
 
     if (!this.clearSampledPointsFboCommand) {
-      this.clearSampledPointsFboCommand = reglInstance({
+      this.clearSampledPointsFboCommand = new Model(device, {
         frag: clearFrag,
         vert: updateVert,
-        framebuffer: () => this.sampledPointsFbo as regl.Framebuffer2D,
+        framebuffer: () => this.sampledPointsFbo as Framebuffer,
         primitive: 'triangle strip',
         count: 4,
-        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+        attributes: { vertexCoord: createQuadBuffer(device) },
       })
     }
 
     if (!this.fillSampledPointsFboCommand) {
-      this.fillSampledPointsFboCommand = reglInstance({
+      this.fillSampledPointsFboCommand = new Model(device, {
         frag: fillGridWithSampledPointsFrag,
         vert: fillGridWithSampledPointsVert,
         primitive: 'points',
         count: () => data.pointsNumber ?? 0,
-        framebuffer: () => this.sampledPointsFbo as regl.Framebuffer2D,
+        framebuffer: () => this.sampledPointsFbo as Framebuffer,
         attributes: {
           pointIndices: {
             buffer: this.sampledPointIndices,
@@ -340,17 +342,17 @@ export class Points extends CoreModule {
     }
 
     if (!this.drawHighlightedCommand) {
-      this.drawHighlightedCommand = reglInstance({
+      this.drawHighlightedCommand = new Model(device, {
         frag: drawHighlightedFrag,
         vert: drawHighlightedVert,
-        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+        attributes: { vertexCoord: createQuadBuffer(device) },
         primitive: 'triangle strip',
         count: 4,
         uniforms: {
-          color: reglInstance.prop<{ color: number[] }, 'color'>('color'),
-          width: reglInstance.prop<{ width: number }, 'width'>('width'),
-          pointIndex: reglInstance.prop<{ pointIndex: number }, 'pointIndex'>('pointIndex'),
-          size: reglInstance.prop<{ size: number }, 'size'>('size'),
+          color: device.prop<{ color: number[] }, 'color'>('color'),
+          width: device.prop<{ width: number }, 'width'>('width'),
+          pointIndex: device.prop<{ pointIndex: number }, 'pointIndex'>('pointIndex'),
+          size: device.prop<{ size: number }, 'size'>('size'),
           positionsTexture: () => this.currentPositionFbo,
           sizeScale: () => config.pointSizeScale,
           pointsTextureSize: () => store.pointsTextureSize,
@@ -383,13 +385,13 @@ export class Points extends CoreModule {
     }
 
     if (!this.trackPointsCommand) {
-      this.trackPointsCommand = reglInstance({
+      this.trackPointsCommand = new Model(device, {
         frag: trackPositionsFrag,
         vert: updateVert,
-        framebuffer: () => this.trackedPositionsFbo as regl.Framebuffer2D,
+        framebuffer: () => this.trackedPositionsFbo as Framebuffer,
         primitive: 'triangle strip',
         count: 4,
-        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+        attributes: { vertexCoord: createQuadBuffer(device) },
         uniforms: {
           positionsTexture: () => this.currentPositionFbo,
           trackedIndices: () => this.trackedIndicesFbo,
@@ -400,14 +402,14 @@ export class Points extends CoreModule {
   }
 
   public updateColor (): void {
-    const { reglInstance, store: { pointsTextureSize }, data } = this
+    const { device, store: { pointsTextureSize }, data } = this
     if (!pointsTextureSize) return
-    if (!this.colorBuffer) this.colorBuffer = reglInstance.buffer(0)
+    if (!this.colorBuffer) this.colorBuffer = device.createBuffer(0)
     this.colorBuffer(data.pointColors as number[])
   }
 
   public updateGreyoutStatus (): void {
-    const { reglInstance, store: { selectedIndices, pointsTextureSize } } = this
+    const { device, store: { selectedIndices, pointsTextureSize } } = this
     if (!pointsTextureSize) return
 
     // Greyout status: 0 - false, highlighted or normal point; 1 - true, greyout point
@@ -419,7 +421,7 @@ export class Points extends CoreModule {
         initialState[selectedIndex * 4] = 0
       }
     }
-    if (!this.greyoutStatusTexture) this.greyoutStatusTexture = reglInstance.texture()
+    if (!this.greyoutStatusTexture) this.greyoutStatusTexture = device.createTexture()
     this.greyoutStatusTexture({
       data: initialState,
       width: pointsTextureSize,
@@ -427,7 +429,7 @@ export class Points extends CoreModule {
       type: 'float',
     })
     if (!this.greyoutStatusFbo) {
-      this.greyoutStatusFbo = reglInstance.framebuffer({
+      this.greyoutStatusFbo = device.createFramebuffer({
         color: this.greyoutStatusTexture,
         depth: false,
         stencil: false,
@@ -436,9 +438,9 @@ export class Points extends CoreModule {
   }
 
   public updateSize (): void {
-    const { reglInstance, store: { pointsTextureSize }, data } = this
+    const { device, store: { pointsTextureSize }, data } = this
     if (!pointsTextureSize || data.pointsNumber === undefined || data.pointSizes === undefined) return
-    if (!this.sizeBuffer) this.sizeBuffer = reglInstance.buffer(0)
+    if (!this.sizeBuffer) this.sizeBuffer = device.createBuffer(0)
     this.sizeBuffer(data.pointSizes)
 
     const initialState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
@@ -446,7 +448,7 @@ export class Points extends CoreModule {
       initialState[i * 4] = data.pointSizes[i] as number
     }
 
-    if (!this.sizeTexture) this.sizeTexture = reglInstance.texture()
+    if (!this.sizeTexture) this.sizeTexture = device.createTexture()
     this.sizeTexture({
       data: initialState,
       width: pointsTextureSize,
@@ -455,7 +457,7 @@ export class Points extends CoreModule {
     })
 
     if (!this.sizeFbo) {
-      this.sizeFbo = reglInstance.framebuffer({
+      this.sizeFbo = device.createFramebuffer({
         color: this.sizeTexture,
         depth: false,
         stencil: false,
@@ -464,12 +466,12 @@ export class Points extends CoreModule {
   }
 
   public updateSampledPointsGrid (): void {
-    const { store: { screenSize }, config: { pointSamplingDistance }, reglInstance } = this
+    const { store: { screenSize }, config: { pointSamplingDistance }, device } = this
     const dist = pointSamplingDistance ?? Math.min(...screenSize) / 2
     const w = Math.ceil(screenSize[0] / dist)
     const h = Math.ceil(screenSize[1] / dist)
     destroyFramebuffer(this.sampledPointsFbo)
-    this.sampledPointsFbo = reglInstance.framebuffer({
+    this.sampledPointsFbo = device.createFramebuffer({
       shape: [w, h],
       depth: false,
       stencil: false,
@@ -523,7 +525,7 @@ export class Points extends CoreModule {
   }
 
   public trackPointsByIndices (indices?: number[] | undefined): void {
-    const { store: { pointsTextureSize }, reglInstance } = this
+    const { store: { pointsTextureSize }, device } = this
     this.trackedIndices = indices
     if (!indices?.length) return
     const textureSize = Math.ceil(Math.sqrt(indices.length))
@@ -537,7 +539,7 @@ export class Points extends CoreModule {
         initialState[i * 4 + 3] = 0
       }
     }
-    if (!this.trackedIndicesTexture) this.trackedIndicesTexture = reglInstance.texture()
+    if (!this.trackedIndicesTexture) this.trackedIndicesTexture = device.createTexture()
     this.trackedIndicesTexture({
       data: initialState,
       width: textureSize,
@@ -545,14 +547,14 @@ export class Points extends CoreModule {
       type: 'float',
     })
     if (!this.trackedIndicesFbo) {
-      this.trackedIndicesFbo = reglInstance.framebuffer({
+      this.trackedIndicesFbo = device.createFramebuffer({
         color: this.trackedIndicesTexture,
         depth: false,
         stencil: false,
       })
     }
 
-    if (!this.trackedPositionsFbo) this.trackedPositionsFbo = reglInstance.framebuffer()
+    if (!this.trackedPositionsFbo) this.trackedPositionsFbo = device.createFramebuffer()
     this.trackedPositionsFbo({
       shape: [textureSize, textureSize],
       depth: false,
@@ -566,7 +568,7 @@ export class Points extends CoreModule {
   public getTrackedPositionsMap (): Map<number, [number, number]> {
     const tracked = new Map<number, [number, number]>()
     if (!this.trackedIndices) return tracked
-    const pixels = readPixels(this.reglInstance, this.trackedPositionsFbo as regl.Framebuffer2D)
+    const pixels = readPixels(this.device, this.trackedPositionsFbo as Framebuffer)
     for (let i = 0; i < pixels.length / 4; i += 1) {
       const x = pixels[i * 4]
       const y = pixels[i * 4 + 1]
@@ -583,7 +585,7 @@ export class Points extends CoreModule {
     if (!this.sampledPointsFbo) return positions
     this.clearSampledPointsFboCommand?.()
     this.fillSampledPointsFboCommand?.()
-    const pixels = readPixels(this.reglInstance, this.sampledPointsFbo as regl.Framebuffer2D)
+    const pixels = readPixels(this.device, this.sampledPointsFbo as Framebuffer)
     for (let i = 0; i < pixels.length / 4; i++) {
       const index = pixels[i * 4]
       const isNotEmpty = !!pixels[i * 4 + 1]

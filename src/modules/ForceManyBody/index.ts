@@ -1,4 +1,5 @@
-import regl from 'regl'
+import {Device, Framebuffer, Buffer, Texture} from '@luma.gl/core'
+import {Model} from '@luma.gl/engine'
 import { CoreModule } from '@/graph/modules/core-module'
 import calculateLevelFrag from '@/graph/modules/ForceManyBody/calculate-level.frag'
 import calculateLevelVert from '@/graph/modules/ForceManyBody/calculate-level.vert'
@@ -9,25 +10,25 @@ import clearFrag from '@/graph/modules/Shared/clear.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
 
 export class ForceManyBody extends CoreModule {
-  private randomValuesFbo: regl.Framebuffer2D | undefined
-  private levelsFbos = new Map<string, regl.Framebuffer2D>()
-  private clearLevelsCommand: regl.DrawCommand | undefined
-  private clearVelocityCommand: regl.DrawCommand | undefined
-  private calculateLevelsCommand: regl.DrawCommand | undefined
-  private forceCommand: regl.DrawCommand | undefined
-  private forceFromItsOwnCentermassCommand: regl.DrawCommand | undefined
+  private randomValuesFbo: Framebuffer | undefined
+  private levelsFbos = new Map<string, Framebuffer>()
+  private clearLevelsCommand: Model | undefined
+  private clearVelocityCommand: Model | undefined
+  private calculateLevelsCommand: Model | undefined
+  private forceCommand: Model | undefined
+  private forceFromItsOwnCentermassCommand: Model | undefined
   private quadtreeLevels = 0
-  private randomValuesTexture: regl.Texture2D | undefined
-  private pointIndices: regl.Buffer | undefined
+  private randomValuesTexture: Texture | undefined
+  private pointIndices: Buffer | undefined
 
   public create (): void {
-    const { reglInstance, store } = this
+    const { device, store } = this
     if (!store.pointsTextureSize) return
     this.quadtreeLevels = Math.log2(store.adjustedSpaceSize)
     for (let i = 0; i < this.quadtreeLevels; i += 1) {
       const levelTextureSize = Math.pow(2, i + 1)
       if (!this.levelsFbos.has(`level[${i}]`)) {
-        this.levelsFbos.set(`level[${i}]`, reglInstance.framebuffer())
+        this.levelsFbos.set(`level[${i}]`, device.createFramebuffer())
       }
       const fbo = this.levelsFbos.get(`level[${i}]`)
       if (fbo) {
@@ -46,41 +47,41 @@ export class ForceManyBody extends CoreModule {
       randomValuesState[i * 4 + 1] = store.getRandomFloat(-1, 1) * 0.00001
     }
 
-    if (!this.randomValuesTexture) this.randomValuesTexture = reglInstance.texture()
+    if (!this.randomValuesTexture) this.randomValuesTexture = device.createTexture()
     this.randomValuesTexture({
       data: randomValuesState,
       shape: [store.pointsTextureSize, store.pointsTextureSize, 4],
       type: 'float',
     })
     if (!this.randomValuesFbo) {
-      this.randomValuesFbo = reglInstance.framebuffer({
+      this.randomValuesFbo = device.createFramebuffer({
         color: this.randomValuesTexture,
         depth: false,
         stencil: false,
       })
     }
 
-    if (!this.pointIndices) this.pointIndices = reglInstance.buffer(0)
+    if (!this.pointIndices) this.pointIndices = device.createBuffer(0)
     this.pointIndices(createIndexesForBuffer(store.pointsTextureSize))
   }
 
   public initPrograms (): void {
-    const { reglInstance, config, store, data, points } = this
+    const { device, config, store, data, points } = this
     if (!this.clearLevelsCommand) {
-      this.clearLevelsCommand = reglInstance({
+      this.clearLevelsCommand = new Model(device, {
         frag: clearFrag,
         vert: updateVert,
-        framebuffer: (_: regl.DefaultContext, props: { levelFbo: regl.Framebuffer2D }) => props.levelFbo,
+        framebuffer: (_: regl.DefaultContext, props: { levelFbo: Framebuffer }) => props.levelFbo,
         primitive: 'triangle strip',
         count: 4,
-        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+        attributes: { vertexCoord: createQuadBuffer(device) },
       })
     }
     if (!this.calculateLevelsCommand) {
-      this.calculateLevelsCommand = reglInstance({
+      this.calculateLevelsCommand = new Model(device, {
         frag: calculateLevelFrag,
         vert: calculateLevelVert,
-        framebuffer: (_: regl.DefaultContext, props: { levelFbo: regl.Framebuffer2D; levelTextureSize: number; cellSize: number }) => props.levelFbo,
+        framebuffer: (_: regl.DefaultContext, props: { levelFbo: Framebuffer; levelTextureSize: number; cellSize: number }) => props.levelFbo,
         primitive: 'points',
         count: () => data.pointsNumber ?? 0,
         attributes: {
@@ -112,16 +113,16 @@ export class ForceManyBody extends CoreModule {
     }
 
     if (!this.forceCommand) {
-      this.forceCommand = reglInstance({
+      this.forceCommand = new Model(device, {
         frag: forceFrag,
         vert: updateVert,
-        framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
+        framebuffer: () => points?.velocityFbo as Framebuffer,
         primitive: 'triangle strip',
         count: 4,
-        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+        attributes: { vertexCoord: createQuadBuffer(device) },
         uniforms: {
           positionsTexture: () => points?.previousPositionFbo,
-          level: (_, props: { levelFbo: regl.Framebuffer2D; levelTextureSize: number; level: number }) => props.level,
+          level: (_, props: { levelFbo: Framebuffer; levelTextureSize: number; level: number }) => props.level,
           levels: this.quadtreeLevels,
           levelFbo: (_, props) => props.levelFbo,
           levelTextureSize: (_, props) => props.levelTextureSize,
@@ -147,17 +148,17 @@ export class ForceManyBody extends CoreModule {
     }
 
     if (!this.forceFromItsOwnCentermassCommand) {
-      this.forceFromItsOwnCentermassCommand = reglInstance({
+      this.forceFromItsOwnCentermassCommand = new Model(device, {
         frag: forceCenterFrag,
         vert: updateVert,
-        framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
+        framebuffer: () => points?.velocityFbo as Framebuffer,
         primitive: 'triangle strip',
         count: 4,
-        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+        attributes: { vertexCoord: createQuadBuffer(device) },
         uniforms: {
           positionsTexture: () => points?.previousPositionFbo,
           randomValues: () => this.randomValuesFbo,
-          levelFbo: (_, props: { levelFbo: regl.Framebuffer2D; levelTextureSize: number }) => props.levelFbo,
+          levelFbo: (_, props: { levelFbo: Framebuffer; levelTextureSize: number }) => props.levelFbo,
           levelTextureSize: (_, props) => props.levelTextureSize,
           alpha: () => store.alpha,
           repulsion: () => config.simulation?.repulsion,
@@ -180,13 +181,13 @@ export class ForceManyBody extends CoreModule {
     }
 
     if (!this.clearVelocityCommand) {
-      this.clearVelocityCommand = reglInstance({
+      this.clearVelocityCommand = new Model(device, {
         frag: clearFrag,
         vert: updateVert,
-        framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
+        framebuffer: () => points?.velocityFbo as Framebuffer,
         primitive: 'triangle strip',
         count: 4,
-        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+        attributes: { vertexCoord: createQuadBuffer(device) },
       })
     }
   }

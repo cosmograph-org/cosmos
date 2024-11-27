@@ -1,4 +1,5 @@
-import regl from 'regl'
+import {Device, Framebuffer, Buffer, Texture} from '@luma.gl/core'
+import {Model} from '@luma.gl/engine'
 import { CoreModule } from '@/graph/modules/core-module'
 import calculateCentermassFrag from '@/graph/modules/Clusters/calculate-centermass.frag'
 import calculateCentermassVert from '@/graph/modules/Clusters/calculate-centermass.vert'
@@ -8,20 +9,20 @@ import clearFrag from '@/graph/modules/Shared/clear.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
 
 export class Clusters extends CoreModule {
-  private clusterFbo: regl.Framebuffer2D | undefined
-  private clusterPositionsFbo: regl.Framebuffer2D | undefined
-  private centermassFbo: regl.Framebuffer2D | undefined
-  private clearCentermassCommand: regl.DrawCommand | undefined
-  private calculateCentermassCommand: regl.DrawCommand | undefined
-  private applyForcesCommand: regl.DrawCommand | undefined
-  private clusterTexture: regl.Texture2D | undefined
-  private clusterPositionsTexture: regl.Texture2D | undefined
-  private centermassTexture: regl.Texture2D | undefined
-  private pointIndices: regl.Buffer | undefined
+  private clusterFbo: Framebuffer | undefined
+  private clusterPositionsFbo: Framebuffer | undefined
+  private centermassFbo: Framebuffer | undefined
+  private clearCentermassCommand: Model | undefined
+  private calculateCentermassCommand: Model | undefined
+  private applyForcesCommand: Model | undefined
+  private clusterTexture: Texture | undefined
+  private clusterPositionsTexture: Texture | undefined
+  private centermassTexture: Texture | undefined
+  private pointIndices: Buffer | undefined
   private clustersTextureSize: number | undefined
 
   public create (): void {
-    const { reglInstance, store, data } = this
+    const { device, store, data } = this
     const { pointsTextureSize } = store
     if (data.pointsNumber === undefined || (!data.pointClusters && !data.clusterPositions)) return
 
@@ -33,9 +34,9 @@ export class Clusters extends CoreModule {
 
     this.clustersTextureSize = Math.ceil(Math.sqrt(clusterNumber))
 
-    if (!this.clusterTexture) this.clusterTexture = reglInstance.texture()
+    if (!this.clusterTexture) this.clusterTexture = device.createTexture()
 
-    if (!this.clusterPositionsTexture) this.clusterPositionsTexture = reglInstance.texture()
+    if (!this.clusterPositionsTexture) this.clusterPositionsTexture = device.createTexture()
     const clusterState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
     const clusterPositions = new Float32Array(this.clustersTextureSize * this.clustersTextureSize * 4).fill(-1)
     if (data.clusterPositions) {
@@ -62,7 +63,7 @@ export class Clusters extends CoreModule {
       type: 'float',
     })
     if (!this.clusterFbo) {
-      this.clusterFbo = reglInstance.framebuffer({
+      this.clusterFbo = device.createFramebuffer({
         color: this.clusterTexture,
         depth: false,
         stencil: false,
@@ -75,14 +76,14 @@ export class Clusters extends CoreModule {
       type: 'float',
     })
     if (!this.clusterPositionsFbo) {
-      this.clusterPositionsFbo = reglInstance.framebuffer({
+      this.clusterPositionsFbo = device.createFramebuffer({
         color: this.clusterPositionsTexture,
         depth: false,
         stencil: false,
       })
     }
 
-    if (!this.centermassTexture) this.centermassTexture = reglInstance.texture()
+    if (!this.centermassTexture) this.centermassTexture = device.createTexture()
 
     this.centermassTexture({
       data: new Float32Array(this.clustersTextureSize * this.clustersTextureSize * 4).fill(0),
@@ -90,36 +91,36 @@ export class Clusters extends CoreModule {
       type: 'float',
     })
     if (!this.centermassFbo) {
-      this.centermassFbo = reglInstance.framebuffer({
+      this.centermassFbo = device.createFramebuffer({
         color: this.centermassTexture,
         depth: false,
         stencil: false,
       })
     }
 
-    if (!this.pointIndices) this.pointIndices = reglInstance.buffer(0)
+    if (!this.pointIndices) this.pointIndices = device.createBuffer(0)
     this.pointIndices(createIndexesForBuffer(store.pointsTextureSize))
   }
 
   public initPrograms (): void {
-    const { reglInstance, store, data, points } = this
+    const { device, store, data, points } = this
     if (data.pointClusters === undefined) return
 
     if (!this.clearCentermassCommand) {
-      this.clearCentermassCommand = reglInstance({
+      this.clearCentermassCommand = new Model(device, {
         frag: clearFrag,
         vert: updateVert,
-        framebuffer: () => this.centermassFbo as regl.Framebuffer2D,
+        framebuffer: () => this.centermassFbo as Framebuffer,
         primitive: 'triangle strip',
         count: 4,
-        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+        attributes: { vertexCoord: createQuadBuffer(device) },
       })
     }
     if (!this.calculateCentermassCommand) {
-      this.calculateCentermassCommand = reglInstance({
+      this.calculateCentermassCommand = new Model(device, {
         frag: calculateCentermassFrag,
         vert: calculateCentermassVert,
-        framebuffer: () => this.centermassFbo as regl.Framebuffer2D,
+        framebuffer: () => this.centermassFbo as Framebuffer,
         primitive: 'points',
         count: () => data.pointsNumber ?? 0,
         attributes: {
@@ -150,13 +151,13 @@ export class Clusters extends CoreModule {
       })
     }
     if (!this.applyForcesCommand) {
-      this.applyForcesCommand = reglInstance({
+      this.applyForcesCommand = new Model(device, {
         frag: forceFrag,
         vert: updateVert,
-        framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
+        framebuffer: () => points?.velocityFbo as Framebuffer,
         primitive: 'triangle strip',
         count: 4,
-        attributes: { vertexCoord: createQuadBuffer(reglInstance) },
+        attributes: { vertexCoord: createQuadBuffer(device) },
         uniforms: {
           positionsTexture: () => points?.previousPositionFbo,
           clusterTexture: () => this.clusterFbo,

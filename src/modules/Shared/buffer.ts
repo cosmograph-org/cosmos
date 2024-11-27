@@ -1,7 +1,7 @@
-import regl from 'regl'
+import {Device, Buffer, Framebuffer} from '@luma.gl/core'
 
-export function createQuadBuffer (reglInstance: regl.Regl): { buffer: regl.Buffer; size: number } {
-  const quadBuffer = reglInstance.buffer(new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]))
+export function createQuadBuffer (device: Device): { buffer: Buffer; size: number } {
+  const quadBuffer = device.createBuffer(new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]))
   return {
     buffer: quadBuffer,
     size: 2,
@@ -20,7 +20,7 @@ export function createIndexesForBuffer (textureSize: number): Float32Array {
   return indexes
 }
 
-export function destroyFramebuffer (fbo?: regl.Framebuffer2D): void {
+export function destroyFramebuffer (fbo?: Framebuffer): void {
   if (!fbo) return
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if ((fbo as any)?._framebuffer?.framebuffer) {
@@ -28,7 +28,7 @@ export function destroyFramebuffer (fbo?: regl.Framebuffer2D): void {
   }
 }
 
-export function destroyBuffer (fbo?: regl.Buffer): void {
+export function destroyBuffer (fbo?: Buffer): void {
   if (!fbo) return
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if ((fbo as any)?._buffer?.buffer) {
