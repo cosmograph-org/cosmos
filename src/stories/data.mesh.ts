@@ -6,10 +6,17 @@ function getRandom (min: number, max: number): number {
   return Math.random() * (max - min) + min
 }
 
+function getPositionOnCircle (radius: number, angle: number, center: number): [number, number] {
+  const x = center + radius * Math.cos(angle)
+  const y = center + radius * Math.sin(angle)
+  return [x, y]
+}
+
 export type MeshData = {
   pointPositions: number[];
   links: number[];
   clusters: number[];
+  clusterPositions: number[];
   pointColors: number[];
 }
 
@@ -17,7 +24,8 @@ export function generateMeshData (
   n: number,
   m: number,
   nClusters: number,
-  wholeness: number
+  wholeness: number,
+  radialness = 150
 ): MeshData {
   const pointColorScale = scaleSequential(interpolateWarm)
   pointColorScale.domain([0, nClusters])
@@ -25,11 +33,20 @@ export function generateMeshData (
   const pointPositions = new Array(n * m * 2)
   const links: number[] = []
   const clusters = new Array(n * m)
+  const clusterPositions = new Array(nClusters * 2)
   const pointColors = new Array(n * m * 4)
 
+  const spaceSize = 4096
+
+  for (let clusterIndex = 0; clusterIndex < nClusters; clusterIndex += 1) {
+    const [x, y] = getPositionOnCircle(radialness, 2 * Math.PI * (clusterIndex / nClusters), spaceSize / 2)
+    clusterPositions[clusterIndex * 2] = x
+    clusterPositions[clusterIndex * 2 + 1] = y
+  }
+
   for (let pointIndex = 0; pointIndex < n * m; pointIndex += 1) {
-    const x = 4096 * getRandom(0.495, 0.505)
-    const y = 4096 * getRandom(0.495, 0.505)
+    const x = spaceSize * getRandom(0.495, 0.505)
+    const y = spaceSize * getRandom(0.495, 0.505)
     pointPositions[pointIndex * 2] = x
     pointPositions[pointIndex * 2 + 1] = y
 
@@ -58,5 +75,5 @@ export function generateMeshData (
     }
   }
 
-  return { pointPositions, links, clusters, pointColors }
+  return { pointPositions, links, clusters, clusterPositions, pointColors }
 }
