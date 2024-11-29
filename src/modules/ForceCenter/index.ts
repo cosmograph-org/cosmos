@@ -90,7 +90,7 @@ export class ForceCenter extends CoreModule {
         uniforms: {
           positionsTexture: () => points?.previousPositionFbo,
           centermassTexture: () => this.centermassFbo,
-          centerForce: () => config.simulation?.center,
+          centerForce: () => config.simulationCenter,
           alpha: () => store.alpha,
         },
       })

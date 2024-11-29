@@ -153,7 +153,7 @@ export class Points extends CoreModule {
           uniforms: {
             positionsTexture: () => this.previousPositionFbo,
             velocity: () => this.velocityFbo,
-            friction: () => config.simulation?.friction,
+            friction: () => config.simulationFriction,
             spaceSize: () => store.adjustedSpaceSize,
           },
         })

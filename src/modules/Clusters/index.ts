@@ -184,7 +184,7 @@ export class Clusters extends CoreModule {
           clusterForceCoefficient: () => this.clusterForceCoefficientFbo,
           alpha: () => store.alpha,
           clustersTextureSize: () => this.clustersTextureSize,
-          clusterCoefficient: () => this.config.simulation?.cluster,
+          clusterCoefficient: () => this.config.simulationCluster,
         },
       })
     }

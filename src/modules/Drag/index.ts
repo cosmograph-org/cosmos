@@ -14,16 +14,16 @@ export class Drag {
       if (this.store.hoveredPoint) {
         this.store.draggingPointIndex = this.store.hoveredPoint.index
         this.isActive = true
-        this.config.events?.onDragStart?.(e)
+        this.config?.onDragStart?.(e)
       }
     })
     .on('drag', (e) => {
-      this.config.events?.onDrag?.(e)
+      this.config?.onDrag?.(e)
     })
     .on('end', (e) => {
       this.isActive = false
       this.store.draggingPointIndex = undefined
-      this.config.events?.onDragEnd?.(e)
+      this.config?.onDragEnd?.(e)
     })
 
   public constructor (store: Store, config: GraphConfigInterface) {

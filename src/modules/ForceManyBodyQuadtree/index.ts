@@ -120,7 +120,7 @@ export class ForceManyBodyQuadtree extends CoreModule {
     }
 
     this.quadtreeCommand = reglInstance({
-      frag: forceFrag(config.simulation?.repulsionQuadtreeLevels ?? this.quadtreeLevels, this.quadtreeLevels),
+      frag: forceFrag(config.simulationRepulsionQuadtreeLevels ?? this.quadtreeLevels, this.quadtreeLevels),
       vert: updateVert,
       framebuffer: () => points?.velocityFbo as regl.Framebuffer2D,
       primitive: 'triangle strip',
@@ -130,8 +130,8 @@ export class ForceManyBodyQuadtree extends CoreModule {
         positionsTexture: () => points?.previousPositionFbo,
         randomValues: () => this.randomValuesFbo,
         spaceSize: () => store.adjustedSpaceSize,
-        repulsion: () => config.simulation?.repulsion,
-        theta: () => config.simulation?.repulsionTheta,
+        repulsion: () => config.simulationRepulsion,
+        theta: () => config.simulationRepulsionTheta,
         alpha: () => store.alpha,
         ...Object.fromEntries(this.levelsFbos),
       },
