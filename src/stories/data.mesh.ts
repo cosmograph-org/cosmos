@@ -1,4 +1,4 @@
-import { scaleSequential } from 'd3-scale'
+import { scaleLinear, scaleSequential } from 'd3-scale'
 import { interpolateWarm } from 'd3-scale-chromatic'
 import { getRgbaColor } from '@/graph/helper'
 
@@ -17,6 +17,7 @@ export type MeshData = {
   links: number[];
   clusters: number[];
   clusterPositions: number[];
+  clusterForces: number[];
   pointColors: number[];
 }
 
@@ -25,21 +26,24 @@ export function generateMeshData (
   m: number,
   nClusters: number,
   wholeness: number,
-  radialness = 150
+  radialness = [10, 1000]
 ): MeshData {
   const pointColorScale = scaleSequential(interpolateWarm)
   pointColorScale.domain([0, nClusters])
+  const radius = scaleLinear(radialness)
+  radius.domain([0, nClusters])
 
   const pointPositions = new Array(n * m * 2)
   const links: number[] = []
   const clusters = new Array(n * m)
   const clusterPositions = new Array(nClusters * 2)
+  const clusterForces = new Array(n * m)
   const pointColors = new Array(n * m * 4)
 
   const spaceSize = 4096
 
   for (let clusterIndex = 0; clusterIndex < nClusters; clusterIndex += 1) {
-    const [x, y] = getPositionOnCircle(radialness, 2 * Math.PI * (clusterIndex / nClusters), spaceSize / 2)
+    const [x, y] = getPositionOnCircle(radius(clusterIndex), 15 * Math.PI * (clusterIndex / nClusters), spaceSize / 2)
     clusterPositions[clusterIndex * 2] = x
     clusterPositions[clusterIndex * 2 + 1] = y
   }
@@ -51,6 +55,7 @@ export function generateMeshData (
     pointPositions[pointIndex * 2 + 1] = y
 
     clusters[pointIndex] = pointIndex % nClusters
+    clusterForces[pointIndex] = (nClusters - (pointIndex % nClusters)) / nClusters
     const pointColor = pointColorScale(pointIndex % nClusters)
     const rgba = getRgbaColor(pointColor)
     pointColors[pointIndex * 4] = rgba[0]
@@ -75,5 +80,5 @@ export function generateMeshData (
     }
   }
 
-  return { pointPositions, links, clusters, clusterPositions, pointColors }
+  return { pointPositions, links, clusters, clusterForces, clusterPositions, pointColors }
 }
