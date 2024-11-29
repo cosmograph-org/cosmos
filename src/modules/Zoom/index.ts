@@ -14,7 +14,7 @@ export class Zoom {
     .on('start', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => {
       this.isRunning = true
       const userDriven = !!e.sourceEvent
-      this.config?.events?.onZoomStart?.(e, userDriven)
+      this.config?.onZoomStart?.(e, userDriven)
     })
     .on('zoom', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => {
       this.eventTransform = e.transform
@@ -29,13 +29,13 @@ export class Zoom {
       mat3.scale(transform, transform, [1, -1])
 
       const userDriven = !!e.sourceEvent
-      this.config?.events?.onZoom?.(e, userDriven)
+      this.config?.onZoom?.(e, userDriven)
     })
     .on('end', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => {
       this.isRunning = false
 
       const userDriven = !!e.sourceEvent
-      this.config?.events?.onZoomEnd?.(e, userDriven)
+      this.config?.onZoomEnd?.(e, userDriven)
     })
 
   public isRunning = false

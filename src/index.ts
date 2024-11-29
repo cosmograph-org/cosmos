@@ -238,7 +238,7 @@ export class Graph {
       this.store.setFocusedPoint(this.config.focusedPointIndex)
     }
     if (prevConfig.spaceSize !== this.config.spaceSize ||
-      prevConfig.simulation.repulsionQuadtreeLevels !== this.config.simulation.repulsionQuadtreeLevels) {
+      prevConfig.simulationRepulsionQuadtreeLevels !== this.config.simulationRepulsionQuadtreeLevels) {
       this.store.adjustSpaceSize(this.config.spaceSize, this.reglInstance.limits.maxTextureSize)
       this.resizeCanvas(true)
       this.update(this.store.isSimulationRunning ? this.store.alpha : 0)
@@ -751,7 +751,7 @@ export class Graph {
     this.store.isSimulationRunning = true
     this.store.alpha = alpha
     this.store.simulationProgress = 0
-    this.config.simulation.onStart?.()
+    this.config.onSimulationStart?.()
     this.stopFrames()
     this.frame()
   }
@@ -761,7 +761,7 @@ export class Graph {
    */
   public pause (): void {
     this.store.isSimulationRunning = false
-    this.config.simulation.onPause?.()
+    this.config.onSimulationPause?.()
   }
 
   /**
@@ -769,7 +769,7 @@ export class Graph {
    */
   public restart (): void {
     this.store.isSimulationRunning = true
-    this.config.simulation.onRestart?.()
+    this.config.onSimulationRestart?.()
   }
 
   /**
@@ -879,7 +879,7 @@ export class Graph {
   }
 
   private frame (): void {
-    const { config: { simulation, renderLinks, disableSimulation }, store: { alpha, isSimulationRunning } } = this
+    const { config: { simulationGravity, simulationCenter, renderLinks, disableSimulation }, store: { alpha, isSimulationRunning } } = this
     if (alpha < ALPHA_MIN && isSimulationRunning) this.end()
     if (!this.store.pointsTextureSize) return
 
@@ -895,12 +895,12 @@ export class Graph {
           this.points.updatePosition()
         }
         if ((isSimulationRunning && !this.zoomInstance.isRunning)) {
-          if (simulation.gravity) {
+          if (simulationGravity) {
             this.forceGravity?.run()
             this.points.updatePosition()
           }
 
-          if (simulation.center) {
+          if (simulationCenter) {
             this.forceCenter?.run()
             this.points.updatePosition()
           }
@@ -920,10 +920,10 @@ export class Graph {
             this.points.updatePosition()
           }
 
-          this.store.alpha += this.store.addAlpha(this.config.simulation.decay ?? defaultConfigValues.simulation.decay)
+          this.store.alpha += this.store.addAlpha(this.config.simulationDecay ?? defaultConfigValues.simulation.decay)
           if (this.isRightClickMouse) this.store.alpha = Math.max(this.store.alpha, 0.1)
           this.store.simulationProgress = Math.sqrt(Math.min(1, ALPHA_MIN / this.store.alpha))
-          this.config.simulation.onTick?.(
+          this.config.onSimulationTick?.(
             this.store.alpha,
             this.store.hoveredPoint?.index,
             this.store.hoveredPoint?.position
@@ -964,11 +964,11 @@ export class Graph {
   private end (): void {
     this.store.isSimulationRunning = false
     this.store.simulationProgress = 1
-    this.config.simulation.onEnd?.()
+    this.config.onSimulationEnd?.()
   }
 
   private onClick (event: MouseEvent): void {
-    this.config.events.onClick?.(
+    this.config.onClick?.(
       this.store.hoveredPoint?.index,
       this.store.hoveredPoint?.position,
       event
@@ -988,7 +988,7 @@ export class Graph {
     this.currentEvent = event
     this.updateMousePosition(event)
     this.isRightClickMouse = event.which === 3
-    this.config.events.onMouseMove?.(
+    this.config.onMouseMove?.(
       this.store.hoveredPoint?.index,
       this.store.hoveredPoint?.position,
       this.currentEvent
@@ -1073,13 +1073,13 @@ export class Graph {
     }
 
     if (isMouseover && this.store.hoveredPoint) {
-      this.config.events.onPointMouseOver?.(
+      this.config.onPointMouseOver?.(
         this.store.hoveredPoint.index,
         this.store.hoveredPoint.position,
         this.currentEvent
       )
     }
-    if (isMouseout) this.config.events.onPointMouseOut?.(this.currentEvent)
+    if (isMouseout) this.config.onPointMouseOut?.(this.currentEvent)
     this.updateCanvasCursor()
   }
 
@@ -1093,4 +1093,4 @@ export class Graph {
   }
 }
 
-export type { GraphConfigInterface, GraphEvents, GraphSimulationSettings } from './config'
+export type { GraphConfigInterface } from './config'

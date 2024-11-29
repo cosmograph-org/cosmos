@@ -30,14 +30,12 @@ export const createCosmos = (props: CosmosStoryProps): HTMLCanvasElement => {
     fitViewOnInit: false,
     hoveredPointRingColor: '#4B5BBF',
     enableDrag: true,
-    simulation: {
-      linkDistance: 1,
-      linkSpring: 2,
-      repulsion: 0.5,
-      gravity: 0.02,
-      decay: 10000000,
-      friction: 0.7,
-    },
+    simulationLinkDistance: 1,
+    simulationLinkSpring: 2,
+    simulationRepulsion: 0.5,
+    simulationGravity: 0.02,
+    simulationFriction: 0.7,
+    simulationDecay: 10000000,
     ...props,
   }
 
