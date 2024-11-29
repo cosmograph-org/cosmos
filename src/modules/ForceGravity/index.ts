@@ -19,7 +19,7 @@ export class ForceGravity extends CoreModule {
         attributes: { vertexCoord: createQuadBuffer(reglInstance) },
         uniforms: {
           positionsTexture: () => points?.previousPositionFbo,
-          gravity: () => config.simulation?.gravity,
+          gravity: () => config.simulationGravity,
           spaceSize: () => store.adjustedSpaceSize,
           alpha: () => store.alpha,
         },

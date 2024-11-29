@@ -128,9 +128,9 @@ export class ForceLink extends CoreModule {
         attributes: { vertexCoord: createQuadBuffer(reglInstance) },
         uniforms: {
           positionsTexture: () => points?.previousPositionFbo,
-          linkSpring: () => config.simulation?.linkSpring,
-          linkDistance: () => config.simulation?.linkDistance,
-          linkDistRandomVariationRange: () => config.simulation?.linkDistRandomVariationRange,
+          linkSpring: () => config.simulationLinkSpring,
+          linkDistance: () => config.simulationLinkDistance,
+          linkDistRandomVariationRange: () => config.simulationLinkDistRandomVariationRange,
           linkInfoTexture: () => this.linkFirstIndicesAndAmountFbo,
           linkIndicesTexture: () => this.indicesFbo,
           linkPropertiesTexture: () => this.biasAndStrengthFbo,

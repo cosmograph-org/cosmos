@@ -126,9 +126,9 @@ export class ForceManyBody extends CoreModule {
           levelFbo: (_, props) => props.levelFbo,
           levelTextureSize: (_, props) => props.levelTextureSize,
           alpha: () => store.alpha,
-          repulsion: () => config.simulation?.repulsion,
+          repulsion: () => config.simulationRepulsion,
           spaceSize: () => store.adjustedSpaceSize,
-          theta: () => config.simulation?.repulsionTheta,
+          theta: () => config.simulationRepulsionTheta,
         },
         blend: {
           enable: true,
@@ -160,7 +160,7 @@ export class ForceManyBody extends CoreModule {
           levelFbo: (_, props: { levelFbo: regl.Framebuffer2D; levelTextureSize: number }) => props.levelFbo,
           levelTextureSize: (_, props) => props.levelTextureSize,
           alpha: () => store.alpha,
-          repulsion: () => config.simulation?.repulsion,
+          repulsion: () => config.simulationRepulsion,
           spaceSize: () => store.adjustedSpaceSize,
         },
         blend: {

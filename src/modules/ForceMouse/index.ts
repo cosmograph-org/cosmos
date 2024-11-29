@@ -20,7 +20,7 @@ export class ForceMouse extends CoreModule {
         uniforms: {
           positionsTexture: () => points?.previousPositionFbo,
           mousePos: () => store.mousePosition,
-          repulsion: () => config.simulation?.repulsionFromMouse,
+          repulsion: () => config.simulationRepulsionFromMouse,
         },
       })
     }

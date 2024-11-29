@@ -13,192 +13,6 @@ import {
 import { isPlainObject } from '@/graph/helper'
 import { type Hovered } from '@/graph/modules/Store'
 
-export interface GraphEvents {
-  /**
-   * Callback function that will be called on every canvas click.
-   * If clicked on a point, its index will be passed as the first argument,
-   * position as the second argument and the corresponding mouse event as the third argument:
-   * `(index: number | undefined, pointPosition: [number, number] | undefined, event: MouseEvent) => void`.
-   * Default value: `undefined`
-   */
-  onClick?: (
-      index: number | undefined, pointPosition: [number, number] | undefined, event: MouseEvent
-    ) => void;
-  /**
-   * Callback function that will be called when mouse movement happens.
-   * If the mouse moves over a point, its index will be passed as the first argument,
-   * position as the second argument and the corresponding mouse event as the third argument:
-   * `(index: number | undefined, pointPosition: [number, number] | undefined, event: MouseEvent) => void`.
-   * Default value: `undefined`
-   */
-  onMouseMove?: (
-      index: number | undefined, pointPosition: [number, number] | undefined, event: MouseEvent
-    ) => void;
-  /**
-   * Callback function that will be called when a point appears under the mouse
-   * as a result of a mouse event, zooming and panning, or movement of points.
-   * The point index will be passed as the first argument, position as the second argument
-   * and the corresponding mouse event or D3's zoom event as the third argument:
-   * `(index: number, pointPosition: [number, number], event: MouseEvent | D3DragEvent<HTMLCanvasElement, undefined, Hovered>
-   * | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined) => void`.
-   * Default value: `undefined`
-   */
-  onPointMouseOver?: (
-      index: number,
-      pointPosition: [number, number],
-      event: MouseEvent | D3DragEvent<HTMLCanvasElement, undefined, Hovered> | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined
-    ) => void;
-  /**
-   * Callback function that will be called when a point is no longer underneath
-   * the mouse pointer because of a mouse event, zoom/pan event, or movement of points.
-   * The corresponding mouse event or D3's zoom event will be passed as the first argument:
-   * `(event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | D3DragEvent<HTMLCanvasElement, undefined, Hovered> | undefined) => void`.
-   * Default value: `undefined`
-   */
-  onPointMouseOut?: (event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | D3DragEvent<HTMLCanvasElement, undefined, Hovered> | undefined) => void;
-  /**
-   * Callback function that will be called when zooming or panning starts.
-   * First argument is a D3 Zoom Event and second indicates whether
-   * the event has been initiated by a user interaction (e.g. a mouse event):
-   * `(event: D3ZoomEvent, userDriven: boolean) => void`.
-   * Default value: `undefined`
-   */
-  onZoomStart?: (e: D3ZoomEvent<HTMLCanvasElement, undefined>, userDriven: boolean) => void;
-  /**
-   * Callback function that will be called continuously during zooming or panning.
-   * First argument is a D3 Zoom Event and second indicates whether
-   * the event has been initiated by a user interaction (e.g. a mouse event):
-   * `(event: D3ZoomEvent, userDriven: boolean) => void`.
-   * Default value: `undefined`
-   */
-  onZoom?: (e: D3ZoomEvent<HTMLCanvasElement, undefined>, userDriven: boolean) => void;
-  /**
-   * Callback function that will be called when zooming or panning ends.
-   * First argument is a D3 Zoom Event and second indicates whether
-   * the event has been initiated by a user interaction (e.g. a mouse event):
-   * `(event: D3ZoomEvent, userDriven: boolean) => void`.
-   * Default value: `undefined`
-   */
-  onZoomEnd?: (e: D3ZoomEvent<HTMLCanvasElement, undefined>, userDriven: boolean) => void;
-  /**
-   * Callback function that will be called when dragging starts.
-   * First argument is a D3 Drag Event:
-   * `(event: D3DragEvent) => void`.
-   * Default value: `undefined`
-   */
-  onDragStart?: (e: D3DragEvent<HTMLCanvasElement, undefined, Hovered>) => void;
-  /**
-   * Callback function that will be called continuously during dragging.
-   * First argument is a D3 Drag Event:
-   * `(event: D3DragEvent) => void`.
-   * Default value: `undefined`
-   */
-  onDrag?: (e: D3DragEvent<HTMLCanvasElement, undefined, Hovered>) => void;
-  /**
-   * Callback function that will be called when dragging ends.
-   * First argument is a D3 Drag Event:
-   * `(event: D3DragEvent) => void`.
-   * Default value: `undefined`
-   */
-  onDragEnd?: (e: D3DragEvent<HTMLCanvasElement, undefined, Hovered>) => void;
-}
-
-export interface GraphSimulationSettings {
-  /**
-   * Decay coefficient. Use smaller values if you want the simulation to "cool down" slower.
-   * Default value: `5000`
-   */
-  decay?: number;
-  /**
-   * Gravity force coefficient.
-   * Default value: `0.25`
-   */
-  gravity?: number;
-  /**
-   * Centering to center mass force coefficient.
-   * Default value: `0`
-   */
-  center?: number;
-  /**
-   * Repulsion force coefficient.
-   * Default value: `1.0`
-   */
-  repulsion?: number;
-  /**
-   * Decreases / increases the detalization of the Many-Body force calculations.
-   * When `useQuadtree` is set to `true`, this property corresponds to the Barnes–Hut approximation criterion.
-   * Default value: `1.15`
-   */
-  repulsionTheta?: number;
-  /**
-   * Barnes–Hut approximation depth.
-   * Can only be used when `useQuadtree` is set `true`.
-   * Default value: `12`
-   */
-  repulsionQuadtreeLevels?: number;
-  /**
-   * Link spring force coefficient.
-   * Default value: `1`
-   */
-  linkSpring?: number;
-  /**
-   * Minimum link distance.
-   * Default value: `10`
-   */
-  linkDistance?: number;
-  /**
-   * Range of random link distance values.
-   * Default value: `[1, 1.2]`
-   */
-  linkDistRandomVariationRange?: number[];
-  /**
-   * Repulsion coefficient from mouse position.
-   * The repulsion force is activated by pressing the right mouse button.
-   * Default value: `2`
-   */
-  repulsionFromMouse?: number;
-  /**
-   * Friction coefficient.
-   * Default value: `0.85`
-   */
-  friction?: number;
-  /**
-   * Cluster coefficient.
-   * Default value: `0.1`
-   */
-  cluster?: number;
-  /**
-   * Callback function that will be called when the simulation starts.
-   * Default value: `undefined`
-   */
-  onStart?: () => void;
-  /**
-   * Callback function that will be called on every simulation tick.
-   * The value of the first argument `alpha` will decrease over time as the simulation "cools down".
-   * If there's a point under the mouse pointer, its index will be passed as the second argument
-   * and position as the third argument:
-   * `(alpha: number, hoveredIndex: number | undefined, pointPosition: [number, number] | undefined) => void`.
-   * Default value: `undefined`
-   */
-  onTick?: (
-    alpha: number, hoveredIndex?: number, pointPosition?: [number, number]
-    ) => void;
-  /**
-   * Callback function that will be called when the simulation stops.
-   * Default value: `undefined`
-   */
-  onEnd?: () => void;
-  /**
-   * Callback function that will be called when the simulation gets paused.
-   * Default value: `undefined`
-   */
-  onPause?: () => void;
-  /**
-   * Callback function that will be called when the simulation is restarted.
-   * Default value: `undefined`
-   */
-  onRestart?: () => void;
-}
 export interface GraphConfigInterface {
   /**
    * TODO: rethink the logic of `disableSimulation` param 👇.
@@ -367,12 +181,199 @@ export interface GraphConfigInterface {
    * Default value: `false`
    */
   useQuadtree?: boolean;
-  /** Simulation parameters and event listeners */
-  simulation?: GraphSimulationSettings;
+
   /**
-   * Events
+   * Decay coefficient. Use smaller values if you want the simulation to "cool down" slower.
+   * Default value: `5000`
    */
-  events?: GraphEvents;
+  simulationDecay?: number;
+    /**
+   * Gravity force coefficient.
+   * Default value: `0.25`
+   */
+    simulationGravity?: number;
+  /**
+   * Centering to center mass force coefficient.
+   * Default value: `0`
+   */
+  simulationCenter?: number;
+  /**
+   * Repulsion force coefficient.
+   * Default value: `1.0`
+   */
+  simulationRepulsion?: number;
+  /**
+   * Decreases / increases the detalization of the Many-Body force calculations.
+   * When `useQuadtree` is set to `true`, this property corresponds to the Barnes–Hut approximation criterion.
+   * Default value: `1.15`
+   */
+  simulationRepulsionTheta?: number;
+  /**
+   * Barnes–Hut approximation depth.
+   * Can only be used when `useQuadtree` is set `true`.
+   * Default value: `12`
+   */
+  simulationRepulsionQuadtreeLevels?: number;
+  /**
+   * Link spring force coefficient.
+   * Default value: `1`
+   */
+  simulationLinkSpring?: number;
+  /**
+   * Minimum link distance.
+   * Default value: `10`
+   */
+  simulationLinkDistance?: number;
+  /**
+   * Range of random link distance values.
+   * Default value: `[1, 1.2]`
+   */
+  simulationLinkDistRandomVariationRange?: number[];
+  /**
+   * Repulsion coefficient from mouse position.
+   * The repulsion force is activated by pressing the right mouse button.
+   * Default value: `2`
+   */
+  simulationRepulsionFromMouse?: number;
+  /**
+   * Friction coefficient.
+   * Default value: `0.85`
+   */
+  simulationFriction?: number;
+  /**
+   * Cluster coefficient.
+   * Default value: `0.1`
+   */
+  simulationCluster?: number;
+
+  /**
+   * Callback function that will be called when the simulation starts.
+   * Default value: `undefined`
+   */
+  onSimulationStart?: () => void;
+  /**
+   * Callback function that will be called on every simulation tick.
+   * The value of the first argument `alpha` will decrease over time as the simulation "cools down".
+   * If there's a point under the mouse pointer, its index will be passed as the second argument
+   * and position as the third argument:
+   * `(alpha: number, hoveredIndex: number | undefined, pointPosition: [number, number] | undefined) => void`.
+   * Default value: `undefined`
+   */
+  onSimulationTick?: (
+    alpha: number, hoveredIndex?: number, pointPosition?: [number, number]
+    ) => void;
+  /**
+   * Callback function that will be called when the simulation stops.
+   * Default value: `undefined`
+   */
+  onSimulationEnd?: () => void;
+  /**
+   * Callback function that will be called when the simulation gets paused.
+   * Default value: `undefined`
+   */
+  onSimulationPause?: () => void;
+  /**
+   * Callback function that will be called when the simulation is restarted.
+   * Default value: `undefined`
+   */
+  onSimulationRestart?: () => void;
+
+  /**
+   * Callback function that will be called on every canvas click.
+   * If clicked on a point, its index will be passed as the first argument,
+   * position as the second argument and the corresponding mouse event as the third argument:
+   * `(index: number | undefined, pointPosition: [number, number] | undefined, event: MouseEvent) => void`.
+   * Default value: `undefined`
+   */
+  onClick?: (
+    index: number | undefined, pointPosition: [number, number] | undefined, event: MouseEvent
+  ) => void;
+
+  /**
+   * Callback function that will be called when mouse movement happens.
+   * If the mouse moves over a point, its index will be passed as the first argument,
+   * position as the second argument and the corresponding mouse event as the third argument:
+   * `(index: number | undefined, pointPosition: [number, number] | undefined, event: MouseEvent) => void`.
+   * Default value: `undefined`
+   */
+  onMouseMove?: (
+    index: number | undefined, pointPosition: [number, number] | undefined, event: MouseEvent
+  ) => void;
+
+  /**
+   * Callback function that will be called when a point appears under the mouse
+   * as a result of a mouse event, zooming and panning, or movement of points.
+   * The point index will be passed as the first argument, position as the second argument
+   * and the corresponding mouse event or D3's zoom event as the third argument:
+   * `(index: number, pointPosition: [number, number], event: MouseEvent | D3DragEvent<HTMLCanvasElement, undefined, Hovered>
+   * | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined) => void`.
+   * Default value: `undefined`
+   */
+  onPointMouseOver?: (
+    index: number,
+    pointPosition: [number, number],
+    event: MouseEvent | D3DragEvent<HTMLCanvasElement, undefined, Hovered> | D3ZoomEvent<HTMLCanvasElement, undefined> | undefined
+  ) => void;
+
+  /**
+   * Callback function that will be called when a point is no longer underneath
+   * the mouse pointer because of a mouse event, zoom/pan event, or movement of points.
+   * The corresponding mouse event or D3's zoom event will be passed as the first argument:
+   * `(event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | D3DragEvent<HTMLCanvasElement, undefined, Hovered> | undefined) => void`.
+   * Default value: `undefined`
+   */
+  onPointMouseOut?: (event: MouseEvent | D3ZoomEvent<HTMLCanvasElement, undefined> | D3DragEvent<HTMLCanvasElement, undefined, Hovered> | undefined) => void;
+
+  /**
+   * Callback function that will be called when zooming or panning starts.
+   * First argument is a D3 Zoom Event and second indicates whether
+   * the event has been initiated by a user interaction (e.g. a mouse event):
+   * `(event: D3ZoomEvent, userDriven: boolean) => void`.
+   * Default value: `undefined`
+   */
+  onZoomStart?: (e: D3ZoomEvent<HTMLCanvasElement, undefined>, userDriven: boolean) => void;
+
+  /**
+   * Callback function that will be called continuously during zooming or panning.
+   * First argument is a D3 Zoom Event and second indicates whether
+   * the event has been initiated by a user interaction (e.g. a mouse event):
+   * `(event: D3ZoomEvent, userDriven: boolean) => void`.
+   * Default value: `undefined`
+   */
+  onZoom?: (e: D3ZoomEvent<HTMLCanvasElement, undefined>, userDriven: boolean) => void;
+
+  /**
+   * Callback function that will be called when zooming or panning ends.
+   * First argument is a D3 Zoom Event and second indicates whether
+   * the event has been initiated by a user interaction (e.g. a mouse event):
+   * `(event: D3ZoomEvent, userDriven: boolean) => void`.
+   * Default value: `undefined`
+   */
+  onZoomEnd?: (e: D3ZoomEvent<HTMLCanvasElement, undefined>, userDriven: boolean) => void;
+
+  /**
+   * Callback function that will be called when dragging starts.
+   * First argument is a D3 Drag Event:
+   * `(event: D3DragEvent) => void`.
+   * Default value: `undefined`
+   */
+  onDragStart?: (e: D3DragEvent<HTMLCanvasElement, undefined, Hovered>) => void;
+
+  /**
+   * Callback function that will be called continuously during dragging.
+   * First argument is a D3 Drag Event:
+   * `(event: D3DragEvent) => void`.
+   * Default value: `undefined`
+   */
+  onDrag?: (e: D3DragEvent<HTMLCanvasElement, undefined, Hovered>) => void;
+
+  /**
+   * Callback function that will be called when dragging ends.
+   * First argument is a D3 Drag Event:
+   * `(event: D3DragEvent) => void`.
+   * Default value: `undefined`
+   */
+  onDragEnd?: (e: D3DragEvent<HTMLCanvasElement, undefined, Hovered>) => void;
 
   /**
    * Show WebGL performance monitor.
@@ -478,38 +479,35 @@ export class GraphConfig implements GraphConfigInterface {
   public linkVisibilityMinTransparency = defaultConfigValues.linkVisibilityMinTransparency
   public useQuadtree = defaultConfigValues.useQuadtree
 
-  public simulation: GraphSimulationSettings = {
-    decay: defaultConfigValues.simulation.decay,
-    gravity: defaultConfigValues.simulation.gravity,
-    center: defaultConfigValues.simulation.center,
-    repulsion: defaultConfigValues.simulation.repulsion,
-    repulsionTheta: defaultConfigValues.simulation.repulsionTheta,
-    repulsionQuadtreeLevels: defaultConfigValues.simulation.repulsionQuadtreeLevels,
-    linkSpring: defaultConfigValues.simulation.linkSpring,
-    linkDistance: defaultConfigValues.simulation.linkDistance,
-    linkDistRandomVariationRange: defaultConfigValues.simulation.linkDistRandomVariationRange,
-    repulsionFromMouse: defaultConfigValues.simulation.repulsionFromMouse,
-    friction: defaultConfigValues.simulation.friction,
-    cluster: defaultConfigValues.simulation.cluster,
-    onStart: undefined,
-    onTick: undefined,
-    onEnd: undefined,
-    onPause: undefined,
-    onRestart: undefined,
-  }
+  public simulationDecay = defaultConfigValues.simulation.decay
+  public simulationGravity = defaultConfigValues.simulation.gravity
+  public simulationCenter = defaultConfigValues.simulation.center
+  public simulationRepulsion = defaultConfigValues.simulation.repulsion
+  public simulationRepulsionTheta = defaultConfigValues.simulation.repulsionTheta
+  public simulationRepulsionQuadtreeLevels = defaultConfigValues.simulation.repulsionQuadtreeLevels
+  public simulationLinkSpring = defaultConfigValues.simulation.linkSpring
+  public simulationLinkDistance = defaultConfigValues.simulation.linkDistance
+  public simulationLinkDistRandomVariationRange = defaultConfigValues.simulation.linkDistRandomVariationRange
+  public simulationRepulsionFromMouse = defaultConfigValues.simulation.repulsionFromMouse
+  public simulationFriction = defaultConfigValues.simulation.friction
+  public simulationCluster = defaultConfigValues.simulation.cluster
 
-  public events: GraphEvents = {
-    onClick: undefined,
-    onMouseMove: undefined,
-    onPointMouseOver: undefined,
-    onPointMouseOut: undefined,
-    onZoomStart: undefined,
-    onZoom: undefined,
-    onZoomEnd: undefined,
-    onDragStart: undefined,
-    onDrag: undefined,
-    onDragEnd: undefined,
-  }
+  public onSimulationStart: GraphConfigInterface['onSimulationStart'] = undefined
+  public onSimulationTick: GraphConfigInterface['onSimulationTick'] = undefined
+  public onSimulationEnd: GraphConfigInterface['onSimulationEnd'] = undefined
+  public onSimulationPause: GraphConfigInterface['onSimulationPause'] = undefined
+  public onSimulationRestart: GraphConfigInterface['onSimulationRestart'] = undefined
+
+  public onClick: GraphConfigInterface['onClick'] = undefined
+  public onMouseMove: GraphConfigInterface['onMouseMove'] = undefined
+  public onPointMouseOver: GraphConfigInterface['onPointMouseOver'] = undefined
+  public onPointMouseOut: GraphConfigInterface['onPointMouseOut'] = undefined
+  public onZoomStart: GraphConfigInterface['onZoomStart'] = undefined
+  public onZoom: GraphConfigInterface['onZoom'] = undefined
+  public onZoomEnd: GraphConfigInterface['onZoomEnd'] = undefined
+  public onDragStart: GraphConfigInterface['onDragStart'] = undefined
+  public onDrag: GraphConfigInterface['onDrag'] = undefined
+  public onDragEnd: GraphConfigInterface['onDragEnd'] = undefined
 
   public showFPSMonitor = defaultConfigValues.showFPSMonitor
 
