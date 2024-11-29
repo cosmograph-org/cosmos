@@ -10,12 +10,14 @@ import updateVert from '@/graph/modules/Shared/quad.vert'
 export class Clusters extends CoreModule {
   private clusterFbo: regl.Framebuffer2D | undefined
   private clusterPositionsFbo: regl.Framebuffer2D | undefined
+  private clusterForceCoefficientFbo: regl.Framebuffer2D | undefined
   private centermassFbo: regl.Framebuffer2D | undefined
   private clearCentermassCommand: regl.DrawCommand | undefined
   private calculateCentermassCommand: regl.DrawCommand | undefined
   private applyForcesCommand: regl.DrawCommand | undefined
   private clusterTexture: regl.Texture2D | undefined
   private clusterPositionsTexture: regl.Texture2D | undefined
+  private clusterForceCoefficientTexture: regl.Texture2D | undefined
   private centermassTexture: regl.Texture2D | undefined
   private pointIndices: regl.Buffer | undefined
   private clustersTextureSize: number | undefined
@@ -36,8 +38,10 @@ export class Clusters extends CoreModule {
     if (!this.clusterTexture) this.clusterTexture = reglInstance.texture()
 
     if (!this.clusterPositionsTexture) this.clusterPositionsTexture = reglInstance.texture()
+    if (!this.clusterForceCoefficientTexture) this.clusterForceCoefficientTexture = reglInstance.texture()
     const clusterState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
     const clusterPositions = new Float32Array(this.clustersTextureSize * this.clustersTextureSize * 4).fill(-1)
+    const clusterForceCoefficient = new Float32Array(pointsTextureSize * pointsTextureSize * 4).fill(1)
     if (data.clusterPositions) {
       for (let cluster = 0; cluster < clusterNumber; ++cluster) {
         clusterPositions[cluster * 4 + 0] = data.clusterPositions[cluster * 2 + 0] ?? -1
@@ -55,6 +59,8 @@ export class Clusters extends CoreModule {
         clusterState[i * 4 + 0] = clusterIndex % this.clustersTextureSize
         clusterState[i * 4 + 1] = Math.floor(clusterIndex / this.clustersTextureSize)
       }
+
+      if (data.pointClusterForces) clusterForceCoefficient[i * 4 + 0] = data.pointClusterForces[i] ?? 1
     }
     this.clusterTexture({
       data: clusterState,
@@ -77,6 +83,19 @@ export class Clusters extends CoreModule {
     if (!this.clusterPositionsFbo) {
       this.clusterPositionsFbo = reglInstance.framebuffer({
         color: this.clusterPositionsTexture,
+        depth: false,
+        stencil: false,
+      })
+    }
+
+    this.clusterForceCoefficientTexture({
+      data: clusterForceCoefficient,
+      shape: [pointsTextureSize, pointsTextureSize, 4],
+      type: 'float',
+    })
+    if (!this.clusterForceCoefficientFbo) {
+      this.clusterForceCoefficientFbo = reglInstance.framebuffer({
+        color: this.clusterForceCoefficientTexture,
         depth: false,
         stencil: false,
       })
@@ -162,6 +181,7 @@ export class Clusters extends CoreModule {
           clusterTexture: () => this.clusterFbo,
           centermassTexture: () => this.centermassFbo,
           clusterPositionsTexture: () => this.clusterPositionsFbo,
+          clusterForceCoefficient: () => this.clusterForceCoefficientFbo,
           alpha: () => store.alpha,
           clustersTextureSize: () => this.clustersTextureSize,
           clusterCoefficient: () => this.config.simulation?.cluster,
