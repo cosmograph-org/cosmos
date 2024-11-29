@@ -6,6 +6,7 @@ uniform sampler2D positionsTexture;
 uniform sampler2D centermassTexture;
 uniform sampler2D clusterTexture;
 uniform sampler2D clusterPositionsTexture;
+uniform sampler2D clusterForceCoefficient;
 uniform float alpha;
 uniform float clustersTextureSize;
 uniform float clusterCoefficient;
@@ -25,11 +26,12 @@ void main() {
       vec4 centermassValues = texture2D(centermassTexture, pointClusterIndicies.xy / clustersTextureSize);
       clusterPositions = centermassValues.xy / centermassValues.b;
     }
+    vec4 clusterCustomCoeff = texture2D(clusterForceCoefficient, textureCoords);
     vec2 distVector = clusterPositions.xy - pointPosition.xy;
     float dist = sqrt(dot(distVector, distVector));
     if (dist > 0.0) {
       float angle = atan(distVector.y, distVector.x);
-      float addV = alpha * dist * clusterCoefficient;
+      float addV = alpha * dist * clusterCoefficient * clusterCustomCoeff.r;
       velocity.rg += addV * vec2(cos(angle), sin(angle));
     }
   }

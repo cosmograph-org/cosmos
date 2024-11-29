@@ -9,6 +9,7 @@ export class GraphData {
   public inputLinkStrength: number[] | undefined
   public inputPointClusters: (number | undefined)[] | undefined
   public inputClusterPositions: (number | undefined)[] | undefined
+  public inputPointClusterForces: number[] | undefined
 
   public pointPositions: number[] | undefined
   public pointColors: number[] | undefined
@@ -24,6 +25,7 @@ export class GraphData {
 
   public pointClusters: (number | undefined)[] | undefined
   public clusterPositions: (number | undefined)[] | undefined
+  public pointClusterForces: number[] | undefined
 
   /**
    * Each inner array of `sourceIndexToTargetIndices` and `targetIndexToSourceIndices` contains pairs where:
@@ -206,6 +208,11 @@ export class GraphData {
       this.clusterPositions = undefined
     } else {
       this.clusterPositions = this.inputClusterPositions
+    }
+    if (this.inputPointClusterForces === undefined || this.inputPointClusterForces.length !== this.pointsNumber) {
+      this.pointClusterForces = undefined
+    } else {
+      this.pointClusterForces = this.inputPointClusterForces
     }
   }
 

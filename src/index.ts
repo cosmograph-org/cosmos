@@ -71,6 +71,7 @@ export class Graph {
   private _hasLinkArrowsChanged = false
   private _hasPointClustersChanged = false
   private _hasClusterPositionsChanged = false
+  private _hasPointClusterForceChanged = false
 
   public constructor (canvas: HTMLCanvasElement, config?: GraphConfigInterface) {
     if (config) this.config.init(config)
@@ -386,6 +387,21 @@ export class Graph {
   }
 
   /**
+   * Sets the force coefficients for clustering points in the graph.
+   *
+   * This method allows you to customize the forces acting on individual points during the clustering process.
+   * The force coefficients determine the strength of the forces applied to each point.
+   *
+   * @param {number[]} forceCoefficients - Array of force coefficients for each point in the format [coeff1, coeff2, ..., coeffn],
+   * where `n` is the index of the point.
+   * Example: `[1, 0.4, 0.3]` sets the force coefficient for point 0 to 1, point 1 to 0.4, and point 2 to 0.3.
+   */
+  public setClusterForceCoefficients (forceCoefficients: number[]): void {
+    this.graph.inputPointClusterForces = forceCoefficients
+    this._hasPointClusterForceChanged = true
+  }
+
+  /**
    * Renders the graph.
    *
    * @param {number} [simulationAlpha] - Optional value between 0 and 1
@@ -403,6 +419,7 @@ export class Graph {
     this._hasLinkArrowsChanged = true
     this._hasPointClustersChanged = true
     this._hasClusterPositionsChanged = true
+    this._hasPointClusterForceChanged = true
     const { fitViewOnInit, fitViewDelay, fitViewPadding, fitViewDuration, fitViewByPointsInRect, initialZoomLevel } = this.config
     if (!this.graph.pointsNumber && !this.graph.linksNumber) {
       this.stopFrames()
@@ -800,7 +817,7 @@ export class Graph {
     this.forceLinkIncoming?.create(LinkDirection.INCOMING)
     this.forceLinkOutgoing?.create(LinkDirection.OUTGOING)
     this.forceCenter?.create()
-    if (this._hasPointClustersChanged || this._hasClusterPositionsChanged) this.clusters?.create()
+    if (this._hasPointClustersChanged || this._hasClusterPositionsChanged || this._hasPointClusterForceChanged) this.clusters?.create()
 
     this._hasPointPositionsChanged = false
     this._hasPointColorsChanged = false
@@ -809,6 +826,9 @@ export class Graph {
     this._hasLinkColorsChanged = false
     this._hasLinkWidthsChanged = false
     this._hasLinkArrowsChanged = false
+    this._hasPointClustersChanged = false
+    this._hasClusterPositionsChanged = false
+    this._hasPointClusterForceChanged = false
   }
 
   /**
