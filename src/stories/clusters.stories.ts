@@ -30,6 +30,7 @@ export const worm: Story = {
     pointColors: wormData.pointColors,
     pointClusters: wormData.clusters,
     links: wormData.links,
+    linkColors: wormData.linkColors,
   },
 }
 
@@ -38,9 +39,14 @@ export const radial: Story = {
   args: {
     pointPositions: radialData.pointPositions,
     pointColors: radialData.pointColors,
+    pointSizes: radialData.pointSizes,
     pointClusters: radialData.clusters,
-    clusterPositions: radialData.clusterPositions,
+
     links: radialData.links,
+    linkColors: radialData.linkColors,
+    linkWidths: radialData.linkWidths,
+
+    clusterPositions: radialData.clusterPositions,
     clusterForces: radialData.clusterForces,
   },
 }

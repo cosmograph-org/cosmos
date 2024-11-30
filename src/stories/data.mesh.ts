@@ -13,12 +13,18 @@ function getPositionOnCircle (radius: number, angle: number, center: number): [n
 }
 
 export type MeshData = {
-  pointPositions: number[];
-  links: number[];
+  pointPositions: Float32Array;
+  pointColors: Float32Array;
+  pointSizes: Float32Array;
+
+  links: Float32Array;
+  linkColors: Float32Array;
+  linkWidths: Float32Array;
+  // linkStrength: Float32Array;
+
   clusters: number[];
   clusterPositions: number[];
-  clusterForces: number[];
-  pointColors: number[];
+  clusterForces: Float32Array;
 }
 
 export function generateMeshData (
@@ -33,12 +39,13 @@ export function generateMeshData (
   const radius = scaleLinear(radialness)
   radius.domain([0, nClusters])
 
-  const pointPositions = new Array(n * m * 2)
+  const pointPositions = new Float32Array(n * m * 2)
   const links: number[] = []
   const clusters = new Array(n * m)
   const clusterPositions = new Array(nClusters * 2)
-  const clusterForces = new Array(n * m)
-  const pointColors = new Array(n * m * 4)
+  const clusterForces = new Float32Array(n * m)
+  const pointColors = new Float32Array(n * m * 4)
+  const pointSizes = new Float32Array(n * m)
 
   const spaceSize = 4096
 
@@ -63,6 +70,8 @@ export function generateMeshData (
     pointColors[pointIndex * 4 + 2] = rgba[2]
     pointColors[pointIndex * 4 + 3] = rgba[3]
 
+    pointSizes[pointIndex] = getRandom(1, 5)
+
     const nextPointIndex = pointIndex + 1
     const bottomPointIndex = pointIndex + n
     const pointLine = Math.floor(pointIndex / n)
@@ -80,5 +89,33 @@ export function generateMeshData (
     }
   }
 
-  return { pointPositions, links, clusters, clusterForces, clusterPositions, pointColors }
+  const linkColors = new Float32Array(links.length / 2 * 4)
+  const linkWidths = new Float32Array(links.length / 2)
+  // const linkStrength = new Float32Array(links.length / 2)
+  for (let i = 0; i < links.length / 2; i++) {
+    const sourcePointIndex = links[i * 2] as number
+    const rgba = getRgbaColor(pointColorScale(sourcePointIndex % nClusters))
+    linkColors[i * 4 + 0] = rgba[0]
+    linkColors[i * 4 + 1] = rgba[1]
+    linkColors[i * 4 + 2] = rgba[2]
+    linkColors[i * 4 + 3] = 0.9
+
+    linkWidths[i] = getRandom(0.1, 0.5)
+    // linkStrength[i] = (n * m - sourcePointIndex) / (n * m)
+  }
+
+  return {
+    pointPositions,
+    pointColors,
+    pointSizes,
+
+    links: new Float32Array(links),
+    linkColors,
+    linkWidths,
+    // linkStrength,
+
+    clusters,
+    clusterForces,
+    clusterPositions,
+  }
 }

@@ -132,19 +132,19 @@ export class Lines extends CoreModule {
   public updateColor (): void {
     const { reglInstance, data } = this
     if (!this.colorBuffer) this.colorBuffer = reglInstance.buffer(0)
-    this.colorBuffer(data.linkColors ?? [])
+    this.colorBuffer(data.linkColors ?? new Float32Array())
   }
 
   public updateWidth (): void {
     const { reglInstance, data } = this
     if (!this.widthBuffer) this.widthBuffer = reglInstance.buffer(0)
-    this.widthBuffer(data.linkWidths ?? [])
+    this.widthBuffer(data.linkWidths ?? new Float32Array())
   }
 
   public updateArrow (): void {
     const { reglInstance, data } = this
     if (!this.arrowBuffer) this.arrowBuffer = reglInstance.buffer(0)
-    this.arrowBuffer(data.linkArrows ?? [])
+    this.arrowBuffer(data.linkArrows ?? new Float32Array())
   }
 
   public updateCurveLineGeometry (): void {
