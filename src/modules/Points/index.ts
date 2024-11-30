@@ -403,7 +403,7 @@ export class Points extends CoreModule {
     const { reglInstance, store: { pointsTextureSize }, data } = this
     if (!pointsTextureSize) return
     if (!this.colorBuffer) this.colorBuffer = reglInstance.buffer(0)
-    this.colorBuffer(data.pointColors as number[])
+    this.colorBuffer(data.pointColors as Float32Array)
   }
 
   public updateGreyoutStatus (): void {

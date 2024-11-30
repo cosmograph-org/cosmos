@@ -1,31 +1,31 @@
 import { getRgbaColor, isNumber } from '@/graph/helper'
 import { GraphConfig } from '@/graph/config'
 export class GraphData {
-  public inputPointPositions: number[] | undefined
-  public inputPointColors: number[] | undefined
-  public inputPointSizes: number[] | undefined
-  public inputLinkColors: number[] | undefined
-  public inputLinkWidths: number[] | undefined
-  public inputLinkStrength: number[] | undefined
+  public inputPointPositions: Float32Array | undefined
+  public inputPointColors: Float32Array | undefined
+  public inputPointSizes: Float32Array | undefined
+  public inputLinkColors: Float32Array | undefined
+  public inputLinkWidths: Float32Array | undefined
+  public inputLinkStrength: Float32Array | undefined
   public inputPointClusters: (number | undefined)[] | undefined
   public inputClusterPositions: (number | undefined)[] | undefined
-  public inputPointClusterForces: number[] | undefined
+  public inputPointClusterForces: Float32Array | undefined
 
-  public pointPositions: number[] | undefined
-  public pointColors: number[] | undefined
-  public pointSizes: number[] | undefined
+  public pointPositions: Float32Array | undefined
+  public pointColors: Float32Array | undefined
+  public pointSizes: Float32Array | undefined
 
-  public inputLinks: number[] | undefined
-  public links: number[] | undefined
-  public linkColors: number[] | undefined
-  public linkWidths: number[] | undefined
+  public inputLinks: Float32Array | undefined
+  public links: Float32Array | undefined
+  public linkColors: Float32Array | undefined
+  public linkWidths: Float32Array | undefined
   public linkArrowsBoolean: boolean[] | undefined
   public linkArrows: number[] | undefined
-  public linkStrength: (number | undefined)[] | undefined
+  public linkStrength: Float32Array | undefined
 
   public pointClusters: (number | undefined)[] | undefined
   public clusterPositions: (number | undefined)[] | undefined
-  public pointClusterForces: number[] | undefined
+  public pointClusterForces: Float32Array | undefined
 
   /**
    * Each inner array of `sourceIndexToTargetIndices` and `targetIndexToSourceIndices` contains pairs where:
@@ -67,7 +67,7 @@ export class GraphData {
     // Sets point colors to default values from config if the input is missing or does not match input points number.
     const defaultRgba = getRgbaColor(this._config.defaultPointColor)
     if (this.inputPointColors === undefined || this.inputPointColors.length / 4 !== this.pointsNumber) {
-      this.pointColors = new Array(this.pointsNumber * 4)
+      this.pointColors = new Float32Array(this.pointsNumber * 4)
       for (let i = 0; i < this.pointColors.length / 4; i++) {
         this.pointColors[i * 4] = defaultRgba[0]
         this.pointColors[i * 4 + 1] = defaultRgba[1]
@@ -96,7 +96,7 @@ export class GraphData {
 
     // Sets point sizes to default values from config if the input is missing or does not match input points number.
     if (this.inputPointSizes === undefined || this.inputPointSizes.length !== this.pointsNumber) {
-      this.pointSizes = new Array(this.pointsNumber).fill(this._config.defaultPointSize)
+      this.pointSizes = new Float32Array(this.pointsNumber).fill(this._config.defaultPointSize)
     } else {
       this.pointSizes = this.inputPointSizes
       for (let i = 0; i < this.pointSizes.length; i++) {
@@ -123,7 +123,7 @@ export class GraphData {
     // Sets link colors to default values from config if the input is missing or does not match input links number.
     const defaultRgba = getRgbaColor(this._config.defaultLinkColor)
     if (this.inputLinkColors === undefined || this.inputLinkColors.length / 4 !== this.linksNumber) {
-      this.linkColors = new Array(this.linksNumber * 4)
+      this.linkColors = new Float32Array(this.linksNumber * 4)
 
       for (let i = 0; i < this.linkColors.length / 4; i++) {
         this.linkColors[i * 4] = defaultRgba[0]
@@ -153,7 +153,7 @@ export class GraphData {
 
     // Sets link widths to default values from config if the input is missing or does not match input links number.
     if (this.inputLinkWidths === undefined || this.inputLinkWidths.length !== this.linksNumber) {
-      this.linkWidths = new Array(this.linksNumber).fill(this._config.defaultLinkWidth)
+      this.linkWidths = new Float32Array(this.linksNumber).fill(this._config.defaultLinkWidth)
     } else {
       this.linkWidths = this.inputLinkWidths
       for (let i = 0; i < this.linkWidths.length; i++) {

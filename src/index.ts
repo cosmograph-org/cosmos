@@ -263,11 +263,11 @@ export class Graph {
   /**
    * Sets the positions for the graph points.
    *
-   * @param {number[]} pointPositions - An array representing the positions of points in the format [x1, y1, x2, y2, ..., xn, yn],
+   * @param {Float32Array} pointPositions - A Float32Array representing the positions of points in the format [x1, y1, x2, y2, ..., xn, yn],
    * where `n` is the index of the point.
-   * Example: `[1, 2, 3, 4, 5, 6]` sets the first point to (1, 2), the second point to (3, 4), and so on.
+   * Example: `new Float32Array([1, 2, 3, 4, 5, 6])` sets the first point to (1, 2), the second point to (3, 4), and so on.
    */
-  public setPointPositions (pointPositions: number[]): void {
+  public setPointPositions (pointPositions: Float32Array): void {
     this.graph.inputPointPositions = pointPositions
     this._hasPointPositionsChanged = true
   }
@@ -275,11 +275,11 @@ export class Graph {
   /**
    * Sets the colors for the graph points.
    *
-   * @param {number[]} pointColors - An array representing the colors of points in the format [r1, g1, b1, a1, r2, g2, b2, a2, ..., rn, gn, bn, an],
+   * @param {Float32Array} pointColors - A Float32Array representing the colors of points in the format [r1, g1, b1, a1, r2, g2, b2, a2, ..., rn, gn, bn, an],
    * where each color is represented in RGBA format.
-   * Example: `[255, 0, 0, 1, 0, 255, 0, 1]` sets the first point to red and the second point to green.
+   * Example: `new Float32Array([255, 0, 0, 1, 0, 255, 0, 1])` sets the first point to red and the second point to green.
   */
-  public setPointColors (pointColors: number[]): void {
+  public setPointColors (pointColors: Float32Array): void {
     this.graph.inputPointColors = pointColors
     this._hasPointColorsChanged = true
   }
@@ -287,11 +287,11 @@ export class Graph {
   /**
    * Sets the sizes for the graph points.
    *
-   * @param {number[]} pointSizes - An array representing the sizes of points in the format [size1, size2, ..., sizen],
+   * @param {Float32Array} pointSizes - A Float32Array representing the sizes of points in the format [size1, size2, ..., sizen],
    * where `n` is the index of the point.
-   * Example: `[10, 20, 30]` sets the first point to size 10, the second point to size 20, and the third point to size 30.
+   * Example: `new Float32Array([10, 20, 30])` sets the first point to size 10, the second point to size 20, and the third point to size 30.
    */
-  public setPointSizes (pointSizes: number[]): void {
+  public setPointSizes (pointSizes: Float32Array): void {
     this.graph.inputPointSizes = pointSizes
     this._hasPointSizesChanged = true
   }
@@ -299,11 +299,12 @@ export class Graph {
   /**
    * Sets the links for the graph.
    *
-   * @param {number[]} links - An array representing the links between points in the format [source1, target1, source2, target2, ..., sourcen, targetn],
+   * @param {Float32Array} links - A Float32Array representing the links between points
+   * in the format [source1, target1, source2, target2, ..., sourcen, targetn],
    * where `source` and `target` are the indices of the points being linked.
-   * Example: `[0, 1, 1, 2]` creates a link from point 0 to point 1 and another link from point 1 to point 2.
+   * Example: `new Float32Array([0, 1, 1, 2])` creates a link from point 0 to point 1 and another link from point 1 to point 2.
    */
-  public setLinks (links: number[]): void {
+  public setLinks (links: Float32Array): void {
     this.graph.inputLinks = links
     this._hasLinksChanged = true
   }
@@ -311,11 +312,11 @@ export class Graph {
   /**
    * Sets the colors for the graph links.
    *
-   * @param {number[]} linkColors - An array representing the colors of links in the format [r1, g1, b1, a1, r2, g2, b2, a2, ..., rn, gn, bn, an],
+   * @param {Float32Array} linkColors - A Float32Array representing the colors of links in the format [r1, g1, b1, a1, r2, g2, b2, a2, ..., rn, gn, bn, an],
    * where each color is in RGBA format.
-   * Example: `[255, 0, 0, 1, 0, 255, 0, 1]` sets the first link to red and the second link to green.
+   * Example: `new Float32Array([255, 0, 0, 1, 0, 255, 0, 1])` sets the first link to red and the second link to green.
    */
-  public setLinkColors (linkColors: number[]): void {
+  public setLinkColors (linkColors: Float32Array): void {
     this.graph.inputLinkColors = linkColors
     this._hasLinkColorsChanged = true
   }
@@ -323,11 +324,11 @@ export class Graph {
   /**
    * Sets the widths for the graph links.
    *
-   * @param {number[]} linkWidths - An array representing the widths of links in the format [width1, width2, ..., widthn],
+   * @param {Float32Array} linkWidths - A Float32Array representing the widths of links in the format [width1, width2, ..., widthn],
    * where `n` is the index of the link.
-   * Example: `[1, 2, 3]` sets the first link to width 1, the second link to width 2, and the third link to width 3.
+   * Example: `new Float32Array([1, 2, 3])` sets the first link to width 1, the second link to width 2, and the third link to width 3.
    */
-  public setLinkWidths (linkWidths: number[]): void {
+  public setLinkWidths (linkWidths: Float32Array): void {
     this.graph.inputLinkWidths = linkWidths
     this._hasLinkWidthsChanged = true
   }
@@ -347,11 +348,11 @@ export class Graph {
   /**
    * Sets the strength for the graph links.
    *
-   * @param {number[]} linkStrength - An array representing the strength of each link in the format [strength1, strength2, ..., strengthn],
+   * @param {Float32Array} linkStrength - A Float32Array representing the strength of each link in the format [strength1, strength2, ..., strengthn],
    * where `n` is the index of the link.
-   * Example: `[1, 2, 3]` sets the first link to strength 1, the second link to strength 2, and the third link to strength 3.
+   * Example: `new Float32Array([1, 2, 3])` sets the first link to strength 1, the second link to strength 2, and the third link to strength 3.
    */
-  public setLinkStrength (linkStrength: number[]): void {
+  public setLinkStrength (linkStrength: Float32Array): void {
     this.graph.inputLinkStrength = linkStrength
   }
 
@@ -392,11 +393,11 @@ export class Graph {
    * This method allows you to customize the forces acting on individual points during the clustering process.
    * The force coefficients determine the strength of the forces applied to each point.
    *
-   * @param {number[]} forceCoefficients - Array of force coefficients for each point in the format [coeff1, coeff2, ..., coeffn],
+   * @param {Float32Array} forceCoefficients - A Float32Array of force coefficients for each point in the format [coeff1, coeff2, ..., coeffn],
    * where `n` is the index of the point.
-   * Example: `[1, 0.4, 0.3]` sets the force coefficient for point 0 to 1, point 1 to 0.4, and point 2 to 0.3.
+   * Example: `new Float32Array([1, 0.4, 0.3])` sets the force coefficient for point 0 to 1, point 1 to 0.4, and point 2 to 0.3.
    */
-  public setClusterForceCoefficients (forceCoefficients: number[]): void {
+  public setClusterForceCoefficients (forceCoefficients: Float32Array): void {
     this.graph.inputPointClusterForces = forceCoefficients
     this._hasPointClusterForceChanged = true
   }
