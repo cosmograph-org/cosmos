@@ -29,6 +29,8 @@ export class GraphData {
   public targetIndexToSourceIndices: ([number, number][] | undefined)[] | undefined
 
   public degree: number[] | undefined
+  public inDegree: number[] | undefined
+  public outDegree: number[] | undefined
 
   private _config: GraphConfig
 
@@ -230,11 +232,19 @@ export class GraphData {
   private _calculateDegrees (): void {
     if (this.pointsNumber === undefined) {
       this.degree = undefined
+      this.inDegree = undefined
+      this.outDegree = undefined
       return
     }
+    
     this.degree = new Array(this.pointsNumber).fill(0)
+    this.inDegree = new Array(this.pointsNumber).fill(0)
+    this.outDegree = new Array(this.pointsNumber).fill(0)
+    
     for (let i = 0; i < this.pointsNumber; i++) {
-      this.degree[i] = (this.sourceIndexToTargetIndices?.[i]?.length ?? 0) + (this.targetIndexToSourceIndices?.[i]?.length ?? 0)
+      this.inDegree[i] = this.targetIndexToSourceIndices?.[i]?.length ?? 0
+      this.outDegree[i] = this.sourceIndexToTargetIndices?.[i]?.length ?? 0
+      this.degree[i] = (this.inDegree[i] ?? 0) + (this.outDegree[i] ?? 0)
     }
   }
 }
