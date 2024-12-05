@@ -15,10 +15,10 @@ void main() {
   vec4 pointPosition = texture2D(positionsTexture, pointIndices / pointsTextureSize);
   rgba = vec4(pointPosition.xy, 1.0, 0.0);
 
-  vec4 pointClusterIndicies = texture2D(clusterTexture, pointIndices / pointsTextureSize);
+  vec4 pointClusterIndices = texture2D(clusterTexture, pointIndices / pointsTextureSize);
   vec2 xy = vec2(0.0);
-  if (pointClusterIndicies.x >= 0.0 && pointClusterIndicies.y >= 0.0) {
-    xy = 2.0 * (pointClusterIndicies.xy + 0.5) / clustersTextureSize - 1.0;
+  if (pointClusterIndices.x >= 0.0 && pointClusterIndices.y >= 0.0) {
+    xy = 2.0 * (pointClusterIndices.xy + 0.5) / clustersTextureSize - 1.0;
   }
   
   gl_Position = vec4(xy, 0.0, 1.0);

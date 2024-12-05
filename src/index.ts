@@ -534,6 +534,27 @@ export class Graph {
   }
 
   /**
+   * Get current X and Y coordinates of the clusters.
+   * @returns Array of point cluster.
+   */
+  public getClusterPositions (): number[] {
+    if (this.graph.pointClusters === undefined || this.clusters === undefined) return []
+    const positions: number[] = []
+    const clusterPositionsPixels = readPixels(this.reglInstance, this.clusters.centermassFbo as regl.Framebuffer2D)
+    positions.length = clusterPositionsPixels.length / 2
+    for (let i = 0; i < positions.length / 2; i += 1) {
+      const sumX = clusterPositionsPixels[i * 4 + 0]
+      const sumY = clusterPositionsPixels[i * 4 + 1]
+      const sumN = clusterPositionsPixels[i * 4 + 2]
+      if (sumX !== undefined && sumY !== undefined && sumN !== undefined) {
+        positions[i * 2] = sumX / sumN
+        positions[i * 2 + 1] = sumY / sumN
+      }
+    }
+    return positions
+  }
+
+  /**
    * Center and zoom in/out the view to fit all points in the scene.
    * @param duration Duration of the center and zoom in/out animation in milliseconds (`250` by default).
    * @param padding Padding around the viewport in percentage (`0.1` by default).

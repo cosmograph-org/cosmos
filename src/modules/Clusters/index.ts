@@ -8,10 +8,11 @@ import clearFrag from '@/graph/modules/Shared/clear.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
 
 export class Clusters extends CoreModule {
+  public centermassFbo: regl.Framebuffer2D | undefined
+
   private clusterFbo: regl.Framebuffer2D | undefined
   private clusterPositionsFbo: regl.Framebuffer2D | undefined
   private clusterForceCoefficientFbo: regl.Framebuffer2D | undefined
-  private centermassFbo: regl.Framebuffer2D | undefined
   private clearCentermassCommand: regl.DrawCommand | undefined
   private calculateCentermassCommand: regl.DrawCommand | undefined
   private applyForcesCommand: regl.DrawCommand | undefined

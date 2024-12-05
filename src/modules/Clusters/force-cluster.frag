@@ -17,13 +17,13 @@ varying vec2 textureCoords;
 void main() {
   vec4 pointPosition = texture2D(positionsTexture, textureCoords);
   vec4 velocity = vec4(0.0);
-  vec4 pointClusterIndicies = texture2D(clusterTexture, textureCoords);
+  vec4 pointClusterIndices = texture2D(clusterTexture, textureCoords);
   // no cluster, so no forces
-  if (pointClusterIndicies.x >= 0.0 && pointClusterIndicies.y >= 0.0) {
+  if (pointClusterIndices.x >= 0.0 && pointClusterIndices.y >= 0.0) {
     // positioning points to custom cluster position or either to the center of mass
-    vec2 clusterPositions = texture2D(clusterPositionsTexture, pointClusterIndicies.xy / clustersTextureSize).xy;
+    vec2 clusterPositions = texture2D(clusterPositionsTexture, pointClusterIndices.xy / clustersTextureSize).xy;
     if (clusterPositions.x < 0.0 || clusterPositions.y < 0.0) {
-      vec4 centermassValues = texture2D(centermassTexture, pointClusterIndicies.xy / clustersTextureSize);
+      vec4 centermassValues = texture2D(centermassTexture, pointClusterIndices.xy / clustersTextureSize);
       clusterPositions = centermassValues.xy / centermassValues.b;
     }
     vec4 clusterCustomCoeff = texture2D(clusterForceCoefficient, textureCoords);
