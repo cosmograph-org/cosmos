@@ -9,7 +9,7 @@ export class GraphData {
   public inputLinkStrength: Float32Array | undefined
   public inputPointClusters: (number | undefined)[] | undefined
   public inputClusterPositions: (number | undefined)[] | undefined
-  public inputPointClusterForces: Float32Array | undefined
+  public inputClusterStrength: Float32Array | undefined
 
   public pointPositions: Float32Array | undefined
   public pointColors: Float32Array | undefined
@@ -25,7 +25,7 @@ export class GraphData {
 
   public pointClusters: (number | undefined)[] | undefined
   public clusterPositions: (number | undefined)[] | undefined
-  public pointClusterForces: Float32Array | undefined
+  public clusterStrength: Float32Array | undefined
 
   /**
    * Each inner array of `sourceIndexToTargetIndices` and `targetIndexToSourceIndices` contains pairs where:
@@ -209,10 +209,10 @@ export class GraphData {
     } else {
       this.clusterPositions = this.inputClusterPositions
     }
-    if (this.inputPointClusterForces === undefined || this.inputPointClusterForces.length !== this.pointsNumber) {
-      this.pointClusterForces = undefined
+    if (this.inputClusterStrength === undefined || this.inputClusterStrength.length !== this.pointsNumber) {
+      this.clusterStrength = undefined
     } else {
-      this.pointClusterForces = this.inputPointClusterForces
+      this.clusterStrength = this.inputClusterStrength
     }
   }
 

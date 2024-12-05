@@ -47,7 +47,7 @@ export const radial: Story = {
     linkWidths: radialData.linkWidths,
 
     clusterPositions: radialData.clusterPositions,
-    clusterForces: radialData.clusterForces,
+    clusterStrength: radialData.clusterStrength,
   },
 }
 
