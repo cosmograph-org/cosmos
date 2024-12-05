@@ -60,5 +60,7 @@ export const withoutLinks: Story = {
     pointPositions: withoutLinksData.pointPositions,
     pointColors: withoutLinksData.pointColors,
     pointClusters: withoutLinksData.clusters,
+
+    showClusterLabels: true,
   },
 }
