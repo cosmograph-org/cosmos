@@ -60,7 +60,7 @@ export class Clusters extends CoreModule {
         clusterState[i * 4 + 1] = Math.floor(clusterIndex / this.clustersTextureSize)
       }
 
-      if (data.pointClusterForces) clusterForceCoefficient[i * 4 + 0] = data.pointClusterForces[i] ?? 1
+      if (data.clusterStrength) clusterForceCoefficient[i * 4 + 0] = data.clusterStrength[i] ?? 1
     }
     this.clusterTexture({
       data: clusterState,

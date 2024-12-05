@@ -13,7 +13,7 @@ export type CosmosStoryProps = GraphConfigInterface & {
 
   pointClusters?: number[];
   clusterPositions?: number[];
-  clusterForces?: Float32Array;
+  clusterStrength?: Float32Array;
 }
 
 export const createCosmos = (props: CosmosStoryProps): HTMLCanvasElement => {
@@ -60,7 +60,7 @@ export const createCosmos = (props: CosmosStoryProps): HTMLCanvasElement => {
 
     if (props.pointClusters) graph.setPointClusters(props.pointClusters)
     if (props.clusterPositions) graph.setClusterPositions(props.clusterPositions)
-    if (props.clusterForces) graph.setClusterForceCoefficients(props.clusterForces)
+    if (props.clusterStrength) graph.setClusterStrength(props.clusterStrength)
 
     graph.zoom(0.9)
     graph.render()
