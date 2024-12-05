@@ -388,17 +388,17 @@ export class Graph {
   }
 
   /**
-   * Sets the force coefficients for clustering points in the graph.
+   * Sets the force strength coefficients for clustering points in the graph.
    *
    * This method allows you to customize the forces acting on individual points during the clustering process.
    * The force coefficients determine the strength of the forces applied to each point.
    *
-   * @param {Float32Array} forceCoefficients - A Float32Array of force coefficients for each point in the format [coeff1, coeff2, ..., coeffn],
+   * @param {Float32Array} clusterStrength - A Float32Array of force strength coefficients for each point in the format [coeff1, coeff2, ..., coeffn],
    * where `n` is the index of the point.
    * Example: `new Float32Array([1, 0.4, 0.3])` sets the force coefficient for point 0 to 1, point 1 to 0.4, and point 2 to 0.3.
    */
-  public setClusterForceCoefficients (forceCoefficients: Float32Array): void {
-    this.graph.inputPointClusterForces = forceCoefficients
+  public setClusterStrength (clusterStrength: Float32Array): void {
+    this.graph.inputClusterStrength = clusterStrength
     this._hasPointClusterForceChanged = true
   }
 
