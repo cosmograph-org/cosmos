@@ -30,7 +30,7 @@ export const FullMesh: Story = {
   },
 }
 
-export const MeshWithHoles = (): HTMLCanvasElement => {
+export const MeshWithHoles = (): HTMLDivElement => {
   const { pointPositions, links, pointColors } = generateMeshData(40, 80, 15, 0.8)
 
   return createCosmos({

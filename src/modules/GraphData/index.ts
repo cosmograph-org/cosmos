@@ -268,11 +268,11 @@ export class GraphData {
       this.outDegree = undefined
       return
     }
-    
+
     this.degree = new Array(this.pointsNumber).fill(0)
     this.inDegree = new Array(this.pointsNumber).fill(0)
     this.outDegree = new Array(this.pointsNumber).fill(0)
-    
+
     for (let i = 0; i < this.pointsNumber; i++) {
       this.inDegree[i] = this.targetIndexToSourceIndices?.[i]?.length ?? 0
       this.outDegree[i] = this.sourceIndexToTargetIndices?.[i]?.length ?? 0
