@@ -106,7 +106,10 @@ export class Lines extends CoreModule {
   }
 
   public draw (): void {
-    if (!this.pointsBuffer || !this.colorBuffer || !this.widthBuffer || !this.curveLineBuffer) return
+    if (!this.pointsBuffer || !this.curveLineBuffer) return
+    if (!this.colorBuffer) this.updateColor()
+    if (!this.widthBuffer) this.updateWidth()
+    if (!this.arrowBuffer) this.updateArrow()
     this.drawCurveCommand?.()
   }
 

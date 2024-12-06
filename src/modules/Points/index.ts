@@ -484,6 +484,8 @@ export class Points extends CoreModule {
 
   public draw (): void {
     const { config: { renderHoveredPointRing, defaultPointSize }, store, data } = this
+    if (!this.colorBuffer) this.updateColor()
+    if (!this.sizeBuffer) this.updateSize()
     this.drawCommand?.()
     if ((renderHoveredPointRing) && store.hoveredPoint) {
       this.drawHighlightedCommand?.({
