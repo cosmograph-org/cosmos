@@ -397,7 +397,7 @@ export class Graph {
    * where `n` is the index of the point.
    * Example: `new Float32Array([1, 0.4, 0.3])` sets the force coefficient for point 0 to 1, point 1 to 0.4, and point 2 to 0.3.
    */
-  public setClusterStrength (clusterStrength: Float32Array): void {
+  public setPointClusterStrength (clusterStrength: Float32Array): void {
     this.graph.inputClusterStrength = clusterStrength
     this._hasPointClusterForceChanged = true
   }
