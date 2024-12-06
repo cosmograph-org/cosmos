@@ -63,7 +63,7 @@ export const createCosmos = (props: CosmosStoryProps): HTMLDivElement => {
 
     if (props.pointClusters) graph.setPointClusters(props.pointClusters)
     if (props.clusterPositions) graph.setClusterPositions(props.clusterPositions)
-    if (props.clusterStrength) graph.setClusterStrength(props.clusterStrength)
+    if (props.clusterStrength) graph.setPointClusterStrength(props.clusterStrength)
 
     graph.zoom(0.9)
     graph.render()
