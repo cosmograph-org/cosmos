@@ -43,7 +43,7 @@ export interface GraphConfigInterface {
    * in the format `[red, green, blue, alpha]` where each value is a number between 0 and 255.
    * Default value: '#b3b3b3'
    */
-  defaultPointColor?: string | [number, number, number, number];
+  pointColor?: string | [number, number, number, number];
 
   /**
    * Greyed out point opacity value when the selection is active.
@@ -55,7 +55,7 @@ export interface GraphConfigInterface {
    * if the size value in the array is `undefined` or `null`.
    * Default value: `4`
   */
-  defaultPointSize?: number;
+  pointSize?: number;
   /**
    * Scale factor for the point size.
    * Default value: `1`
@@ -109,7 +109,7 @@ export interface GraphConfigInterface {
    * in the format `[red, green, blue, alpha]` where each value is a number between 0 and 255.
    * Default value: '#666666'
    */
-  defaultLinkColor?: string | [number, number, number, number];
+  linkColor?: string | [number, number, number, number];
 
   /**
    * Greyed out link opacity value when the selection is active.
@@ -120,7 +120,7 @@ export interface GraphConfigInterface {
    * The default width value to use for links when no link widths are provided or if the width value in the array is `undefined` or `null`.
    * Default value: `1`
   */
-  defaultLinkWidth?: number;
+  linkWidth?: number;
   /**
    * Scale factor for the link width.
    * Default value: `1`
@@ -152,7 +152,7 @@ export interface GraphConfigInterface {
    * The default link arrow value that controls whether or not to display link arrows.
    * Default value: `false`
    */
-  defaultLinkArrows?: boolean;
+  linkArrows?: boolean;
   /**
    * Scale factor for the link arrows size.
    * Default value: `1`
@@ -191,7 +191,7 @@ export interface GraphConfigInterface {
    * Gravity force coefficient.
    * Default value: `0.25`
    */
-    simulationGravity?: number;
+  simulationGravity?: number;
   /**
    * Centering to center mass force coefficient.
    * Default value: `0`
@@ -455,25 +455,25 @@ export class GraphConfig implements GraphConfigInterface {
   public disableSimulation = defaultConfigValues.disableSimulation
   public backgroundColor = defaultBackgroundColor
   public spaceSize = defaultConfigValues.spaceSize
-  public defaultPointColor = defaultPointColor
+  public pointColor = defaultPointColor
   public pointGreyoutOpacity = defaultGreyoutPointOpacity
-  public defaultPointSize = defaultPointSize
+  public pointSize = defaultPointSize
   public pointSizeScale = defaultConfigValues.pointSizeScale
   public hoveredPointCursor = defaultConfigValues.hoveredPointCursor
   public renderHoveredPointRing = defaultConfigValues.renderHoveredPointRing
   public hoveredPointRingColor = defaultConfigValues.hoveredPointRingColor
   public focusedPointRingColor = defaultConfigValues.focusedPointRingColor
   public focusedPointIndex = defaultConfigValues.focusedPointIndex
-  public defaultLinkColor = defaultLinkColor
+  public linkColor = defaultLinkColor
   public linkGreyoutOpacity = defaultGreyoutLinkOpacity
-  public defaultLinkWidth = defaultLinkWidth
+  public linkWidth = defaultLinkWidth
   public linkWidthScale = defaultConfigValues.linkWidthScale
   public renderLinks = defaultConfigValues.renderLinks
   public curvedLinks = defaultConfigValues.curvedLinks
   public curvedLinkSegments = defaultConfigValues.curvedLinkSegments
   public curvedLinkWeight = defaultConfigValues.curvedLinkWeight
   public curvedLinkControlPointDistance = defaultConfigValues.curvedLinkControlPointDistance
-  public defaultLinkArrows = defaultConfigValues.arrowLinks
+  public linkArrows = defaultConfigValues.arrowLinks
   public linkArrowsSizeScale = defaultConfigValues.arrowSizeScale
   public linkVisibilityDistanceRange = defaultConfigValues.linkVisibilityDistanceRange
   public linkVisibilityMinTransparency = defaultConfigValues.linkVisibilityMinTransparency

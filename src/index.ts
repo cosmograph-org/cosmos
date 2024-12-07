@@ -203,23 +203,23 @@ export class Graph {
   public setConfig (config: Partial<GraphConfigInterface>): void {
     const prevConfig = { ...this.config }
     this.config.init(config)
-    if (prevConfig.defaultPointColor !== this.config.defaultPointColor) {
+    if (prevConfig.pointColor !== this.config.pointColor) {
       this.graph.updatePointColor()
       this.points.updateColor()
     }
-    if (prevConfig.defaultPointSize !== this.config.defaultPointSize) {
+    if (prevConfig.pointSize !== this.config.pointSize) {
       this.graph.updatePointSize()
       this.points.updateSize()
     }
-    if (prevConfig.defaultLinkColor !== this.config.defaultLinkColor) {
+    if (prevConfig.linkColor !== this.config.linkColor) {
       this.graph.updateLinkColor()
       this.lines.updateColor()
     }
-    if (prevConfig.defaultLinkWidth !== this.config.defaultLinkWidth) {
+    if (prevConfig.linkWidth !== this.config.linkWidth) {
       this.graph.updateLinkWidth()
       this.lines.updateWidth()
     }
-    if (prevConfig.defaultLinkArrows !== this.config.defaultLinkArrows) {
+    if (prevConfig.linkArrows !== this.config.linkArrows) {
       this.graph.updateArrows()
       this.lines.updateArrow()
     }
