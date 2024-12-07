@@ -26,12 +26,12 @@ export const createCosmos = (props: CosmosStoryProps): HTMLDivElement => {
 
   const config: GraphConfigInterface = {
     backgroundColor: '#212C42',
-    defaultPointSize: 3,
-    defaultPointColor: '#4B5BBF',
+    pointSize: 3,
+    pointColor: '#4B5BBF',
     pointGreyoutOpacity: 0.1,
-    defaultLinkWidth: 0.2,
-    defaultLinkColor: '#5F74C2',
-    defaultLinkArrows: false,
+    linkWidth: 0.2,
+    linkColor: '#5F74C2',
+    linkArrows: false,
     linkGreyoutOpacity: 0,
     curvedLinks: true,
     renderLinks: true,

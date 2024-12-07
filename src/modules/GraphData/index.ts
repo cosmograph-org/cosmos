@@ -67,7 +67,7 @@ export class GraphData {
     }
 
     // Sets point colors to default values from config if the input is missing or does not match input points number.
-    const defaultRgba = getRgbaColor(this._config.defaultPointColor)
+    const defaultRgba = getRgbaColor(this._config.pointColor)
     if (this.inputPointColors === undefined || this.inputPointColors.length / 4 !== this.pointsNumber) {
       this.pointColors = new Float32Array(this.pointsNumber * 4)
       for (let i = 0; i < this.pointColors.length / 4; i++) {
@@ -98,12 +98,12 @@ export class GraphData {
 
     // Sets point sizes to default values from config if the input is missing or does not match input points number.
     if (this.inputPointSizes === undefined || this.inputPointSizes.length !== this.pointsNumber) {
-      this.pointSizes = new Float32Array(this.pointsNumber).fill(this._config.defaultPointSize)
+      this.pointSizes = new Float32Array(this.pointsNumber).fill(this._config.pointSize)
     } else {
       this.pointSizes = this.inputPointSizes
       for (let i = 0; i < this.pointSizes.length; i++) {
         if (!isNumber(this.pointSizes[i])) {
-          this.pointSizes[i] = this._config.defaultPointSize
+          this.pointSizes[i] = this._config.pointSize
         }
       }
     }
@@ -123,7 +123,7 @@ export class GraphData {
     }
 
     // Sets link colors to default values from config if the input is missing or does not match input links number.
-    const defaultRgba = getRgbaColor(this._config.defaultLinkColor)
+    const defaultRgba = getRgbaColor(this._config.linkColor)
     if (this.inputLinkColors === undefined || this.inputLinkColors.length / 4 !== this.linksNumber) {
       this.linkColors = new Float32Array(this.linksNumber * 4)
 
@@ -155,12 +155,12 @@ export class GraphData {
 
     // Sets link widths to default values from config if the input is missing or does not match input links number.
     if (this.inputLinkWidths === undefined || this.inputLinkWidths.length !== this.linksNumber) {
-      this.linkWidths = new Float32Array(this.linksNumber).fill(this._config.defaultLinkWidth)
+      this.linkWidths = new Float32Array(this.linksNumber).fill(this._config.linkWidth)
     } else {
       this.linkWidths = this.inputLinkWidths
       for (let i = 0; i < this.linkWidths.length; i++) {
         if (!isNumber(this.linkWidths[i])) {
-          this.linkWidths[i] = this._config.defaultLinkWidth
+          this.linkWidths[i] = this._config.linkWidth
         }
       }
     }
@@ -177,7 +177,7 @@ export class GraphData {
 
     // Sets link arrows to default values from config if the input is missing or does not match input links number.
     if (this.linkArrowsBoolean === undefined || this.linkArrowsBoolean.length !== this.linksNumber) {
-      this.linkArrows = new Array(this.linksNumber).fill(+this._config.defaultLinkArrows)
+      this.linkArrows = new Array(this.linksNumber).fill(+this._config.linkArrows)
     } else {
       this.linkArrows = this.linkArrowsBoolean.map(d => +d)
     }
