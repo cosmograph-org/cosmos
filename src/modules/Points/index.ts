@@ -483,7 +483,7 @@ export class Points extends CoreModule {
   }
 
   public draw (): void {
-    const { config: { renderHoveredPointRing, defaultPointSize }, store, data } = this
+    const { config: { renderHoveredPointRing, pointSize }, store, data } = this
     if (!this.colorBuffer) this.updateColor()
     if (!this.sizeBuffer) this.updateSize()
     this.drawCommand?.()
@@ -492,7 +492,7 @@ export class Points extends CoreModule {
         width: 0.85,
         color: store.hoveredPointRingColor,
         pointIndex: store.hoveredPoint.index,
-        size: data.pointSizes?.[store.hoveredPoint.index] ?? defaultPointSize,
+        size: data.pointSizes?.[store.hoveredPoint.index] ?? pointSize,
       })
     }
     if (store.focusedPoint) {
@@ -500,7 +500,7 @@ export class Points extends CoreModule {
         width: 0.75,
         color: store.focusedPointRingColor,
         pointIndex: store.focusedPoint.index,
-        size: data.pointSizes?.[store.focusedPoint.index] ?? defaultPointSize,
+        size: data.pointSizes?.[store.focusedPoint.index] ?? pointSize,
       })
     }
   }
