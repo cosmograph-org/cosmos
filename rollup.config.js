@@ -41,6 +41,7 @@ const config = {
       resolve: ['', '/index.ts', '.ts'],
       entries: [
         { find: '@/graph', replacement: path.resolve(__dirname, 'src/') },
+        { find: '@cosmograph/cosmos', replacement: path.resolve(__dirname, 'src/') },
       ],
     }),
   ],

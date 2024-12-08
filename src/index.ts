@@ -1127,3 +1127,5 @@ export class Graph {
 }
 
 export type { GraphConfigInterface } from './config'
+
+export * from './helper'
