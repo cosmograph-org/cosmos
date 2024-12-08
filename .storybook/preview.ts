@@ -5,6 +5,7 @@ const preview: Preview = {
   parameters: {
     layout: 'fullscreen',
     controls: {
+      disable: true,
       matchers: {
         color: /(background|color)$/i,
         date: /Date$/i,

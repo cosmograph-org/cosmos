@@ -1,6 +1,6 @@
 import { scaleLinear, scaleSequential } from 'd3-scale'
 import { interpolateWarm } from 'd3-scale-chromatic'
-import { getRgbaColor } from '@/graph/helper'
+import { getRgbaColor } from '@cosmograph/cosmos'
 
 function getRandom (min: number, max: number): number {
   return Math.random() * (max - min) + min
