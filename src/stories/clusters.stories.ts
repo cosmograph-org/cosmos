@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/html'
-import { CosmosStoryProps, createCosmos } from '@/graph/stories/cosmos'
+import { CosmosStoryProps, createCosmos } from '@/graph/stories/create-cosmos'
 
-import { generateMeshData } from './data.mesh'
+import { generateMeshData } from './generate-mesh-data'
 
 const meta: Meta<CosmosStoryProps> = {
   title: 'Clusters',
