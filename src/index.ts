@@ -23,6 +23,7 @@ import { Drag } from '@/graph/modules/Drag'
 import { defaultConfigValues, defaultScaleToZoom } from '@/graph/variables'
 
 export class Graph {
+  public debugCount = 0
   public config = new GraphConfig()
   public graph = new GraphData(this.config)
   private canvas: HTMLCanvasElement
@@ -532,6 +533,20 @@ export class Graph {
     const positions: number[] = []
     const clusterPositionsPixels = readPixels(this.reglInstance, this.clusters.centermassFbo as regl.Framebuffer2D)
     positions.length = clusterPositionsPixels.length / 2
+    if (this.debugCount === 0) {
+      // console log sum of each third element in clusterPositionsPixels - that equals to sum of all points in all clusters
+      let sum = 0
+      for (let i = 0; i < positions.length / 2; i += 1) {
+        const sumN = clusterPositionsPixels[i * 4 + 2]
+        if (sumN !== undefined) {
+          sum += sumN
+        }
+      }
+      console.log('sum of all points in all clusters from Read Pixels', sum)
+      console.log('cluster texture from Read Pixels', clusterPositionsPixels)
+      this.debugCount = 1
+    }
+
     for (let i = 0; i < positions.length / 2; i += 1) {
       const sumX = clusterPositionsPixels[i * 4 + 0]
       const sumY = clusterPositionsPixels[i * 4 + 1]

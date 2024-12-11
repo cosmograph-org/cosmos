@@ -24,12 +24,20 @@ void main() {
     vec2 clusterPositions = texture2D(clusterPositionsTexture, pointClusterIndices.xy / clustersTextureSize).xy;
     if (clusterPositions.x < 0.0 || clusterPositions.y < 0.0) {
       vec4 centermassValues = texture2D(centermassTexture, pointClusterIndices.xy / clustersTextureSize);
-      clusterPositions = centermassValues.xy / centermassValues.b;
+      // prevent division by zero
+      if (centermassValues.b > 0.0) {
+        clusterPositions = centermassValues.xy / centermassValues.b;
+      } else {
+        clusterPositions = vec2(0.0);
+      }
+      
     }
     vec4 clusterCustomCoeff = texture2D(clusterForceCoefficient, textureCoords);
     vec2 distVector = clusterPositions.xy - pointPosition.xy;
     float dist = sqrt(dot(distVector, distVector));
     if (dist > 0.0) {
+    // For the purpose of debugging
+    // if (dist > 100.0) {
       float angle = atan(distVector.y, distVector.x);
       float addV = alpha * dist * clusterCoefficient * clusterCustomCoeff.r;
       velocity.rg += addV * vec2(cos(angle), sin(angle));

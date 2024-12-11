@@ -51,7 +51,10 @@ export const radial: Story = {
   },
 }
 
-const withoutLinksData = generateMeshData(100, 100, 15, 1.0)
+// const withoutLinksData = generateMeshData(100, 100, 1000, 1.0)
+// If the number of clusters is set to 50, the issue will appear 🕴️
+// const withoutLinksData = generateMeshData(100, 100, 50, 1.0, undefined, true)
+const withoutLinksData = generateMeshData(100, 100, 45, 1.0, undefined, true)
 export const withoutLinks: Story = {
   args: {
     simulationGravity: 0.5,

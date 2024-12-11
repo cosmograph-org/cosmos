@@ -32,7 +32,8 @@ export function generateMeshData (
   m: number,
   nClusters: number,
   wholeness: number,
-  radialness = [10, 1000]
+  radialness = [10, 1000],
+  piy = false
 ): MeshData {
   const pointColorScale = scaleSequential(interpolateWarm)
   pointColorScale.domain([0, nClusters])
@@ -102,6 +103,14 @@ export function generateMeshData (
 
     linkWidths[i] = getRandom(0.1, 0.5)
     // linkStrength[i] = (n * m - sourcePointIndex) / (n * m)
+  }
+
+  if (piy) {
+    const clusterSum = clusters.reduce((acc, curr) => {
+      acc[curr] = (acc[curr] || 0) + 1
+      return acc
+    }, {} as Record<number, number>)
+    console.log('sum values for each cluster', clusterSum)
   }
 
   return {

@@ -68,10 +68,21 @@ export const createCosmos = (props: CosmosStoryProps): HTMLDivElement => {
     graph.zoom(0.9)
     graph.render()
 
+    graph.setConfig({
+      onClick: (index) => {
+        if (index !== undefined) console.log(index, props.pointClusters?.[index])
+      },
+    })
+
+    let debugCount = 0
     if (props.showClusterLabels) {
       const clusterLabelDivs: HTMLDivElement[] = []
       function updateClusterLabels (graph: Graph): void {
         const clusterPositions = graph.getClusterPositions()
+        if (debugCount === 0) {
+          console.log('cluster positions', clusterPositions)
+          debugCount = 1
+        }
         const nClusters = clusterPositions.length / 2
         if (nClusters === 0) return
         if (clusterLabelDivs.length === 0) {

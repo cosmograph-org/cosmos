@@ -34,7 +34,8 @@ export class Clusters extends CoreModule {
       return Math.max(max, clusterIndex)
     }, 0) + 1
 
-    this.clustersTextureSize = Math.ceil(Math.sqrt(clusterNumber))
+    this.clustersTextureSize = Math.ceil(Math.sqrt(clusterNumber)) // + 1
+    console.log('size of texture that stores clusters', this.clustersTextureSize)
 
     if (!this.clusterTexture) this.clusterTexture = reglInstance.texture()
 
@@ -51,7 +52,13 @@ export class Clusters extends CoreModule {
     }
 
     for (let i = 0; i < data.pointsNumber; ++i) {
-      const clusterIndex = data.pointClusters?.[i]
+      // const clusterIndex = data.pointClusters?.[i]
+
+      let clusterIndex = 11
+      if (data.pointClusters?.[i] === 10) {
+        clusterIndex = 12
+      }
+
       if (clusterIndex === undefined) {
         // no cluster, so no forces
         clusterState[i * 4 + 0] = -1
@@ -63,6 +70,8 @@ export class Clusters extends CoreModule {
 
       if (data.clusterStrength) clusterForceCoefficient[i * 4 + 0] = data.clusterStrength[i] ?? 1
     }
+    console.log('texture that stores ij entry of cluster in cluster texture for each point', clusterState)
+
     this.clusterTexture({
       data: clusterState,
       shape: [pointsTextureSize, pointsTextureSize, 4],
