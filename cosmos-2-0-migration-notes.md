@@ -10,7 +10,7 @@ This update is centered on enhancing data performance by utilizing formats direc
 
 #### Replacing `setData`
 
-The `setData` method has been replaced with `setPointPositions` and `setLinks`. These new methods accept arrays of numbers, which are directly used to create WebGL textures.
+The `setData` method has been replaced with `setPointPositions` and `setLinks`. These new methods accept Float32Array, which are directly used to create WebGL textures.
 
 **Before:**
 ```js
@@ -22,18 +22,18 @@ graph.setData(
 
 **After:**
 ```js
-graph.setPointPositions([
+graph.setPointPositions(new Float32Array([
   400, 400, // x and y of the first point
   500, 500, // x and y of the second point
-]);
-graph.setLinks([
+]));
+graph.setLinks(new Float32Array([
   0, 1 // Link between the first and second point
-]);
+]));
 ```
 
 #### Configuration Updates
 
-Accessor functions for styling such as `nodeColor`, `nodeSize`, `linkColor`, `linkWidth`, and `linkArrows`, are eliminated. You can now set these attributes directly using arrays of numbers.
+Accessor functions for styling such as `nodeColor`, `nodeSize`, `linkColor`, `linkWidth`, and `linkArrows`, are eliminated. You can now set these attributes directly using Float32Array.
 
 **Old Method for Setting Node Color:**
 ```js
@@ -42,33 +42,36 @@ config.nodeColor = node => node.color;
 
 **New Method for Setting Point Colors:**
 ```js
-graph.setPointColors([
+graph.setPointColors(new Float32Array([
   0.5, 0.5, 1, 1, // r, g, b, alpha for the first point
   0.5, 1, 0.5, 1, // r, g, b, alpha for the second point
-]);
+]));
 ```
 
-If you don't set point colors, sizes, link colors, widths, or arrows, default values from the new config parameters (`defaultPointColor`, `defaultPointSize`, `defaultLinkColor`, `defaultLinkWidth`, and `defaultLinkArrow`) will be applied.
+**Flat Configuration Object:**
 
-**Example:**
+The configuration object is now flat instead of nested.
+
+**Old Config:**
 ```js
 const config = {
-  defaultPointColor: 'navajowhite'
-};
+  backgroundColor: 'black',
+  simulation: {
+    repulsion: 0.5,
+  },
+  events: {
+    onNodeMouseOver: (node, index, pos) => console.log(`Hovered over node ${node.id}`)
+  }
+}
 ```
 
-**Modifying Event Handling**
-
-Event handling now focuses on point indices instead of node objects.
-
-**Old Event Handling:**
+**New config:**
 ```js
-config.events.onNodeMouseOver = (node, index, pos) => console.log(`Hovered over node ${node.id}`);
-```
-
-**New Event Handling:**
-```js
-config.events.onPointMouseOver = (index, pos) => console.log(`Hovered over point at index ${index}`);
+const config = {
+  backgroundColor: 'black',
+  simulationRepulsion: 0.5,
+  onPointMouseOver: (index, pos) => console.log(`Hovered over point at index ${index}`);
+}
 ```
 
 **Summary of Additional Changes**
