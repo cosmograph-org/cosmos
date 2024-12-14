@@ -21,11 +21,14 @@ import { Store, ALPHA_MIN, MAX_POINT_SIZE, type Hovered } from '@/graph/modules/
 import { Zoom } from '@/graph/modules/Zoom'
 import { Drag } from '@/graph/modules/Drag'
 import { defaultConfigValues, defaultScaleToZoom } from '@/graph/variables'
+import { attributionSvg } from '@/graph/attribution'
 
 export class Graph {
   public config = new GraphConfig()
   public graph = new GraphData(this.config)
+  private div: HTMLDivElement
   private canvas: HTMLCanvasElement
+  private attributionDivElement: HTMLElement | undefined
   private canvasD3Selection: Selection<HTMLCanvasElement, undefined, null, undefined>
   private reglInstance: regl.Regl
   private requestAnimationFrameId = 0
@@ -73,25 +76,23 @@ export class Graph {
   private _hasClusterPositionsChanged = false
   private _hasPointClusterForceChanged = false
 
-  public constructor (canvas: HTMLCanvasElement, config?: GraphConfigInterface) {
+  public constructor (div: HTMLDivElement, config?: GraphConfigInterface) {
     if (config) this.config.init(config)
 
+    this.div = div
+    const canvas = document.createElement('canvas')
+    canvas.style.width = '100%'
+    canvas.style.height = '100%'
+    this.div.appendChild(canvas)
+    this.addAttribution()
     const w = canvas.clientWidth
     const h = canvas.clientHeight
 
     canvas.width = w * this.config.pixelRatio
     canvas.height = h * this.config.pixelRatio
-    // If the canvas element has no CSS width and height style, the clientWidth and the clientHeight will always
-    // be equal to the width and height canvas attribute.
-    // In order to prevent resize problem assume that canvas CSS style width and height has a value of 100%.
-    if (canvas.style.width === '' && canvas.style.height === '') {
-      select(canvas)
-        .style('width', '100%')
-        .style('height', '100%')
-    }
 
     this.canvas = canvas
-    this.canvasD3Selection = select<HTMLCanvasElement, undefined>(canvas)
+    this.canvasD3Selection = select<HTMLCanvasElement, undefined>(this.canvas)
     this.canvasD3Selection
       .on('mouseenter.cosmos', () => { this._isMouseOnCanvas = true })
       .on('mousemove.cosmos', () => { this._isMouseOnCanvas = true })
@@ -1102,6 +1103,26 @@ export class Graph {
       if (!this.config.enableDrag || this.store.isSpaceKeyPressed) select(this.canvas).style('cursor', hoveredPointCursor)
       else select(this.canvas).style('cursor', 'grab')
     } else select(this.canvas).style('cursor', null)
+  }
+
+  private addAttribution (): void {
+    document.documentElement.style.setProperty('--cosmos-attribution-color', 'white')
+    this.attributionDivElement = document.createElement('div')
+    this.attributionDivElement.style.cssText = `
+      cursor: pointer;
+      user-select: none;
+      position: absolute;
+      margin: 0 0.6rem 0.6rem 0;
+      line-height: 0;
+      bottom: 0;
+      right: 0;
+      color: var(--cosmos-attribution-color);
+    `
+    this.attributionDivElement.onclick = (): void => window.open('https://cosmograph.app/', '_blank')?.focus()
+    const svgParser = new DOMParser()
+    const svgElement = svgParser.parseFromString(attributionSvg, 'image/svg+xml').firstChild as SVGElement
+    this.attributionDivElement.appendChild(svgElement)
+    this.div.appendChild(this.attributionDivElement)
   }
 }
 
