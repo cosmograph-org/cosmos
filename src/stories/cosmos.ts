@@ -19,10 +19,10 @@ export type CosmosStoryProps = GraphConfigInterface & {
 
 export const createCosmos = (props: CosmosStoryProps): HTMLDivElement => {
   const div = document.createElement('div')
-  const canvas = document.createElement('canvas')
-  canvas.style.height = '100vh'
-  canvas.style.width = '100%'
-  div.appendChild(canvas)
+  // const canvas = document.createElement('canvas')
+  div.style.height = '100vh'
+  div.style.width = '100%'
+  // div.appendChild(canvas)
 
   const config: GraphConfigInterface = {
     backgroundColor: '#212C42',
@@ -50,7 +50,7 @@ export const createCosmos = (props: CosmosStoryProps): HTMLDivElement => {
 
   // If we initialize the graph before the canvas is added to the DOM, nothing happens
   requestAnimationFrame(() => {
-    const graph = new Graph(canvas, config)
+    const graph = new Graph(div, config)
 
     graph.setPointPositions(props.pointPositions)
     graph.setPointColors(props.pointColors)
