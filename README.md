@@ -13,7 +13,7 @@ It enables real-time simulation of network graphs consisting of hundreds of thou
 
 [📺 Comparison with other libraries](https://www.youtube.com/watch?v=HWk78hP8aEE)
 
-[🎮 Try Cosmos on CodeSandbox](https://stackblitz.com/edit/how-to-use-cosmos?file=src%2Fmain.ts)
+[🎮 Try Cosmos on StackBlitz](https://stackblitz.com/edit/how-to-use-cosmos?file=src%2Fmain.ts)
 
 ---
 
@@ -31,31 +31,25 @@ Configure the graph, set data, and run the simulation:
 import { Graph } from '@cosmograph/cosmos';
 import { pointPositions, links } from './data';
 
-const canvas = document.querySelector('canvas');
+const div = document.querySelector('div');
 const config = {
-  simulation: {
-    repulsion: 0.5,
-  },
+  simulationRepulsion: 0.5,
   renderLinks: true,
-  events: {
-    onClick: (pointIndex) => {
-      console.log('Clicked point index: ', pointIndex);
-    },
+  onClick: (pointIndex) => {
+    console.log('Clicked point index: ', pointIndex);
   },
 };
 
-const graph = new Graph(canvas, config);
+const graph = new Graph(div, config);
 
 graph.setPointPositions(pointPositions);
 graph.setLinks(links);
 graph.render();
 ```
 
-- **`pointPositions`**: An array of `[x1, y1, x2, y2, ..., xN, yN]`.
-- **`links`**: An array of `[sourceIndex1, targetIndex1, ..., sourceIndexN, targetIndexN]`.
+- **`pointPositions`**: A Float32Array of `[x1, y1, x2, y2, ..., xN, yN]`.
+- **`links`**: A Float32Array of `[sourceIndex1, targetIndex1, ..., sourceIndexN, targetIndexN]`.
 
-> **Note**
-> If your canvas element has no width and height styles (either CSS or inline), Cosmos will automatically set them to 100%.
 
 ---
 
@@ -65,8 +59,10 @@ Cosmos v2.0 introduces significant improvements in performance and data handling
 
 - Enhanced data structures with WebGL-compatible formats.
 - Methods like `setPointPositions` and `setLinks` replace `setData` for improved efficiency.
-- Direct control over point and link attributes via arrays (e.g., colors, sizes, widths).
+- Direct control over point and link attributes via Float32Array (e.g., colors, sizes, widths).
 - Updated event handling based on indices instead of objects.
+- New Clustering Feature (`setPointClusters`, `setClusterPositions` and `setPointClusterStrength`).
+- Ability to drag points.
 
 Check the [Migration Guide](https://github.com/cosmograph-org/cosmos/tree/next/cosmos-2-0-migration-notes.md) for details.
 
