@@ -8,7 +8,7 @@ export const defaultBackgroundColor = '#222222'
 
 export const defaultConfigValues = {
   disableSimulation: false,
-  spaceSize: 4096,
+  spaceSize: 8192,
   pointSizeScale: 1,
   linkWidthScale: 1,
   arrowSizeScale: 1,

@@ -74,6 +74,22 @@ const config = {
 }
 ```
 
+**Initialization Change: From Canvas to Div**
+
+In version 2.0, the initialization of the graph now requires a div element instead of a canvas element.
+
+**Before**
+```js
+const canvas = document.getElementById('myCanvas')
+const graph = new Graph(canvas, config)
+```
+
+**After**
+```js
+const div = document.getElementById('myDiv')
+const graph = new Graph(div, config)
+```
+
 **Summary of Additional Changes**
 
 - **Terminology Update:** "Node" is now "Point," but "Link" remains unchanged.

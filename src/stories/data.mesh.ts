@@ -47,7 +47,7 @@ export function generateMeshData (
   const pointColors = new Float32Array(n * m * 4)
   const pointSizes = new Float32Array(n * m)
 
-  const spaceSize = 4096
+  const spaceSize = 8192
 
   for (let clusterIndex = 0; clusterIndex < nClusters; clusterIndex += 1) {
     const [x, y] = getPositionOnCircle(radius(clusterIndex), 15 * Math.PI * (clusterIndex / nClusters), spaceSize / 2)

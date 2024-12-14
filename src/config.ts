@@ -32,7 +32,7 @@ export interface GraphConfigInterface {
   backgroundColor?: string | [number, number, number, number];
   /**
    * Simulation space size (max 8192).
-   * Default value: `4096`
+   * Default value: `8192`
    */
   spaceSize?: number;
 
