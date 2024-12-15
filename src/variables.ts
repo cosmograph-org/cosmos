@@ -50,6 +50,7 @@ export const defaultConfigValues = {
   fitViewPadding: 0.1,
   fitViewDuration: 250,
   pointSamplingDistance: 150,
+  disableAttribution: false,
 }
 
 export const hoveredPointRingOpacity = 0.7
