@@ -30,6 +30,10 @@ export function getRgbaColor (value: string | [number, number, number, number]):
   ]
 }
 
+export function rgbToBrightness (r: number, g: number, b: number): number {
+  return (0.2126 * r + 0.7152 * g + 0.0722 * b)
+}
+
 export function readPixels (reglInstance: regl.Regl, fbo: regl.Framebuffer2D): Float32Array {
   let resultPixels = new Float32Array()
   reglInstance({ framebuffer: fbo })(() => {

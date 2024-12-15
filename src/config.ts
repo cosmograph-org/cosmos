@@ -449,6 +449,11 @@ export interface GraphConfigInterface {
    * Default value: `150`
   */
   pointSamplingDistance?: number;
+  /**
+   * Whether to render the attribution or not.
+   * Default value: `false`
+  */
+  disableAttribution?: boolean;
 }
 
 export class GraphConfig implements GraphConfigInterface {
@@ -525,6 +530,7 @@ export class GraphConfig implements GraphConfigInterface {
 
   public randomSeed = undefined
   public pointSamplingDistance = defaultConfigValues.pointSamplingDistance
+  public disableAttribution = defaultConfigValues.disableAttribution
 
   public init (config: GraphConfigInterface): void {
     (Object.keys(config) as (keyof GraphConfigInterface)[])
