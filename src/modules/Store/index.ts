@@ -1,7 +1,7 @@
 import { scaleLinear } from 'd3-scale'
 import { mat3 } from 'gl-matrix'
 import { Random } from 'random'
-import { getRgbaColor } from '@/graph/helper'
+import { getRgbaColor, rgbToBrightness } from '@/graph/helper'
 import { hoveredPointRingOpacity, focusedPointRingOpacity, defaultConfigValues } from '@/graph/variables'
 
 export const ALPHA_MIN = 0.001
@@ -15,7 +15,6 @@ export class Store {
   public linksTextureSize = 0
   public alpha = 1
   public transform = mat3.create()
-  public backgroundColor: [number, number, number, number] = [0, 0, 0, 0]
   public screenSize: [number, number] = [0, 0]
   public mousePosition = [0, 0]
   public screenMousePosition = [0, 0]
@@ -36,6 +35,17 @@ export class Store {
   private scalePointX = scaleLinear()
   private scalePointY = scaleLinear()
   private random = new Random()
+  private _backgroundColor: [number, number, number, number] = [0, 0, 0, 0]
+
+  public get backgroundColor (): [number, number, number, number] {
+    return this._backgroundColor
+  }
+
+  public set backgroundColor (color: [number, number, number, number]) {
+    this._backgroundColor = color
+    const brightness = rgbToBrightness(color[0], color[1], color[2])
+    document.documentElement.style.setProperty('--cosmos-attribution-color', brightness > 0.5 ? 'black' : 'white')
+  }
 
   public addRandomSeed (seed: number | string): void {
     this.random = this.random.clone(seed)

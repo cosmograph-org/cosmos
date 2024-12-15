@@ -1106,7 +1106,7 @@ export class Graph {
   }
 
   private addAttribution (): void {
-    document.documentElement.style.setProperty('--cosmos-attribution-color', 'white')
+    if (this.config.disableAttribution) return
     this.attributionDivElement = document.createElement('div')
     this.attributionDivElement.style.cssText = `
       cursor: pointer;
