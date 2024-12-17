@@ -4,6 +4,8 @@
     "paths": {
       "@/graph": ["src/"],
       "@/graph/*": ["src/*"],
+      "@cosmograph/cosmos": ["src/"],
+      "@cosmograph/cosmos/*": ["src/*"],
     },
     "plugins": [{
       "transform": "@zerollup/ts-transform-paths",
