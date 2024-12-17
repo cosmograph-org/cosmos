@@ -26,7 +26,6 @@ import { attributionSvg } from '@/graph/attribution'
 export class Graph {
   public config = new GraphConfig()
   public graph = new GraphData(this.config)
-  private div: HTMLDivElement
   private canvas: HTMLCanvasElement
   private attributionDivElement: HTMLElement | undefined
   private canvasD3Selection: Selection<HTMLCanvasElement, undefined, null, undefined>
@@ -79,11 +78,11 @@ export class Graph {
   public constructor (div: HTMLDivElement, config?: GraphConfigInterface) {
     if (config) this.config.init(config)
 
-    this.div = div
+    this.store.div = div
     const canvas = document.createElement('canvas')
     canvas.style.width = '100%'
     canvas.style.height = '100%'
-    this.div.appendChild(canvas)
+    this.store.div.appendChild(canvas)
     this.addAttribution()
     const w = canvas.clientWidth
     const h = canvas.clientHeight
@@ -1122,7 +1121,7 @@ export class Graph {
     const svgParser = new DOMParser()
     const svgElement = svgParser.parseFromString(attributionSvg, 'image/svg+xml').firstChild as SVGElement
     this.attributionDivElement.appendChild(svgElement)
-    this.div.appendChild(this.attributionDivElement)
+    this.store.div?.appendChild(this.attributionDivElement)
   }
 }
 
