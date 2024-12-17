@@ -5,7 +5,7 @@
   "jsdelivr": "dist/index.min.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "license": "CC-BY-NC-4.0",
+  "license": "MIT",
   "repository": "git://github.com/cosmograph-org/cosmos.git",
   "type": "module",
   "scripts": {
