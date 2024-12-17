@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/html'
 
-import { CosmosStoryProps, createCosmos } from './create-cosmos'
+import { CosmosStoryProps } from './create-cosmos'
 import { MeshWithHolesStory } from './experiments/mesh-with-holes'
 import { FullMeshStory } from './experiments/full-mesh'
 
@@ -12,7 +12,6 @@ import fullMeshRaw from './experiments/full-mesh?raw'
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta: Meta<CosmosStoryProps> = {
   title: 'Experiments',
-  render: (args) => createCosmos(args),
 }
 
 type Story = StoryObj<CosmosStoryProps>;

@@ -22,7 +22,7 @@ export type MeshData = {
   linkWidths: Float32Array;
   // linkStrength: Float32Array;
 
-  clusters: number[];
+  pointClusters: number[];
   clusterPositions: number[];
   clusterStrength: Float32Array;
 }
@@ -41,7 +41,7 @@ export function generateMeshData (
 
   const pointPositions = new Float32Array(n * m * 2)
   const links: number[] = []
-  const clusters = new Array(n * m)
+  const pointClusters = new Array(n * m)
   const clusterPositions = new Array(nClusters * 2)
   const clusterStrength = new Float32Array(n * m)
   const pointColors = new Float32Array(n * m * 4)
@@ -61,7 +61,7 @@ export function generateMeshData (
     pointPositions[pointIndex * 2] = x
     pointPositions[pointIndex * 2 + 1] = y
 
-    clusters[pointIndex] = pointIndex % nClusters
+    pointClusters[pointIndex] = pointIndex % nClusters
     clusterStrength[pointIndex] = (nClusters - (pointIndex % nClusters)) / nClusters
     const pointColor = pointColorScale(pointIndex % nClusters)
     const rgba = getRgbaColor(pointColor)
@@ -114,7 +114,7 @@ export function generateMeshData (
     linkWidths,
     // linkStrength,
 
-    clusters,
+    pointClusters,
     clusterStrength,
     clusterPositions,
   }
