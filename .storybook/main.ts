@@ -1,4 +1,5 @@
 import type { StorybookConfig } from "@storybook/html-vite";
+import remarkGfm from 'remark-gfm';
 
 const config: StorybookConfig = {
   stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
@@ -6,6 +7,16 @@ const config: StorybookConfig = {
     "@jls-digital/storybook-addon-code",
     "@storybook/addon-essentials",
     "@storybook/addon-interactions",
+    {
+      name: '@storybook/addon-docs',
+      options: {
+        mdxPluginOptions: {
+          mdxCompileOptions: {
+            remarkPlugins: [remarkGfm],
+          },
+        },
+      },
+    },
   ],
   framework: {
     name: "@storybook/html-vite",
