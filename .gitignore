@@ -5,3 +5,4 @@ dist
 yarn.lock
 .eslintcache
 *storybook.log
+storybook-static
