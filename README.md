@@ -8,8 +8,8 @@
 
 It enables real-time simulation of network graphs consisting of hundreds of thousands of points and links on modern hardware.
 
-<img src="https://user-images.githubusercontent.com/755708/173392407-9b05cbb6-d39e-4c2c-ab41-50900cfda823.mp4" autoplay controls>
-</img>
+<video src="https://user-images.githubusercontent.com/755708/173392407-9b05cbb6-d39e-4c2c-ab41-50900cfda823.mp4" autoplay controls alt="Demo of Cosmos GPU-accelerated Force Graph">
+</video>
 
 [📺 Comparison with other libraries](https://www.youtube.com/watch?v=HWk78hP8aEE)
 
@@ -64,7 +64,7 @@ Cosmos v2.0 introduces significant improvements in performance and data handling
 - New Clustering Feature (`setPointClusters`, `setClusterPositions` and `setPointClusterStrength`).
 - Ability to drag points.
 
-Check the [Migration Guide](https://github.com/cosmograph-org/cosmos/tree/next/cosmos-2-0-migration-notes.md) for details.
+Check the [Migration Guide](https://github.com/cosmograph-org/cosmos/cosmos-2-0-migration-notes.md) for details.
 
 ---
 
@@ -98,9 +98,7 @@ Check the [Migration Guide](https://github.com/cosmograph-org/cosmos/tree/next/c
 
 ### License
 
-**CC-BY-NC-4.0**
-
-Cosmos is free for non-commercial usage. If you're a scientist, artist, educator, journalist, or student, we'd love to hear how you're using Cosmos! For commercial projects, please [reach out](mailto:hi@cosmograph.app).
+**MIT**
 
 ---
 
