@@ -1,6 +1,8 @@
 import type { Preview } from "@storybook/html";
 import { themes } from '@storybook/theming';
 
+import './style.css';
+
 const preview: Preview = {
   parameters: {
     layout: 'fullscreen',

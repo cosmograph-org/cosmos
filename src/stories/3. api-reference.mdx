@@ -1,0 +1,413 @@
+import { Meta } from "@storybook/blocks";
+
+<Meta title="API Reference" />
+
+### <a name="set_config" href="#set_config">#</a> graph.<b>setConfig</b>(<i>config</i>)
+
+This method sets the [Cosmos configuration](../?path=/docs/configuration--docs). The changes are applied in real-time.
+
+* **`config`** (Object): The configuration object adhering to Cosmos configuration properties.
+
+### <a name="set_point_positions" href="#set_point_positions">#</a> graph.<b>setPointPositions</b>(<i>pointPositions</i>)
+
+This method sets the positions of points in a Cosmos graph using the provided coordinates array.
+
+* **`pointPositions`** (Float32Array): A Float32Array representing the x and y coordinates of points in the format `[x1, y1, x2, y2, ..., xN, yN]`. Each pair represents the coordinates of a single point.
+
+**Example:**
+```javascript
+graph.setPointPositions(new Float32Array([1, 2, 3, 4, 5, 6]));
+graph.render();
+```
+
+### <a name="set_point_colors" href="#set_point_colors">#</a> graph.<b>setPointColors</b>(<i>pointColors</i>)
+
+This method sets the colors for points in a Cosmos graph.
+
+* **`pointColors`** (Float32Array): A Float32Array representing the colors of points in the format `[r1, g1, b1, a1, r2, g2, b2, a2, ..., rN, gN, bN, aN]`, where each color is represented in RGBA format:
+    - **`r`**: Red value (0.0-1.0)
+    - **`g`**: Green value (0.0-1.0)
+    - **`b`**: Blue value (0.0-1.0)
+    - **`a`**: Alpha value (0.0-1.0, where 0 is fully transparent and 1 is fully opaque)
+
+Each group of four values (`r`, `g`, `b`, `a`) represents the color of a single point in the graph. The order of the colors in the array corresponds to the order of the points in the graph's data.
+
+**Example:**
+
+```javascript
+graph.setPointColors(new Float32Array([
+  1, 0, 0, 1, // Red color for the first point
+  0, 1, 0, 1, // Green color for the second point
+  0, 0, 1, 1  // Blue color for the third point
+]));
+graph.render();
+```
+
+
+### <a name="set_point_sizes" href="#set_point_sizes">#</a> graph.<b>setPointSizes</b>(<i>pointSizes</i>)
+
+This method sets the sizes for the graph points.
+
+* **`pointSizes`** (Float32Array): A Float32Array representing the sizes of points in the format `[size1, size2, ..., sizeN]`, where each `size` value corresponds to the size of the point at the same index in the graph's data.
+
+Each size value in the array specifies the size of a point using the same order as the points in the graph data. 
+
+**Example:**
+```javascript
+graph.setPointSizes(new Float32Array([10, 20, 30]));
+graph.render();
+```
+
+This example sets the size of the first point to 10, the second point to 20, and the third point to 30.
+
+### <a name="set_links" href="#set_links">#</a> graph.<b>setLinks</b>(<i>links</i>)
+
+This method sets the links (connections) between points in a Cosmos graph.
+
+* **`links`** (Float32Array): A Float32Array representing the connections between points in the format `[source1, target1, source2, target2, ..., sourceN, targetN]`, where `source` and `target` are the indices of the points being linked. Each pair of elements in the array represents a single link.
+
+Each pair of elements in the array represents a single link between two points specified by their indices.
+
+**Example:**
+```javascript
+graph.setLinks(new Float32Array([
+  0, 1, // Link between point 0 and point 1
+  1, 2, // Link between point 1 and point 2
+  2, 3  // Link between point 2 and point 3
+]));
+graph.render();
+```
+
+The resulting graph will have a total of 3 links: one between points 0 and 1, another between points 1 and 2, and a third between points 2 and 3.
+
+### <a name="set_link_colors" href="#set_link_colors">#</a> graph.<b>setLinkColors</b>(<i>linkColors</i>)
+
+This method sets the colors for the graph links.
+
+* **`linkColors`** (Float32Array): A Float32Array representing the colors of links in the format `[r1, g1, b1, a1, r2, g2, b2, a2, ..., rN, gN, bN, aN]`, where each color is in RGBA format. Each set of four values (`r`, `g`, `b`, `a`) represents the color of a single link. Here’s a breakdown:
+
+    * **`r`**: Red value (0.0-1.0)
+    * **`g`**: Green value (0.0-1.0)
+    * **`b`**: Blue value (0.0-1.0)
+    * **`a`**: Alpha (opacity) value (0.0-1.0), where 0 is fully transparent and 1 is fully opaque.
+
+The array should contain a multiple of 4 elements, where each set of four elements represents the RGBA color for a single link. The order of the colors in the array corresponds to the order of the links in the graph.
+
+**Example:**
+```javascript
+graph.setLinkColors(new Float32Array([
+  1, 0, 0, 1, // Red for the first link
+  0, 1, 0, 1, // Green for the second link
+  0, 0, 1, 1  // Blue for the third link
+]));
+graph.render();
+```
+
+In this example, the `linkColors` array contains three sets of four elements, each representing the RGBA color for a single link. The first set `[1, 0, 0, 1]` sets the first link to red, the second set `[0, 1, 0, 1]` sets the second link to green, and the third set `[0, 0, 1, 1]` sets the third link to blue.
+
+### <a name="set_link_widths" href="#set_link_widths">#</a> graph.<b>setLinkWidths</b>(<i>linkWidths</i>)
+
+This method sets the widths for the graph links.
+
+* **`linkWidths`** (Float32Array): A Float32Array representing the widths of links in the format `[width1, width2, ..., widthN]`, where each `width` value corresponds to the width of the link at the same index in the graph's data. The lengths of the widths array should match the number of links in the graph. Each width is usually a numerical value representing the thickness of the link.
+
+**Example:**
+```javascript
+graph.setLinkWidths(new Float32Array([1, 2, 3]));
+graph.render();
+```
+
+In this example, the `linkWidths` array contains three numerical values. The first value `1` sets the width of the first link, the second value `2` sets the width of the second link, and the third value `3` sets the width of the third link.
+
+### <a name="set_link_arrows" href="#set_link_arrows">#</a> graph.<b>setLinkArrows</b>(<i>linkArrows</i>)
+
+This method sets the arrows for the graph links.
+
+* **`linkArrows`** (Array): An array of booleans indicating whether each link should have an arrow.
+
+The array should have the same length as the number of links in the graph.
+
+**Example:**
+```javascript
+graph.setLinkArrows([true, false, true]);
+graph.render();
+```
+
+In this example, the `linkArrows` array contains three boolean values. The first value `true` sets an arrow on the first link, the second value `false` leaves the second link without an arrow, and the third value `true` sets an arrow on the third link.
+
+
+### <a name="set_link_strengths" href="#set_link_strengths">#</a> graph.<b>setLinkStrength</b>(<i>linkStrength</i>)
+
+This method sets the strength of the graph links.
+
+* **`linkStrength`** (Float32Array): A Float32Array representing the strength of each link in the format `[strength1, strength2, ..., strengthN]`, where each `strength` is a numerical value. The strength values typically range from 0.0 to 1.0, with higher values indicating stronger links. The length of the `linkStrength` array should match the number of links in the graph.
+
+**Example:**
+```javascript
+graph.setLinkStrength(new Float32Array([0.1, 0.2, 0.3]));
+graph.render();
+```
+
+In this example, the `linkStrength` array contains three numerical values. The first value `0.1` sets the strength of the first link, the second value `0.2` sets the strength of the second link, and the third value `0.3` sets the strength of the third link.
+
+### <a name="set_point_clusters" href="#set_point_clusters">#</a> graph.<b>setPointClusters</b>(<i>pointClusters</i>)
+
+This method sets the point clusters for the graph.
+
+* **`pointClusters`** (Array of `(number | undefined)`): An array where each index corresponds to a point, and the value is the cluster index. `undefined` indicates that a point does not belong to any cluster and will not be affected by cluster forces.
+* **Example:**
+  ```javascript
+  graph.setPointClusters([0, 1, 0, 2, undefined, 1]);
+  ```
+  This example maps points to clusters: point 0 and 2 to cluster 0, point 1 to cluster 1, point 3 to cluster 2, and point 4 is unclustered.
+* **Note:** Clusters without specified positions via `setClusterPositions` will be positioned at their centermass by default.
+
+### <a name="set_cluster_positions" href="#set_cluster_positions">#</a> graph.<b>setClusterPositions</b>(<i>clusterPositions</i>)
+
+This method sets the positions of the point clusters for the graph.
+
+* **`clusterPositions`** (Array of `(number | undefined)`): An array where every two elements represent the x and y coordinates for a cluster position. `undefined` means the cluster's position is not defined and will use centermass positioning instead.
+* **Example:**
+  ```javascript
+  graph.setClusterPositions([10, 20, 30, 40, undefined, undefined]);
+  ```
+  This example places the first cluster at (10, 20) and the second at (30, 40); the third cluster will be positioned at its centermass automatically.
+
+### <a name="set_point_cluster_strength" href="#set_point_cluster_strength">#</a> graph.<b>setPointClusterStrength</b>(<i>clusterStrength</i>)
+
+This method sets the force strength coefficients for clustering points in the graph.
+
+* **`clusterStrength`** (Float32Array): A Float32Array of force strength coefficients for each point in the format `[coeff1, coeff2, ..., coeffn]`, where `n` is the index of the point.
+* **Example:**
+  ```javascript
+  graph.setPointClusterStrength(new Float32Array([1, 0.4, 0.3]));
+  ```
+  This example sets the force coefficient for point 0 to 1, point 1 to 0.4, and point 2 to 0.3.
+
+
+### <a name="render" href="#render">#</a> graph.<b>render</b>([<i>simulationAlpha</i>])
+
+The `render` method renders the graph and, optionally, controls the initial energy of the simulation.
+
+* **`runSimulation`** (number, optional): The higher the value, the more initial energy the simulation will get. Zero value stops the simulation.
+
+### <a name="zoom_to_point_by_index" href="#zoom_to_point_by_index">#</a> graph.<b>zoomToPointByIndex</b>(<i>index</i>, [<i>duration</i>], [<i>scale</i>], [<i>canZoomOut</i>])
+
+This method centers the view on the specified point (by its <i>index</i>) and zooms in with a given animation <i>duration</i> and <i>scale</i> value.
+
+* **`index`** (Number): The index of the point to zoom into.
+* **`duration`** (Number, optional): The animation duration in milliseconds. Default is 700.
+* **`scale`** (Number, optional): The zoom scale. Default is 3.
+* **`canZoomOut`** (Boolean, optional): If set to `false`, prevents zooming out. Default is `true`.
+
+### <a name="set_zoom_level" href="#set_zoom_level">#</a> graph.<b>setZoomLevel</b>(<i>value</i>, [<i>duration</i>])
+
+This method sets the zoom level of the graph view.
+
+* **`value`** (Number): The desired zoom level. Higher values result in a closer zoom, while lower values zoom out.
+* **`duration`** (Number, optional): The duration of the zoom animation in milliseconds. If not provided, the default value is `0`, meaning the zoom level will change instantly without any animation.
+
+
+### <a name="get_zoom_level" href="#get_zoom_level">#</a> graph.<b>getZoomLevel</b>()
+
+This method retrieves the current zoom level of the graph view.
+
+
+### <a name="fit_view" href="#fit_view">#</a> graph.<b>fitView</b>([<i>duration</i>], [<i>padding</i>])
+
+This method centers and zooms the view to fit all points within the scene.
+
+* **`duration`** (Number, optional): The duration of the zoom animation in milliseconds. If not provided, the default value is `250` milliseconds. This allows the view to smoothly transition to fit all points. A value of `0` can be used for an instant fit without any animation.
+* **`padding`** (Number, optional): The padding around the viewport in percentage. This value should be between 0 and 1. Default is 0.1 (10% padding).
+
+The `fitView` method is particularly useful when you want to ensure that all points in the graph are visible within the currently displayed viewport. By fitting the view to include all points, users can get a complete overview of the entire graph.
+
+
+### <a name="fit_view_by_point_indices" href="#fit_view_by_point_indices">#</a> graph.<b>fitViewByPointIndices</b>(<i>indices</i>, [<i>duration</i>], [<i>padding</i>])
+
+The `fitViewByPointIndices` method centers and zooms the view to fit the points specified by their <i>indices</i> in the scene, with an optional animation <i>duration</i> and <i>padding</i>.
+
+* **`indices`** (Array): An array of point indices to fit in the view.
+* **`duration`** (Number, optional): The duration of the animation in milliseconds. Default is 250 ms.
+* **`padding`** (Number, optional): The padding around the viewport in percentage. This value should be between 0 and 1. Default is 0.1 (10% padding).
+
+### <a name="fit_view_by_point_positions" href="#fit_view_by_point_positions">#</a> graph.<b>fitViewByPointPositions</b>(<i>positions</i>, [<i>duration</i>], [<i>padding</i>])
+
+The `fitViewByPointPositions` method centers and zooms the view to fit the points specified by their <i>positions</i> in the scene, with an optional animation <i>duration</i> and <i>padding</i>.
+
+* **`positions`** (Array): An array of point positions to fit in the view.
+* **`duration`** (Number, optional): The duration of the animation in milliseconds. Default is 250 ms.
+* **`padding`** (Number, optional): The padding around the viewport in percentage. This value should be between 0 and 1. Default is 0.1 (10% padding).
+
+### <a name="get_points_in_range" href="#get_points_in_range">#</a> graph.<b>getPointsInRange</b>(<i>selection</i>)
+
+Get points as a Float32Array within a rectangular area defined by two corner points `[[left, top], [right, bottom]]`. The `left` and `right` values represent the horizontal position in pixels, relative to the left edge of the canvas, with `0` being the leftmost position and the width of the canvas being the rightmost position.
+
+The `top` and `bottom` values represent the vertical position in pixels, relative to the top edge of the canvas, with `0` being the topmost position and the height of the canvas being the bottommost position.
+
+### <a name="select_points_in_range" href="#select_points_in_range">#</a> graph.<b>selectPointsInRange</b>(<i>selection</i>)
+
+Select points within a rectangular area defined by two corner points `[[left, top], [right, bottom]]`. The `left` and `right` values represent the horizontal position in pixels, relative to the left edge of the canvas, with `0` being the leftmost position and the width of the canvas being the rightmost position.
+
+The `top` and `bottom` values represent the vertical position in pixels, relative to the top edge of the canvas, with `0` being the topmost position and the height of the canvas being the bottommost position.
+
+
+### <a name="select_point_by_index" href="#select_point_by_index">#</a> graph.<b>selectPointByIndex</b>(<i>index</i>, [<i>selectAdjacentPoints</i>])
+
+This method selects a point in the graph based on its index.
+
+* **`index`** (Number): The index of the point to be selected.
+* **`selectAdjacentPoints`** (Boolean, optional): If set to `true`, adjacent points to the specified index will also be selected. The default value is `false`.
+
+
+### <a name="select_points_by_indices" href="#select_points_by_indices">#</a> graph.<b>selectPointsByIndices</b>(<i>indices</i>)
+
+This method selects multiple points in the graph based on their indices.
+
+* **`indices`** (Array): An array of numbers representing the indices of the points to be selected.
+
+
+### <a name="unselect_points" href="#unselect_points">#</a> graph.<b>unselectPoints</b>()
+
+This method unselects all currently selected points in the graph.
+
+
+### <a name="get_selected_indices" href="#get_selected_indices">#</a> graph.<b>getSelectedIndices</b>()
+
+This method returns an array of indices corresponding to the currently selected points in the graph.
+
+
+### <a name="get_adjacent_indices" href="#get_adjacent_indices">#</a> graph.<b>getAdjacentIndices</b>(<i>index</i>)
+
+This method returns an array of indices that are adjacent to a specific point in the graph, identified by its <i>index</i>.
+
+* **`index`** (Number): The index of the point whose adjacent points are to be retrieved.
+
+
+### <a name="set_focused_point_by_index" href="#set_focused_point_by_index">#</a> graph.<b>setFocusedPointByIndex</b>(<i>index</i>)
+
+This method highlights a specific point in the graph by placing a visual indicator, such as a ring, around it. If `focusedPointIndex` is specified [in the config](https://github.com/cosmograph-org/cosmos/wiki/Cosmos-v2-configuration), this method will have no effect.
+
+* **`index`** (Number, optional): The index of the point to be focused. If not provided, the focus will be reset, and any existing highlight will be removed.
+
+
+### <a name="space_to_screen_position" href="#space_to_screen_position">#</a> graph.<b>spaceToScreenPosition</b>(<i>coordinates</i>)
+
+This method method is used to convert X and Y point coordinates from the space coordinate system (which is typically used for graph data) to the screen coordinate system (which is used for rendering the graph on the display).
+
+* **`coordinates`** (Array): An array of two numbers in the format `[x, y]`, representing the X and Y coordinates in the space coordinate system.
+
+
+### <a name="screen_to_space_position" href="#screen_to_space_position">#</a> graph.<b>screenToSpacePosition</b>(<i>coordinates</i>)
+
+This` method converts X and Y point coordinates from the screen coordinate system (which is used for rendering the graph on the display) to the space coordinate system (which is typically used for graph data).
+
+* **`coordinates`** (Array): An array of two numbers in the format `[x, y]`, representing the X and Y coordinates in the screen coordinate system.
+
+
+### <a name="space_to_screen_radius" href="#space_to_screen_radius">#</a> graph.<b>spaceToScreenRadius</b>(<i>radius</i>)
+
+This method is used to convert a <i>radius</i> value from the space coordinate system (which is typically used for graph data) to the screen coordinate system (which is used for rendering the graph on the display).
+
+* **`radius`** (Number): The radius value in the space coordinate system that needs to be converted to the screen coordinate system.
+
+
+### <a name="get_point_radius_by_index" href="#get_point_radius_by_index">#</a> graph.<b>getPointRadiusByIndex</b>(<i>index</i>)
+
+This method retrieves the radius of a point in the graph identified by its <i>index</i>.
+
+* **`index`** (Number): The index of the point for which the radius is to be retrieved.
+
+
+### <a name="track_point_positions_by_indices" href="#track_point_positions_by_indices">#</a> graph.<b>trackPointPositionsByIndices</b>(<i>indices</i>)
+
+This method allows you to monitor the coordinates of specific points over time. This is particularly useful for observing dynamic changes in the positions of points during the simulation. The positions of the tracked points are updated on each tick of the Cosmos simulation.
+
+* **`indices`** (Array): An array of numbers representing the indices of points to be tracked.
+
+To retrieve the current positions of the tracked points, use the [**getTrackedPointPositionsMap**](#get_tracked_point_positions_map) method, which returns a `Map` object containing the point coordinates.
+
+
+### <a name="get_tracked_point_positions_map" href="#get_tracked_point_positions_map">#</a> graph.<b>getTrackedPointPositionsMap</b>()
+
+This method retrieves the current positions of points that are being tracked. This method is particularly useful for monitoring the changing coordinates of specific points over time during the simulation. Using this method in conjunction with the [**trackPointPositionsByIndices**](#track_point_positions_by_indices) method allows for dynamic tracking and retrieval of point positions.
+
+**Returns:**
+
+* A `Map` object where the keys are the indices of the tracked points and the values are their corresponding X and Y coordinates in the form of a `[number, number]` array.
+
+
+### <a name="get_sampled_point_positions_map" href="#get_sampled_point_positions_map">#</a> graph.<b>getSampledPointPositionsMap</b>()
+
+This method provides a sampling of point positions from the currently visible points on the screen. It returns a `Map` containing a sample of point indices and their corresponding X and Y coordinates for the points that are currently visible on the screen.
+
+The number of sampled points is determined by the `pointSamplingDistance` [configuration property](../?path=/docs/configuration--docs). This property controls the density of the sampled points:
+* A higher value for `pointSamplingDistance` results in fewer sampled points.
+* A lower value results in more sampled points.
+
+The sample aims to distribute points evenly across the visible area.
+
+
+### <a name="start" href="#start">#</a> graph.<b>start</b>([<i>alpha</i>])
+
+Starts the simulation with an optional <i>alpha</i> parameter, which controls the initial energy of the simulation.
+
+* **`alpha`** (Number, optional): A number between `0` and `1` representing the initial energy of the simulation. The default value is `1` if not provided. A higher `alpha` value results in more initial energy for the simulation.
+
+
+### <a name="pause" href="#pause">#</a> graph.<b>pause</b>()
+
+Pauses the current simulation in the graph.
+
+
+### <a name="restart" href="#restart">#</a> graph.<b>restart</b>()
+
+Restarts the current simulation in the graph.
+
+
+### <a name="step" href="#step">#</a> graph.<b>step</b>()
+
+Renders a single frame of the simulation and pauses the simulation if it was active.
+
+
+### <a name="destroy" href="#destroy">#</a> graph.<b>destroy</b>()
+
+Destroys the current Cosmos instance.
+
+### <a name="create" href="#create">#</a> graph.<b>create</b>()
+
+Creates a new Cosmos instance.
+
+
+### <a name="flatten" href="#flatten">#</a> graph.<b>flatten</b>(<i>pointPositions</i>)
+
+This method converts an array of tuple positions into a single, flat array containing all coordinates sequentially.
+
+* **`pointPositions`** (Array of Arrays): An array of tuples, where each tuple contains two numbers representing the x and y coordinates of a point in the graph. For example, `[[x1, y1], [x2, y2], ..., [xn, yn]]`.
+
+### <a name="pair" href="#pair">#</a> graph.<b>pair</b>(<i>pointPositions</i>)
+
+This method converts a flat array of point positions into an array of tuple pairs, where each tuple represents the x and y coordinates of a point in the graph.
+
+* **`pointPositions`** (Array): A flat array of numbers representing the x and y coordinates of points sequentially. For example, `[x1, y1, x2, y2, ..., xn, yn]`.
+
+
+### <a name="get_point_positions" href="#get_point_positions">#</a> graph.<b>getPointPositions</b>()
+
+This method retrieves the current X and Y coordinates of all points in the graph as an array of numbers. The returned array is in the same order as the point positions were added to the graph.
+
+### <a name="get_cluster_positions" href="#get_cluster_positions">#</a> graph.<b>getClusterPositions</b>()
+
+This method returns an array of cluster positions, where each pair of elements represents the x and y coordinates of a cluster.
+
+### <a name="progress" href="#progress">#</a> graph.<b>progress</b>
+
+Returns the current progress of the graph simulation as a float value between 0 (start) and 1 (end). This method can be called at any time during the simulation to get the current progress percentage.
+
+### <a name="is_simulation_running" href="#is_simulation_running">#</a> graph.<b>isSimulationRunning</b>
+
+A boolean property of the graph object that indicates whether the graph simulation is currently running (`true`) or not (`false`). This property can be accessed at any time to check the simulation's status.
+
+### <a name="max_point_size" href="#max_point_size">#</a> graph.<b>maxPointSize</b>
+
+A number property of the graph object that represents the maximum point size the user's hardware can render using the `gl.POINTS` primitive in WebGL. This value varies between different GPUs and is a limitation of the WebGL rendering context.

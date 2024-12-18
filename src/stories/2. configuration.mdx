@@ -1,0 +1,54 @@
+
+import { Meta } from "@storybook/blocks";
+
+<Meta title="Configuration" />
+
+# Cosmos configuration properties
+
+| Property | Description | Default |
+|---|---|---|
+| disableSimulation | Do not run the simulation, just render the graph. Cosmos uses the `x` and `y` values of the points’ data to determine their position in the graph. If `x` and `y` values are not specified, the position of the points will be assigned randomly. This property will be applied only on component initialization and it can't be changed using the `setConfig` method | `false` |
+| backgroundColor | Canvas background color | `#222222` |
+| spaceSize | Simulation space size (max 8192) | `8192` |
+| pointColor | The default color to use for points when no point colors are provided, or if the color value in the array is `undefined` or `null`. This can be either a hex color string (e.g., '#b3b3b3') or an array of RGBA values in the format `[red, green, blue, alpha]` where each value is a number between 0 and 255 | `#b3b3b3` |
+| pointGreyoutOpacity | Greyed out point opacity value when the selection is active | `0.1` |
+| pointSize | The default size value to use for points when no point sizes are provided or if the size value in the array is `undefined` or `null` | `4` |
+| pointSizeScale | Scale factor for the point size | `1` |
+| hoveredPointCursor | Cursor style to use when hovering over a point | `auto` |
+| renderHoveredPointRing | Turns ring rendering around a point on hover on / off | `false` |
+| hoveredPointRingColor | Hovered point ring color hex value or an array of RGBA values | `white` |
+| focusedPointRingColor | Focused point ring color hex value or an array of RGBA values | `white` |
+| focusedPointIndex | Set focus on a point by index. A ring will be highlighted around the focused point. Has priority over the `setFocusedPointByIndex` method. When set to `undefined`, no point is focused. | `undefined` |
+| renderLinks | Turns link rendering on / off | `true` |
+| linkColor | The default color to use for links when no link colors are provided, or if the color value in the array is `undefined` or `null`. This can be either a hex color string (e.g., '#666666') or an array of RGBA values in the format `[red, green, blue, alpha]` where each value is a number between 0 and 255 | `#666666` |
+| linkGreyoutOpacity | Greyed out link opacity value when the selection is active | `0.1` |
+| linkWidth | The default width value to use for links when no link widths are provided or if the width value in the array is `undefined` or `null` | `1` |
+| linkWidthScale | Scale factor for the link width | `1` |
+| curvedLinks | If set to true, links are rendered as curved lines. Otherwise as straight lines | `false` |
+| curvedLinkSegments | Number of segments in a curved line | `19` |
+| curvedLinkWeight | Weight affects the shape of the curve | `0.8` |
+| curvedLinkControlPointDistance | Defines the position of the control point of the curve on the normal from the centre of the line. If set to 1 then the control point is at a distance equal to the length of the line | `0.5` |
+| linkArrows | The default link arrow value that controls whether or not to display link arrows | `false` |
+| linkArrowsSizeScale | Scale factor for the link arrows size | `1` |
+| linkVisibilityDistanceRange | The range defines the minimum and maximum link visibility distance in pixels.<br /><br />The link will be fully opaque when its length is less than the first number in the array, and will have `linkVisibilityMinTransparency` transparency when its length is greater than the second number in the array.<br /><br />This distance is defined in screen space coordinates and will change as you zoom in and out (e.g. links become longer when you zoom in, and shorter when you zoom out). | `[50, 150]` |
+| linkVisibilityMinTransparency | The transparency value that the link will have when its length reaches the maximum link distance value from `linkVisibilityDistanceRange`. | `0.25` |
+| useQuadtree | Use the classic [quadtree algorithm](https://en.wikipedia.org/wiki/Barnes%E2%80%93Hut_simulation) for the Many-Body force. This property will be applied only on component initialization and it can't be changed using the `setConfig` method.<br /><br /> ⚠ The algorithm might not work on some GPUs (e.g. Nvidia) and on Windows (unless you disable ANGLE in the browser settings). | `false` |
+
+## Simulation configuration
+
+Cosmos layout algorithm was inspired by the [d3-force](https://github.com/d3/d3-force#forces) simulation forces: Link, Many-Body, Gravitation, and Centering. It provides several simulation settings to adjust the layout. Each of them can be changed in real time, while the simulation is in progress.
+
+| Property | Description  | Recommended range | Default |
+|---|---|---|---|
+| simulationDecay | Force simulation decay coefficient. <br /><br />Use smaller values if you want the simulation to "cool down" slower.| 100 – 10 000| `5000` |
+| simulationGravity | Gravity force coefficient | 0.0 – 1.0 | `0.25` |
+| simulationCenter | Centering force coefficient | 0.0 – 1.0 | `0.0` |
+| simulationRepulsion | Repulsion force coefficient | 0.0 – 2.0 | `1.0` |
+| simulationRepulsionTheta | Decreases / increases the detalization of the Many-Body force calculations. <br /><br /> When `useQuadtree` is set to `true`, this property corresponds to the Barnes–Hut approximation criterion. | 0.3 – 2.0 | `1.15` |
+| simulationRepulsionQuadtreeLevels | Barnes–Hut approximation depth. <br /><br />Can only be used when `useQuadtree` is set `true`.  | 5 – 12 | `12` | 
+| simulationLinkSpring | Link spring force coefficient | 0.0 – 2.0 | `1.0` |
+| simulationLinkDistance | Minimum link distance | 1 – 20 | `10` |
+| simulationLinkDistRandomVariationRange | Link distance randomness multiplier range | [0.8 – 1.2,<br/> 1.2 – 2.0] | `[1.0, 1.2]` |
+| simulationRepulsionFromMouse | Repulsion from the mouse pointer force coefficient. The repulsion force is activated by pressing the right mouse button. | 0.0 – 5.0 | `2.0`
+| simulationFriction | Friction coefficient| 0.8 – 1.0 | `0.85` |
+| simulationCluster | Cluster coefficient| 0.0 – 1.0 | `0.1` |

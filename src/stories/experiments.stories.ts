@@ -11,7 +11,7 @@ import fullMeshRaw from './experiments/full-mesh?raw'
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta: Meta<CosmosStoryProps> = {
-  title: 'Experiments',
+  title: 'Examples/Experiments',
 }
 
 type Story = StoryObj<CosmosStoryProps>;

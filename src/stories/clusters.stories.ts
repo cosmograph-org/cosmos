@@ -11,7 +11,7 @@ import wormStory from './clusters/worm?raw'
 import radialStory from './clusters/radial?raw'
 
 const meta: Meta<CosmosStoryProps> = {
-  title: 'Clusters',
+  title: 'Examples/Clusters',
   parameters: {
     controls: {
       disable: true,
