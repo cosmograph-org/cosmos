@@ -86,6 +86,7 @@ export class Graph {
     this.addAttribution()
     const w = canvas.clientWidth
     const h = canvas.clientHeight
+    this.store.updateScreenSize(w, h)
 
     canvas.width = w * this.config.pixelRatio
     canvas.height = h * this.config.pixelRatio
@@ -142,7 +143,6 @@ export class Graph {
 
     this.store.maxPointSize = (this.reglInstance.limits.pointSizeDims[1] ?? MAX_POINT_SIZE) / this.config.pixelRatio
     this.store.adjustSpaceSize(this.config.spaceSize, this.reglInstance.limits.maxTextureSize)
-    this.store.updateScreenSize(w, h)
 
     this.points = new Points(this.reglInstance, this.config, this.store, this.graph)
     this.lines = new Lines(this.reglInstance, this.config, this.store, this.graph, this.points)

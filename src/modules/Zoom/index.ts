@@ -21,6 +21,7 @@ export class Zoom {
       const { eventTransform: { x, y, k }, store: { transform, screenSize } } = this
       const w = screenSize[0]
       const h = screenSize[1]
+      if (!w || !h) return
       mat3.projection(transform, w, h)
       mat3.translate(transform, transform, [x, y])
       mat3.scale(transform, transform, [k, k])
