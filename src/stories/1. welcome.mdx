@@ -1,0 +1,63 @@
+import { Meta } from "@storybook/blocks";
+
+<Meta title="Welcome to Cosmos" />
+
+<h1>🪐 ![](https://github.com/user-attachments/assets/f1d7540e-7791-4c5c-9804-65b9d45acd7e)</h1>
+
+<p style={{ fontSize: '1.2rem' }}>This page contains examples of how to use Cosmos — a low-level library for visualizing network graphs and machine learning embeddings.</p>
+
+<video style={{ width: '100%' }} src="https://user-images.githubusercontent.com/755708/173392407-9b05cbb6-d39e-4c2c-ab41-50900cfda823.mp4" loop autoPlay muted playsInline>
+</video>
+
+---
+
+### Quick Start
+
+Install the package:
+
+```bash
+npm install @cosmograph/cosmos
+```
+
+
+Get the data, [configure](../?path=/docs/configuration--docs) the graph and run the simulation:
+```javascript
+import { Graph } from '@cosmograph/cosmos'
+
+const div = document.querySelector('div')
+const config = {
+  simulationFriction: 0.1, // keeps the graph inert
+  simulationGravity: 0, // disables gravity
+  simulationRepulsion: 0.5, // increases repulsion between points
+  curvedLinks: true, // curved links
+  fitViewPadding: 0.3, // centers the graph width padding of ~30% of screen
+  onClick: pointIndex => { console.log('Clicked point index: ', pointIndex) },
+  /* ... */
+}
+
+const graph = new Graph(div, config)
+
+// Points: [x1, y1, x2, y2, x3, y3]
+const pointPositions = new Float32Array([
+  0.0, 0.0,    // Point 1 at (0,0)
+  1.0, 0.0,    // Point 2 at (1,0)
+  0.5, 1.0,    // Point 3 at (0.5,1)
+]);
+
+graph.setPointPositions(pointPositions)
+
+// Links: [sourceIndex1, targetIndex1, sourceIndex2, targetIndex2]
+const links = new Float32Array([
+  0, 1,    // Link from point 0 to point 1
+  1, 2,    // Link from point 1 to point 2
+  2, 0,    // Link from point 2 to point 0
+]);
+
+graph.setLinks(links)
+
+graph.render()
+```
+
+### Examples
+- [Basic Set-Up](https://stackblitz.com/edit/how-to-use-cosmos?file=src%2Fmain.ts)
+- [Adding Node Labels](https://stackblitz.com/edit/cosmos-node-labels?file=src%2Fmain.ts) (via [`@interacta/css-labels`](https://www.npmjs.com/package/@interacta/css-labels))

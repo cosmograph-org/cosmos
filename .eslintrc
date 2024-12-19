@@ -22,7 +22,17 @@
     "import/no-default-export": "error",
     "import/prefer-default-export": 0,
     "import/first": ["error", "absolute-first"],
-    "import/order": ["error", {"groups": ["builtin", "external", "parent", "sibling", "index", "object"]}],
+    "import/order": ["error", 
+      {
+        "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "object"],
+        "pathGroups": [
+          {
+            "pattern": "@/**",
+            "group": "internal"
+          }
+        ],
+      }
+    ],
     "comma-dangle": ["error", {
       "arrays": "always-multiline",
       "objects": "always-multiline",

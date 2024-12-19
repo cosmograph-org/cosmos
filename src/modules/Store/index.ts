@@ -1,21 +1,20 @@
 import { scaleLinear } from 'd3-scale'
 import { mat3 } from 'gl-matrix'
 import { Random } from 'random'
-import { getRgbaColor } from '@/graph/helper'
-import { hoveredNodeRingOpacity, focusedNodeRingOpacity, defaultConfigValues } from '@/graph/variables'
+import { getRgbaColor, rgbToBrightness } from '@/graph/helper'
+import { hoveredPointRingOpacity, focusedPointRingOpacity, defaultConfigValues } from '@/graph/variables'
 
 export const ALPHA_MIN = 0.001
 export const MAX_POINT_SIZE = 64
 
-type Hovered<Node> = { node: Node; index: number; position: [ number, number ] }
-type Focused<Node> = { node: Node; index: number }
+export type Hovered = { index: number; position: [ number, number ] }
+type Focused = { index: number }
 
-export class Store <N> {
+export class Store {
   public pointsTextureSize = 0
   public linksTextureSize = 0
   public alpha = 1
   public transform = mat3.create()
-  public backgroundColor: [number, number, number, number] = [0, 0, 0, 0]
   public screenSize: [number, number] = [0, 0]
   public mousePosition = [0, 0]
   public screenMousePosition = [0, 0]
@@ -24,16 +23,31 @@ export class Store <N> {
   public simulationProgress = 0
   public selectedIndices: Float32Array | null = null
   public maxPointSize = MAX_POINT_SIZE
-  public hoveredNode: Hovered<N> | undefined = undefined
-  public focusedNode: Focused<N> | undefined = undefined
+  public hoveredPoint: Hovered | undefined = undefined
+  public focusedPoint: Focused | undefined = undefined
+  public draggingPointIndex: number | undefined = undefined
   public adjustedSpaceSize = defaultConfigValues.spaceSize
+  public isSpaceKeyPressed = false
+  public div: HTMLDivElement | undefined
 
-  public hoveredNodeRingColor = [1, 1, 1, hoveredNodeRingOpacity]
-  public focusedNodeRingColor = [1, 1, 1, focusedNodeRingOpacity]
+  public hoveredPointRingColor = [1, 1, 1, hoveredPointRingOpacity]
+  public focusedPointRingColor = [1, 1, 1, focusedPointRingOpacity]
   private alphaTarget = 0
-  private scaleNodeX = scaleLinear()
-  private scaleNodeY = scaleLinear()
+  private scalePointX = scaleLinear()
+  private scalePointY = scaleLinear()
   private random = new Random()
+  private _backgroundColor: [number, number, number, number] = [0, 0, 0, 0]
+
+  public get backgroundColor (): [number, number, number, number] {
+    return this._backgroundColor
+  }
+
+  public set backgroundColor (color: [number, number, number, number]) {
+    this._backgroundColor = color
+    const brightness = rgbToBrightness(color[0], color[1], color[2])
+    document.documentElement.style.setProperty('--cosmos-attribution-color', brightness > 0.65 ? 'black' : 'white')
+    if (this.div) this.div.style.backgroundColor = `rgba(${color[0] * 255}, ${color[1] * 255}, ${color[2] * 255}, ${color[3]})`
+  }
 
   public addRandomSeed (seed: number | string): void {
     this.random = this.random.clone(seed)
@@ -57,40 +71,40 @@ export class Store <N> {
   public updateScreenSize (width: number, height: number): void {
     const { adjustedSpaceSize } = this
     this.screenSize = [width, height]
-    this.scaleNodeX
+    this.scalePointX
       .domain([0, adjustedSpaceSize])
       .range([(width - adjustedSpaceSize) / 2, (width + adjustedSpaceSize) / 2])
-    this.scaleNodeY
+    this.scalePointY
       .domain([adjustedSpaceSize, 0])
       .range([(height - adjustedSpaceSize) / 2, (height + adjustedSpaceSize) / 2])
   }
 
   public scaleX (x: number): number {
-    return this.scaleNodeX(x)
+    return this.scalePointX(x)
   }
 
   public scaleY (y: number): number {
-    return this.scaleNodeY(y)
+    return this.scalePointY(y)
   }
 
-  public setHoveredNodeRingColor (color: string): void {
+  public setHoveredPointRingColor (color: string): void {
     const convertedRgba = getRgbaColor(color)
-    this.hoveredNodeRingColor[0] = convertedRgba[0]
-    this.hoveredNodeRingColor[1] = convertedRgba[1]
-    this.hoveredNodeRingColor[2] = convertedRgba[2]
+    this.hoveredPointRingColor[0] = convertedRgba[0]
+    this.hoveredPointRingColor[1] = convertedRgba[1]
+    this.hoveredPointRingColor[2] = convertedRgba[2]
   }
 
-  public setFocusedNodeRingColor (color: string): void {
+  public setFocusedPointRingColor (color: string): void {
     const convertedRgba = getRgbaColor(color)
-    this.focusedNodeRingColor[0] = convertedRgba[0]
-    this.focusedNodeRingColor[1] = convertedRgba[1]
-    this.focusedNodeRingColor[2] = convertedRgba[2]
+    this.focusedPointRingColor[0] = convertedRgba[0]
+    this.focusedPointRingColor[1] = convertedRgba[1]
+    this.focusedPointRingColor[2] = convertedRgba[2]
   }
 
-  public setFocusedNode (node?: N, index?: number): void {
-    if (node && index !== undefined) {
-      this.focusedNode = { node, index }
-    } else this.focusedNode = undefined
+  public setFocusedPoint (index?: number): void {
+    if (index !== undefined) {
+      this.focusedPoint = { index }
+    } else this.focusedPoint = undefined
   }
 
   public addAlpha (decay: number): number {

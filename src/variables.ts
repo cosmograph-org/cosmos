@@ -1,6 +1,6 @@
-export const defaultNodeColor = '#b3b3b3'
-export const defaultGreyoutNodeOpacity = 0.1
-export const defaultNodeSize = 4
+export const defaultPointColor = '#b3b3b3'
+export const defaultGreyoutPointOpacity = 0.1
+export const defaultPointSize = 4
 export const defaultLinkColor = '#666666'
 export const defaultGreyoutLinkOpacity = 0.1
 export const defaultLinkWidth = 1
@@ -8,8 +8,8 @@ export const defaultBackgroundColor = '#222222'
 
 export const defaultConfigValues = {
   disableSimulation: false,
-  spaceSize: 4096,
-  nodeSizeScale: 1,
+  spaceSize: 8192,
+  pointSizeScale: 1,
   linkWidthScale: 1,
   arrowSizeScale: 1,
   renderLinks: true,
@@ -17,34 +17,42 @@ export const defaultConfigValues = {
   curvedLinkSegments: 19,
   curvedLinkWeight: 0.8,
   curvedLinkControlPointDistance: 0.5,
-  arrowLinks: true,
+  arrowLinks: false,
   linkVisibilityDistanceRange: [50, 150],
   linkVisibilityMinTransparency: 0.25,
-  hoveredNodeRingColor: 'white',
-  focusedNodeRingColor: 'white',
+  hoveredPointCursor: 'auto',
+  renderHoveredPointRing: false,
+  hoveredPointRingColor: 'white',
+  focusedPointRingColor: 'white',
+  focusedPointIndex: undefined,
   useQuadtree: false,
   simulation: {
-    decay: 1000,
-    gravity: 0,
+    decay: 5000,
+    gravity: 0.25,
     center: 0,
-    repulsion: 0.1,
-    repulsionTheta: 1.7,
+    repulsion: 1.0,
+    repulsionTheta: 1.15,
     repulsionQuadtreeLevels: 12,
     linkSpring: 1,
-    linkDistance: 2,
+    linkDistance: 10,
     linkDistRandomVariationRange: [1, 1.2],
     repulsionFromMouse: 2,
     friction: 0.85,
+    cluster: 0.1,
   },
   showFPSMonitor: false,
   pixelRatio: 2,
-  scaleNodesOnZoom: true,
+  scalePointsOnZoom: true,
   disableZoom: false,
+  enableDrag: false,
   fitViewOnInit: true,
   fitViewDelay: 250,
-  nodeSamplingDistance: 150,
+  fitViewPadding: 0.1,
+  fitViewDuration: 250,
+  pointSamplingDistance: 150,
+  disableAttribution: false,
 }
 
-export const hoveredNodeRingOpacity = 0.7
-export const focusedNodeRingOpacity = 0.95
+export const hoveredPointRingOpacity = 0.7
+export const focusedPointRingOpacity = 0.95
 export const defaultScaleToZoom = 3

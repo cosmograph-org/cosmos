@@ -4,8 +4,7 @@ import commonjs from '@rollup/plugin-commonjs'
 import resolve from '@rollup/plugin-node-resolve'
 import terser from '@rollup/plugin-terser'
 import glslify from 'rollup-plugin-glslify'
-import typescript from 'rollup-plugin-typescript2'
-import ttypescript from 'ttypescript'
+import typescript from '@rollup/plugin-typescript'
 import pkg from './package.json'
 
 const libraryName = 'index'
@@ -37,13 +36,12 @@ const config = {
       ],
       exclude: 'node_modules/**',
     }),
-    typescript({
-      typescript: ttypescript,
-    }),
+    typescript(),
     alias({
       resolve: ['', '/index.ts', '.ts'],
       entries: [
         { find: '@/graph', replacement: path.resolve(__dirname, 'src/') },
+        { find: '@cosmograph/cosmos', replacement: path.resolve(__dirname, 'src/') },
       ],
     }),
   ],

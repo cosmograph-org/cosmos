@@ -8,7 +8,7 @@ export function createQuadBuffer (reglInstance: regl.Regl): { buffer: regl.Buffe
   }
 }
 
-export function createIndexesBuffer (reglInstance: regl.Regl, textureSize: number): { buffer: regl.Buffer; size: number } {
+export function createIndexesForBuffer (textureSize: number): Float32Array {
   const indexes = new Float32Array(textureSize * textureSize * 2)
   for (let y = 0; y < textureSize; y++) {
     for (let x = 0; x < textureSize; x++) {
@@ -17,11 +17,7 @@ export function createIndexesBuffer (reglInstance: regl.Regl, textureSize: numbe
       indexes[i + 1] = y
     }
   }
-  const indexBuffer = reglInstance.buffer(indexes)
-  return {
-    buffer: indexBuffer,
-    size: 2,
-  }
+  return indexes
 }
 
 export function destroyFramebuffer (fbo?: regl.Framebuffer2D): void {

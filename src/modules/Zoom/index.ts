@@ -3,25 +3,25 @@ import { extent } from 'd3-array'
 import { mat3 } from 'gl-matrix'
 import { Store } from '@/graph/modules/Store'
 import { GraphConfigInterface } from '@/graph/config'
-import { CosmosInputNode, CosmosInputLink } from '@/graph/types'
 import { clamp } from '@/graph/helper'
 
-export class Zoom <N extends CosmosInputNode, L extends CosmosInputLink> {
-  public readonly store: Store<N>
-  public readonly config: GraphConfigInterface<N, L>
+export class Zoom {
+  public readonly store: Store
+  public readonly config: GraphConfigInterface
   public eventTransform = zoomIdentity
   public behavior = zoom<HTMLCanvasElement, undefined>()
     .scaleExtent([0.001, Infinity])
     .on('start', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => {
       this.isRunning = true
       const userDriven = !!e.sourceEvent
-      this.config?.events?.onZoomStart?.(e, userDriven)
+      this.config?.onZoomStart?.(e, userDriven)
     })
     .on('zoom', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => {
       this.eventTransform = e.transform
       const { eventTransform: { x, y, k }, store: { transform, screenSize } } = this
       const w = screenSize[0]
       const h = screenSize[1]
+      if (!w || !h) return
       mat3.projection(transform, w, h)
       mat3.translate(transform, transform, [x, y])
       mat3.scale(transform, transform, [k, k])
@@ -30,26 +30,26 @@ export class Zoom <N extends CosmosInputNode, L extends CosmosInputLink> {
       mat3.scale(transform, transform, [1, -1])
 
       const userDriven = !!e.sourceEvent
-      this.config?.events?.onZoom?.(e, userDriven)
+      this.config?.onZoom?.(e, userDriven)
     })
     .on('end', (e: D3ZoomEvent<HTMLCanvasElement, undefined>) => {
       this.isRunning = false
 
       const userDriven = !!e.sourceEvent
-      this.config?.events?.onZoomEnd?.(e, userDriven)
+      this.config?.onZoomEnd?.(e, userDriven)
     })
 
   public isRunning = false
 
-  public constructor (store: Store<N>, config: GraphConfigInterface<N, L>) {
+  public constructor (store: Store, config: GraphConfigInterface) {
     this.store = store
     this.config = config
   }
 
   /**
-   * Get the zoom transform that will fit the given node positions into the viewport
+   * Get the zoom transform that will fit the given point positions into the viewport
    *
-   * @param positions An array of node positions in the form `[x, y]`
+   * @param positions An array of point positions in the form `[x, y]`
    * @param scale An optional scale factor to apply to the transform
    * @param padding Padding around the viewport in percentage
    */
@@ -64,6 +64,15 @@ export class Zoom <N extends CosmosInputNode, L extends CosmosInputLink> {
     xExtent[1] = this.store.scaleX(xExtent[1])
     yExtent[0] = this.store.scaleY(yExtent[0])
     yExtent[1] = this.store.scaleY(yExtent[1])
+    // Adjust extent with one screen pixel if one point coordinate is set
+    if (xExtent[0] === xExtent[1]) {
+      xExtent[0] -= 0.5
+      xExtent[1] += 0.5
+    }
+    if (yExtent[0] === yExtent[1]) {
+      yExtent[0] += 0.5
+      yExtent[1] -= 0.5
+    }
 
     const xScale = (width * (1 - padding * 2)) / (xExtent[1] - xExtent[0])
     const yScale = (height * (1 - padding * 2)) / (yExtent[0] - yExtent[1])
@@ -127,9 +136,9 @@ export class Zoom <N extends CosmosInputNode, L extends CosmosInputLink> {
   }
 
   public convertSpaceToScreenRadius (spaceRadius: number): number {
-    const { config: { scaleNodesOnZoom }, store: { maxPointSize }, eventTransform: { k } } = this
+    const { config: { scalePointsOnZoom }, store: { maxPointSize }, eventTransform: { k } } = this
     let size = spaceRadius * 2
-    if (scaleNodesOnZoom) {
+    if (scalePointsOnZoom) {
       size *= k
     } else {
       size *= Math.min(5.0, Math.max(1.0, k * 0.01))
