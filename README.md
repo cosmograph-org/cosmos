@@ -28,23 +28,40 @@ npm install @cosmograph/cosmos
 Configure the graph, set data, and run the simulation:
 
 ```javascript
-import { Graph } from '@cosmograph/cosmos';
-import { pointPositions, links } from './data';
+import { Graph } from '@cosmograph/cosmos'
 
-const div = document.querySelector('div');
+const div = document.querySelector('div')
 const config = {
-  simulationRepulsion: 0.5,
-  renderLinks: true,
-  onClick: (pointIndex) => {
-    console.log('Clicked point index: ', pointIndex);
-  },
-};
+  simulationFriction: 0.1, // keeps the graph inert
+  simulationGravity: 0, // disables gravity
+  simulationRepulsion: 0.5, // increases repulsion between points
+  curvedLinks: true, // curved links
+  fitViewPadding: 0.3, // centers the graph width padding of ~30% of screen
+  onClick: pointIndex => { console.log('Clicked point index: ', pointIndex) },
+  /* ... */
+}
 
-const graph = new Graph(div, config);
+const graph = new Graph(div, config)
 
-graph.setPointPositions(pointPositions);
-graph.setLinks(links);
-graph.render();
+// Points: [x1, y1, x2, y2, x3, y3]
+const pointPositions = new Float32Array([
+  0.0, 0.0,    // Point 1 at (0,0)
+  1.0, 0.0,    // Point 2 at (1,0)
+  0.5, 1.0,    // Point 3 at (0.5,1)
+]);
+
+graph.setPointPositions(pointPositions)
+
+// Links: [sourceIndex1, targetIndex1, sourceIndex2, targetIndex2]
+const links = new Float32Array([
+  0, 1,    // Link from point 0 to point 1
+  1, 2,    // Link from point 1 to point 2
+  2, 0,    // Link from point 2 to point 0
+]);
+
+graph.setLinks(links)
+
+graph.render()
 ```
 
 - **`pointPositions`**: A Float32Array of `[x1, y1, x2, y2, ..., xN, yN]`.
