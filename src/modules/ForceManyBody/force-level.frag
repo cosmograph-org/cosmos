@@ -29,13 +29,12 @@ vec2 calculateAdditionalVelocity (vec2 ij, vec2 pp) {
     float l = dot(distVector, distVector);
     float dist = sqrt(l);
     if (l > 0.0) {
-      float angle = atan(distVector.y, distVector.x);
       float c = alpha * repulsion * centermass.b;
 
       float distanceMin2 = 1.0;
       if (l < distanceMin2) l = sqrt(distanceMin2 * l);
       float addV = c / sqrt(l);
-      add = addV * vec2(cos(angle), sin(angle));
+      add = addV * normalize(distVector);
     }
   }
   return add;

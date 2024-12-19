@@ -116,7 +116,7 @@ export class Lines extends CoreModule {
   public updatePointsBuffer (): void {
     const { reglInstance, data, store } = this
     if (data.linksNumber === undefined || data.links === undefined) return
-    const instancePoints: [number, number][] = [] // new Float32Array(data.linksNumber * 2)
+    const instancePoints = new Float32Array(data.linksNumber * 4)
     for (let i = 0; i < data.linksNumber; i++) {
       const fromIndex = data.links[i * 2] as number
       const toIndex = data.links[i * 2 + 1] as number
@@ -124,8 +124,11 @@ export class Lines extends CoreModule {
       const fromY = Math.floor(fromIndex / store.pointsTextureSize)
       const toX = toIndex % store.pointsTextureSize
       const toY = Math.floor(toIndex / store.pointsTextureSize)
-      instancePoints[i * 2] = [fromX, fromY]
-      instancePoints[i * 2 + 1] = [toX, toY]
+      const offset = i * 4
+      instancePoints[offset] = fromX
+      instancePoints[offset + 1] = fromY
+      instancePoints[offset + 2] = toX
+      instancePoints[offset + 3] = toY
     }
 
     if (!this.pointsBuffer) this.pointsBuffer = reglInstance.buffer(0)
