@@ -2,7 +2,7 @@ import regl from 'regl'
 // import { scaleLinear } from 'd3-scale'
 // import { extent } from 'd3-array'
 import { CoreModule } from '@/graph/modules/core-module'
-// import { defaultConfigValues } from '@/graph/variables'
+import { defaultConfigValues } from '@/graph/variables'
 import drawPointsFrag from '@/graph/modules/Points/draw-points.frag'
 import drawPointsVert from '@/graph/modules/Points/draw-points.vert'
 import findPointsOnAreaSelectionFrag from '@/graph/modules/Points/find-points-on-area-selection.frag'
@@ -465,7 +465,8 @@ export class Points extends CoreModule {
 
   public updateSampledPointsGrid (): void {
     const { store: { screenSize }, config: { pointSamplingDistance }, reglInstance } = this
-    const dist = pointSamplingDistance ?? Math.min(...screenSize) / 2
+    let dist = pointSamplingDistance ?? Math.min(...screenSize) / 2
+    if (dist === 0) dist = defaultConfigValues.pointSamplingDistance
     const w = Math.ceil(screenSize[0] / dist)
     const h = Math.ceil(screenSize[1] / dist)
     destroyFramebuffer(this.sampledPointsFbo)

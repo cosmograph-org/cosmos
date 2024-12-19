@@ -28,11 +28,10 @@ void main() {
     }
     vec4 clusterCustomCoeff = texture2D(clusterForceCoefficient, textureCoords);
     vec2 distVector = clusterPositions.xy - pointPosition.xy;
-    float dist = sqrt(dot(distVector, distVector));
+    float dist = length(distVector);
     if (dist > 0.0) {
-      float angle = atan(distVector.y, distVector.x);
       float addV = alpha * dist * clusterCoefficient * clusterCustomCoeff.r;
-      velocity.rg += addV * vec2(cos(angle), sin(angle));
+      velocity.rg += addV * normalize(distVector);
     }
   }
 

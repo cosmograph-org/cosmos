@@ -30,7 +30,7 @@ export class Clusters extends CoreModule {
 
     // Find the highest cluster index in the array and add 1 (since cluster indices start at 0).
     const clusterNumber = (data.pointClusters ?? []).reduce<number>((max, clusterIndex) => {
-      if (clusterIndex === undefined) return max
+      if (clusterIndex === undefined || clusterIndex < 0) return max
       return Math.max(max, clusterIndex)
     }, 0) + 1
 

@@ -45,8 +45,12 @@ export class ForceLink extends CoreModule {
           this.indices[linkIndex * 4 + 1] = Math.floor(connectedPointIndex / pointsTextureSize)
           const degree = data.degree?.[connectedPointIndex] ?? 0
           const connectedDegree = data.degree?.[pointIndex] ?? 0
-          const bias = degree / (degree + connectedDegree)
-          let strength = data.linkStrength?.[initialLinkIndex] ?? (1 / Math.min(degree, connectedDegree))
+          const degreeSum = degree + connectedDegree
+          // Prevent division by zero
+          const bias = degreeSum !== 0 ? degree / degreeSum : 0.5
+          const minDegree = Math.min(degree, connectedDegree)
+          // Prevent division by zero
+          let strength = data.linkStrength?.[initialLinkIndex] ?? (1 / Math.max(minDegree, 1))
           strength = Math.sqrt(strength)
           linkBiasAndStrengthState[linkIndex * 4 + 0] = bias
           linkBiasAndStrengthState[linkIndex * 4 + 1] = strength
