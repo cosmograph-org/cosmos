@@ -81,7 +81,7 @@ Cosmos v2.0 introduces significant improvements in performance and data handling
 - New Clustering Feature (`setPointClusters`, `setClusterPositions` and `setPointClusterStrength`).
 - Ability to drag points.
 
-Check the [Migration Guide](https://github.com/cosmograph-org/cosmos/cosmos-2-0-migration-notes.md) for details.
+Check the [Migration Guide](./cosmos-2-0-migration-notes.md) for details.
 
 ---
 
@@ -106,10 +106,10 @@ Check the [Migration Guide](https://github.com/cosmograph-org/cosmos/cosmos-2-0-
 ---
 
 ### Documentation
-
-- 🛠 [Configuration](https://github.com/cosmograph-org/cosmos/wiki/Cosmos-v2-(Beta-version)-configuration)
-- ⚙️ [API Reference](https://github.com/cosmograph-org/cosmos/wiki/Cosmos-v2-(Beta-version)-API-Reference)
-- 🚀 [Migration Guide](https://github.com/cosmograph-org/cosmos/tree/next/cosmos-2-0-migration-notes.md)
+- 🧑‍💻 [Quick Start](https://cosmograph-org.github.io/cosmos/?path=/docs/welcome-to-cosmos--docs)
+- 🛠 [Configuration](https://cosmograph-org.github.io/cosmos/?path=/docs/configuration--docs)
+- ⚙️ [API Reference](https://cosmograph-org.github.io/cosmos/?path=/docs/api-reference--docs)
+- 🚀 [Migration Guide](./cosmos-2-0-migration-notes.md)
 
 ---
 
