@@ -17,10 +17,8 @@ export type CosmosStoryProps = GraphConfigInterface & {
 
 export const createCosmos = (props: CosmosStoryProps): { div: HTMLDivElement; graph: Graph} => {
   const div = document.createElement('div')
-  // const canvas = document.createElement('canvas')
   div.style.height = '100vh'
   div.style.width = '100%'
-  // div.appendChild(canvas)
 
   const config: GraphConfigInterface = {
     backgroundColor: '#212C42',

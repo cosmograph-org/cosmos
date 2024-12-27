@@ -1,10 +1,12 @@
 
+import { Graph } from '@cosmograph/cosmos'
 import { createCosmos } from '../create-cosmos'
 import { generateMeshData } from '../generate-mesh-data'
 
-export const WormStory = (): HTMLDivElement => {
+export const WormStory = (): {graph: Graph; div: HTMLDivElement} => {
   const { pointPositions, pointColors, links, linkColors, pointClusters } = generateMeshData(100, 100, 1000, 1.0)
-  const { div } = createCosmos({
+
+  return createCosmos({
     simulationGravity: 0.5,
     simulationRepulsion: 1,
     simulationLinkSpring: 1,
@@ -14,6 +16,4 @@ export const WormStory = (): HTMLDivElement => {
     links,
     linkColors,
   })
-
-  return div
 }

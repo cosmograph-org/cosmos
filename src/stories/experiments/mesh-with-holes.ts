@@ -1,13 +1,13 @@
+import { Graph } from '@cosmograph/cosmos'
 import { createCosmos } from '../create-cosmos'
 import { generateMeshData } from '../generate-mesh-data'
 
-export const MeshWithHolesStory = (): HTMLDivElement => {
+export const MeshWithHolesStory = (): { graph: Graph; div: HTMLDivElement} => {
   const { pointPositions, links, pointColors } = generateMeshData(40, 80, 15, 0.8)
-  const { div } = createCosmos({
+
+  return createCosmos({
     pointPositions,
     links,
     pointColors,
   })
-
-  return div
 }
