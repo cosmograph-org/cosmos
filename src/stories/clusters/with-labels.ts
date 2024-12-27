@@ -1,9 +1,10 @@
 
+import { Graph } from '@cosmograph/cosmos'
 import { createClusterLabels } from '../create-cluster-labels'
 import { createCosmos } from '../create-cosmos'
 import { generateMeshData } from '../generate-mesh-data'
 
-export const WithLabelsStory = (): HTMLDivElement => {
+export const WithLabelsStory = (): {div: HTMLDivElement; graph: Graph } => {
   const { pointPositions, pointColors, pointClusters } = generateMeshData(100, 100, 15, 1.0)
   const { div, graph } = createCosmos({
     pointPositions,
@@ -20,5 +21,5 @@ export const WithLabelsStory = (): HTMLDivElement => {
     onSimulationTick: updateClusterLabels.bind(this, graph),
   })
 
-  return div
+  return { div, graph }
 }

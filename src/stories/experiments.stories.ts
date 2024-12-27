@@ -1,5 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/html'
+import type { Meta } from '@storybook/html'
 
+import { createStory, Story } from '@/graph/stories/create-story'
 import { CosmosStoryProps } from './create-cosmos'
 import { MeshWithHolesStory } from './experiments/mesh-with-holes'
 import { FullMeshStory } from './experiments/full-mesh'
@@ -14,26 +15,28 @@ const meta: Meta<CosmosStoryProps> = {
   title: 'Examples/Experiments',
 }
 
-type Story = StoryObj<CosmosStoryProps>;
-
 const sourceCodeAddonParams = [
   { name: 'create-cosmos', code: createCosmosRaw },
   { name: 'generate-mesh-data', code: generateMeshDataRaw },
 ]
 
-export const FullMesh = FullMeshStory as Story
-FullMesh.parameters = {
-  sourceCode: [
-    { name: 'Story', code: fullMeshRaw },
-    ...sourceCodeAddonParams,
-  ],
+export const FullMesh: Story = {
+  ...createStory(FullMeshStory),
+  parameters: {
+    sourceCode: [
+      { name: 'Story', code: fullMeshRaw },
+      ...sourceCodeAddonParams,
+    ],
+  },
 }
-export const MeshWithHoles = MeshWithHolesStory as Story
-MeshWithHoles.parameters = {
-  sourceCode: [
-    { name: 'Story', code: meshWithHolesRaw },
-    ...sourceCodeAddonParams,
-  ],
+export const MeshWithHoles: Story = {
+  ...createStory(MeshWithHolesStory),
+  parameters: {
+    sourceCode: [
+      { name: 'Story', code: meshWithHolesRaw },
+      ...sourceCodeAddonParams,
+    ],
+  },
 }
 
 // eslint-disable-next-line import/no-default-export
