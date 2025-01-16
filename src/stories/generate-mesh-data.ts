@@ -47,7 +47,11 @@ export function generateMeshData (
   const pointColors = new Float32Array(n * m * 4)
   const pointSizes = new Float32Array(n * m)
 
-  const spaceSize = 8192
+  // The maximum texture size can vary between devices and WebGL versions
+  // The space size should be less than the maximum texture size to ensure better visual quality of the generated mesh.
+  const gl = document.createElement('canvas').getContext('webgl')
+  const spaceSize = (gl?.getParameter(gl.MAX_TEXTURE_SIZE) ?? 16384) / 2
+  gl?.getExtension('WEBGL_lose_context')?.loseContext()
 
   for (let clusterIndex = 0; clusterIndex < nClusters; clusterIndex += 1) {
     const [x, y] = getPositionOnCircle(radius(clusterIndex), 15 * Math.PI * (clusterIndex / nClusters), spaceSize / 2)
