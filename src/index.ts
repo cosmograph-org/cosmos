@@ -872,7 +872,6 @@ export class Graph {
     this.store.linksTextureSize = Math.ceil(Math.sqrt((graph.linksNumber ?? 0) * 2))
     this.create()
     this.initPrograms()
-    this.points.trackPointsByIndices()
     this.store.setFocusedPoint(this.config.focusedPointIndex)
     this.store.hoveredPoint = undefined
     this.start(simulationAlpha)
