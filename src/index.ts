@@ -86,12 +86,23 @@ export class Graph {
     this.addAttribution()
     const w = canvas.clientWidth
     const h = canvas.clientHeight
-    this.store.updateScreenSize(w, h)
 
     canvas.width = w * this.config.pixelRatio
     canvas.height = h * this.config.pixelRatio
 
     this.canvas = canvas
+    this.reglInstance = regl({
+      canvas: this.canvas,
+      attributes: {
+        antialias: false,
+        preserveDrawingBuffer: true,
+      },
+      extensions: ['OES_texture_float', 'ANGLE_instanced_arrays'],
+    })
+
+    this.store.adjustSpaceSize(this.config.spaceSize, this.reglInstance.limits.maxTextureSize)
+    this.store.updateScreenSize(w, h)
+
     this.canvasD3Selection = select<HTMLCanvasElement, undefined>(this.canvas)
     this.canvasD3Selection
       .on('mouseenter.cosmos', () => { this._isMouseOnCanvas = true })
@@ -132,17 +143,7 @@ export class Graph {
     if (this.config.disableZoom || !this.config.enableDrag) this.updateZoomDragBehaviors()
     this.setZoomLevel(this.config.initialZoomLevel ?? 1)
 
-    this.reglInstance = regl({
-      canvas: this.canvas,
-      attributes: {
-        antialias: false,
-        preserveDrawingBuffer: true,
-      },
-      extensions: ['OES_texture_float', 'ANGLE_instanced_arrays'],
-    })
-
     this.store.maxPointSize = (this.reglInstance.limits.pointSizeDims[1] ?? MAX_POINT_SIZE) / this.config.pixelRatio
-    this.store.adjustSpaceSize(this.config.spaceSize, this.reglInstance.limits.maxTextureSize)
 
     this.points = new Points(this.reglInstance, this.config, this.store, this.graph)
     this.lines = new Lines(this.reglInstance, this.config, this.store, this.graph, this.points)
