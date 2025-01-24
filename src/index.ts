@@ -22,6 +22,7 @@ import { Zoom } from '@/graph/modules/Zoom'
 import { Drag } from '@/graph/modules/Drag'
 import { defaultConfigValues, defaultScaleToZoom } from '@/graph/variables'
 import { attributionSvg } from '@/graph/attribution'
+import { reglCachedCode } from '@/graph/regl-cached-code'
 
 export class Graph {
   public config = new GraphConfig()
@@ -98,6 +99,9 @@ export class Graph {
         preserveDrawingBuffer: true,
       },
       extensions: ['OES_texture_float', 'ANGLE_instanced_arrays'],
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      cachedCode: reglCachedCode,
     })
 
     this.store.adjustSpaceSize(this.config.spaceSize, this.reglInstance.limits.maxTextureSize)

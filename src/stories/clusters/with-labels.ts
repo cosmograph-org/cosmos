@@ -21,5 +21,7 @@ export const WithLabelsStory = (): {div: HTMLDivElement; graph: Graph } => {
     onSimulationTick: updateClusterLabels.bind(this, graph),
   })
 
+  graph.selectPointsInRange([[0, 2000], [0, 2000]])
+
   return { div, graph }
 }
