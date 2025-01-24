@@ -44,6 +44,7 @@ export const defaultConfigValues = {
   pixelRatio: 2,
   scalePointsOnZoom: true,
   disableZoom: false,
+  enableSimulationDuringZoom: false,
   enableDrag: false,
   fitViewOnInit: true,
   fitViewDelay: 250,

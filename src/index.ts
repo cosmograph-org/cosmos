@@ -906,7 +906,7 @@ export class Graph {
           this.forceMouse?.run()
           this.points.updatePosition()
         }
-        if ((isSimulationRunning && !this.zoomInstance.isRunning)) {
+        if ((isSimulationRunning && !(this.zoomInstance.isRunning && !this.config.enableSimulationDuringZoom))) {
           if (simulationGravity) {
             this.forceGravity?.run()
             this.points.updatePosition()
