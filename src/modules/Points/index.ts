@@ -137,6 +137,8 @@ export class Points extends CoreModule {
 
     this.updateGreyoutStatus()
     this.updateSampledPointsGrid()
+
+    this.trackPointsByIndices()
   }
 
   public initPrograms (): void {

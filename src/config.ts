@@ -401,6 +401,13 @@ export interface GraphConfigInterface {
    */
   disableZoom?: boolean;
   /**
+   * Controls whether the simulation remains active during zoom operations.
+   * When set to `true`, the simulation continues running while zooming.
+   * When set to `false`, the simulation pauses during zoom operations.
+   * Default value: `false`
+   */
+  enableSimulationDuringZoom?: boolean;
+  /**
    * Enables or disables dragging of points in the graph.
    * Default value: `false`
    */
@@ -521,6 +528,7 @@ export class GraphConfig implements GraphConfigInterface {
   public scalePointsOnZoom = defaultConfigValues.scalePointsOnZoom
   public initialZoomLevel = undefined
   public disableZoom = defaultConfigValues.disableZoom
+  public enableSimulationDuringZoom = defaultConfigValues.enableSimulationDuringZoom
   public enableDrag = defaultConfigValues.enableDrag
   public fitViewOnInit = defaultConfigValues.fitViewOnInit
   public fitViewDelay = defaultConfigValues.fitViewDelay
