@@ -637,7 +637,7 @@ export class Points extends CoreModule {
     const h = maxY - minY
     const range = Math.max(w, h)
 
-    // Do not rescale if the range is smaller than the space size (no need to)
+    // Do not rescale if the range is greater than the space size (no need to)
     if (range > spaceSize) {
       this.scaleX = undefined
       this.scaleY = undefined
@@ -645,7 +645,7 @@ export class Points extends CoreModule {
     }
 
     // Density threshold - points per pixel ratio (0.001 = 0.1%)
-    const densityThreshold = 0.001
+    const densityThreshold = spaceSize * spaceSize * 0.001
     // Calculate effective space size based on point density
     const effectiveSpaceSize = pointsNumber > densityThreshold
     // For dense datasets: scale up based on point count, minimum 120% of space
