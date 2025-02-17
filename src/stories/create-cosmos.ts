@@ -2,7 +2,7 @@ import { Graph, GraphConfigInterface } from '@cosmograph/cosmos'
 
 export type CosmosStoryProps = GraphConfigInterface & {
   pointPositions: Float32Array;
-  pointColors: Float32Array;
+  pointColors?: Float32Array;
   pointSizes?: Float32Array;
 
   links?: Float32Array;
@@ -47,7 +47,7 @@ export const createCosmos = (props: CosmosStoryProps): { div: HTMLDivElement; gr
   const graph = new Graph(div, config)
 
   graph.setPointPositions(props.pointPositions)
-  graph.setPointColors(props.pointColors)
+  if (props.pointColors) graph.setPointColors(props.pointColors)
   if (props.pointSizes) graph.setPointSizes(props.pointSizes)
 
   if (props.links) graph.setLinks(props.links)
