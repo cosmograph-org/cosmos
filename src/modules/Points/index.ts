@@ -27,6 +27,8 @@ export class Points extends CoreModule {
   public selectedFbo: regl.Framebuffer2D | undefined
   public hoveredFbo: regl.Framebuffer2D | undefined
   public greyoutStatusFbo: regl.Framebuffer2D | undefined
+  public scaleX: ((x: number) => number) | undefined
+  public scaleY: ((y: number) => number) | undefined
   private colorBuffer: regl.Buffer | undefined
   private sizeFbo: regl.Framebuffer2D | undefined
   private sizeBuffer: regl.Buffer | undefined
@@ -53,12 +55,17 @@ export class Points extends CoreModule {
   private sampledPointIndices: regl.Buffer | undefined
 
   public updatePositions (): void {
-    const { reglInstance, store, data } = this
+    const { reglInstance, store, data, config: { disableRescalePositions, disableSimulation } } = this
     const { pointsTextureSize } = store
     if (!pointsTextureSize || !data.pointPositions || data.pointsNumber === undefined) return
 
     const initialState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
-    // if (!config.disableSimulation) this.rescaleInitialNodePositions() // TODO ⁉️
+    // Rescale positions only when rescaling is enabled OR rescaling is not set and simulation is disabled
+    this.scaleX = undefined
+    this.scaleY = undefined
+    if (disableRescalePositions === false || (disableRescalePositions === undefined && disableSimulation)) {
+      this.rescaleInitialNodePositions()
+    }
     for (let i = 0; i < data.pointsNumber; ++i) {
       initialState[i * 4 + 0] = data.pointPositions[i * 2 + 0] as number
       initialState[i * 4 + 1] = data.pointPositions[i * 2 + 1] as number
@@ -608,34 +615,58 @@ export class Points extends CoreModule {
     this.currentPositionFbo = temp
   }
 
-  // private rescaleInitialNodePositions (): void {
-  //   const { nodes } = this.data
-  //   const { spaceSize } = this.config
-  //   if (nodes.length === 0) return
-  //   const xs = nodes.map(n => n.x).filter((n): n is number => n !== undefined)
-  //   if (xs.length === 0) return
-  //   const ys = nodes.map(n => n.y).filter((n): n is number => n !== undefined)
-  //   if (ys.length === 0) return
-  //   const [minX, maxX] = extent(xs)
-  //   if (minX === undefined || maxX === undefined) return
-  //   const [minY, maxY] = extent(ys)
-  //   if (minY === undefined || maxY === undefined) return
-  //   const w = maxX - minX
-  //   const h = maxY - minY
+  private rescaleInitialNodePositions (): void {
+    const { config: { spaceSize } } = this
+    if (!this.data.pointPositions || !spaceSize) return
 
-  //   const size = Math.max(w, h)
-  //   const dw = (size - w) / 2
-  //   const dh = (size - h) / 2
+    const points = this.data.pointPositions
+    const pointsNumber = points.length / 2
+    let minX = Infinity
+    let maxX = -Infinity
+    let minY = Infinity
+    let maxY = -Infinity
+    for (let i = 0; i < points.length; i += 2) {
+      const x = points[i] as number
+      const y = points[i + 1] as number
+      minX = Math.min(minX, x)
+      maxX = Math.max(maxX, x)
+      minY = Math.min(minY, y)
+      maxY = Math.max(maxY, y)
+    }
+    const w = maxX - minX
+    const h = maxY - minY
+    const range = Math.max(w, h)
 
-  //   const scaleX = scaleLinear()
-  //     .range([0, spaceSize ?? defaultConfigValues.spaceSize])
-  //     .domain([minX - dw, maxX + dw])
-  //   const scaleY = scaleLinear()
-  //     .range([0, spaceSize ?? defaultConfigValues.spaceSize])
-  //     .domain([minY - dh, maxY + dh])
-  //   nodes.forEach(n => {
-  //     n.x = scaleX(n.x as number)
-  //     n.y = scaleY(n.y as number)
-  //   })
-  // }
+    // Do not rescale if the range is smaller than the space size (no need to)
+    if (range > spaceSize) {
+      this.scaleX = undefined
+      this.scaleY = undefined
+      return
+    }
+
+    // Density threshold - points per pixel ratio (0.001 = 0.1%)
+    const densityThreshold = 0.001
+    // Calculate effective space size based on point density
+    const effectiveSpaceSize = pointsNumber > densityThreshold
+    // For dense datasets: scale up based on point count, minimum 120% of space
+      ? spaceSize * Math.max(1.2, Math.sqrt(pointsNumber) / spaceSize)
+    // For sparse datasets: use 10% of space to cluster points closer
+      : spaceSize * 0.1
+
+    // Calculate uniform scale factor to fit data within effective space
+    const scaleFactor = effectiveSpaceSize / range
+    // Center the data horizontally by adding padding on x-axis
+    const offsetX = ((range - w) / 2) * scaleFactor
+    // Center the data vertically by adding padding on y-axis
+    const offsetY = ((range - h) / 2) * scaleFactor
+
+    this.scaleX = (x: number): number => (x - minX) * scaleFactor + offsetX
+    this.scaleY = (y: number): number => (y - minY) * scaleFactor + offsetY
+
+    // Apply scaling to point positions
+    for (let i = 0; i < pointsNumber; i++) {
+      this.data.pointPositions[i * 2] = this.scaleX(points[i * 2] as number)
+      this.data.pointPositions[i * 2 + 1] = this.scaleY(points[i * 2 + 1] as number)
+    }
+  }
 }

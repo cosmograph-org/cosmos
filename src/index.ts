@@ -756,6 +756,24 @@ export class Graph {
   }
 
   /**
+   * Gets the X-axis of rescaling function.
+   *
+   * This scale is automatically created when position rescaling is enabled.
+   */
+  public getScaleX (): ((x: number) => number) | undefined {
+    return this.points.scaleX
+  }
+
+  /**
+   * Gets the Y-axis of rescaling function.
+   *
+   * This scale is automatically created when position rescaling is enabled.
+   */
+  public getScaleY (): ((y: number) => number) | undefined {
+    return this.points.scaleY
+  }
+
+  /**
    * Start the simulation.
    * @param alpha Value from 0 to 1. The higher the value, the more initial energy the simulation will get.
    */

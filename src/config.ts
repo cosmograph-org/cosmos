@@ -461,6 +461,19 @@ export interface GraphConfigInterface {
    * Default value: `false`
   */
   disableAttribution?: boolean;
+  /**
+   * Controls automatic position adjustment of points in the visible space.
+   *
+   * When `undefined` (default):
+   * - If simulation is disabled (`disableSimulation: true`), points will be automatically
+   *   repositioned to fit within the visible space
+   * - If simulation is enabled, points will not be rescaled
+   *
+   * When explicitly set:
+   * - `true`: Forces points positions to be rescaled
+   * - `false`: Forces points positions to not be rescaled
+   */
+  disableRescalePositions?: boolean | undefined;
 }
 
 export class GraphConfig implements GraphConfigInterface {
@@ -539,6 +552,7 @@ export class GraphConfig implements GraphConfigInterface {
   public randomSeed = undefined
   public pointSamplingDistance = defaultConfigValues.pointSamplingDistance
   public disableAttribution = defaultConfigValues.disableAttribution
+  public disableRescalePositions = defaultConfigValues.disableRescalePositions
 
   public init (config: GraphConfigInterface): void {
     (Object.keys(config) as (keyof GraphConfigInterface)[])
