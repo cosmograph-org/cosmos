@@ -1,6 +1,6 @@
 {
   "name": "@cosmograph/cosmos",
-  "version": "2.0.0-beta.21",
+  "version": "2.0.0-beta.22",
   "description": "GPU-based force graph layout and rendering",
   "jsdelivr": "dist/index.min.js",
   "main": "dist/index.js",
