@@ -1,4 +1,3 @@
-
 import { Meta } from "@storybook/blocks";
 
 <Meta title="Configuration" />
@@ -7,7 +6,7 @@ import { Meta } from "@storybook/blocks";
 
 | Property | Description | Default |
 |---|---|---|
-| disableSimulation | Do not run the simulation, just render the graph. Cosmos uses the `x` and `y` values of the points’ data to determine their position in the graph. If `x` and `y` values are not specified, the position of the points will be assigned randomly. This property will be applied only on component initialization and it can't be changed using the `setConfig` method | `false` |
+| disableSimulation | Do not run the simulation, just render the graph. Cosmos uses the `x` and `y` values of the points' data to determine their position in the graph. If `x` and `y` values are not specified, the position of the points will be assigned randomly. This property will be applied only on component initialization and it can't be changed using the `setConfig` method | `false` |
 | backgroundColor | Canvas background color | `#222222` |
 | spaceSize | Simulation space size (max 8192) | `8192` |
 | pointColor | The default color to use for points when no point colors are provided, or if the color value in the array is `undefined` or `null`. This can be either a hex color string (e.g., '#b3b3b3') or an array of RGBA values in the format `[red, green, blue, alpha]` where each value is a number between 0 and 255 | `#b3b3b3` |
@@ -33,6 +32,22 @@ import { Meta } from "@storybook/blocks";
 | linkVisibilityDistanceRange | The range defines the minimum and maximum link visibility distance in pixels.<br /><br />The link will be fully opaque when its length is less than the first number in the array, and will have `linkVisibilityMinTransparency` transparency when its length is greater than the second number in the array.<br /><br />This distance is defined in screen space coordinates and will change as you zoom in and out (e.g. links become longer when you zoom in, and shorter when you zoom out). | `[50, 150]` |
 | linkVisibilityMinTransparency | The transparency value that the link will have when its length reaches the maximum link distance value from `linkVisibilityDistanceRange`. | `0.25` |
 | useQuadtree | Use the classic [quadtree algorithm](https://en.wikipedia.org/wiki/Barnes%E2%80%93Hut_simulation) for the Many-Body force. This property will be applied only on component initialization and it can't be changed using the `setConfig` method.<br /><br /> ⚠ The algorithm might not work on some GPUs (e.g. Nvidia) and on Windows (unless you disable ANGLE in the browser settings). | `false` |
+| showFPSMonitor | Show WebGL performance monitor | `false` |
+| pixelRatio | Canvas pixel ratio | `2` |
+| scalePointsOnZoom | Increase/decrease point size when zooming | `true` |
+| initialZoomLevel | Initial zoom level (set once during initialization) | `undefined` |
+| disableZoom | Disables zooming interactions | `false` |
+| enableSimulationDuringZoom | Keep simulation running during zoom operations | `false` |
+| enableDrag | Enable/disable point dragging | `false` |
+| fitViewOnInit | Auto-zoom to fit all points on initialization | `true` |
+| fitViewDelay | Delay before fitting view when enabled | `250` ms |
+| fitViewPadding | Extra space around points when fitting view | `0.1` |
+| fitViewDuration | Animation duration for fit view operation | `250` ms |
+| fitViewByPointsInRect | When `fitViewOnInit` is set to `true`, fits the view to show the points within a rectangle defined by its two corner coordinates `[[left, bottom], [right, top]]` in the scene space | `undefined` |
+| randomSeed | Providing a value allows control over layout randomness for consistency across simulations. Applied only on initialization | `undefined` |
+| pointSamplingDistance | Sampling density for point position methods (used in `getSampledPointPositionsMap`) | `150` px |
+| disableAttribution | Hide Cosmos attribution watermark | `false` |
+| disableRescalePositions | Control automatic point position adjustment. When undefined: auto-rescale if simulation disabled | `undefined` |
 
 ## Simulation configuration
 
@@ -51,4 +66,24 @@ Cosmos layout algorithm was inspired by the [d3-force](https://github.com/d3/d3-
 | simulationLinkDistRandomVariationRange | Link distance randomness multiplier range | [0.8 – 1.2,<br/> 1.2 – 2.0] | `[1.0, 1.2]` |
 | simulationRepulsionFromMouse | Repulsion from the mouse pointer force coefficient. The repulsion force is activated by pressing the right mouse button. | 0.0 – 5.0 | `2.0`
 | simulationFriction | Friction coefficient| 0.8 – 1.0 | `0.85` |
-| simulationCluster | Cluster coefficient| 0.0 – 1.0 | `0.1` |
+| simulationCluster | Cluster coefficient | 0.0 – 1.0 | `0.1` |
+
+## Event Callbacks
+
+| Callback | Description | 
+|---|---|
+| onSimulationStart | Called when simulation starts |
+| onSimulationTick | Called on every simulation tick with alpha value and hover info |
+| onSimulationEnd | Called when simulation stops |
+| onSimulationPause | Called when simulation pauses |
+| onSimulationRestart | Called when simulation restarts |
+| onClick | Called on canvas click with point index and position |
+| onMouseMove | Called on mouse movement with hover info |
+| onPointMouseOver | Called when pointer enters a point |
+| onPointMouseOut | Called when pointer leaves a point |
+| onZoomStart | Called when zoom/pan starts |
+| onZoom | Called during zoom/pan |
+| onZoomEnd | Called when zoom/pan ends |
+| onDragStart | Called when dragging starts |
+| onDrag | Called during dragging |
+| onDragEnd | Called when dragging ends |

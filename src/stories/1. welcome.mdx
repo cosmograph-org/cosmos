@@ -30,7 +30,9 @@ const config = {
   simulationGravity: 0, // disables gravity
   simulationRepulsion: 0.5, // increases repulsion between points
   curvedLinks: true, // curved links
-  fitViewPadding: 0.3, // centers the graph width padding of ~30% of screen
+  fitViewDelay: 1000, // wait 1 second before fitting the view
+  disableRescalePositions: false, // rescale positions
+  enableDrag: true, // enable dragging points
   onClick: pointIndex => { console.log('Clicked point index: ', pointIndex) },
   /* ... */
 }
@@ -58,6 +60,8 @@ graph.setLinks(links)
 graph.render()
 ```
 
+Try the [Quick Start](../?path=/story/examples-beginners--quick-start) example.
+
 ### Examples
-- [Basic Set-Up](https://stackblitz.com/edit/how-to-use-cosmos?file=src%2Fmain.ts)
+- [Basic Set-Up](../?path=/story/examples-beginners--basic-set-up)
 - [Adding Node Labels](https://stackblitz.com/edit/cosmos-node-labels?file=src%2Fmain.ts) (via [`@interacta/css-labels`](https://www.npmjs.com/package/@interacta/css-labels))
