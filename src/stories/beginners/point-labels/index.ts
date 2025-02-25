@@ -1,0 +1,67 @@
+import { Graph } from '@cosmograph/cosmos'
+import { CosmosLabels } from './labels'
+import { processPerformances, pointsToShowLabelsFor } from './data'
+import './style.css'
+
+/**
+ * Point Labels Story
+ *
+ * @param performances - Performances data fetched from Github Gist:
+ * https://gist.githubusercontent.com/Stukova/e6c4c7777e0166431a983999213f10c8/raw/performances.json
+ *
+ * @returns { graph: Graph; div: HTMLDivElement}
+ */
+export const PointLabelsStory = (
+  performances: {
+    theaterCode: string;
+    performanceTitle: string;
+    theaterName: string;
+  }[]
+): { graph: Graph; div: HTMLDivElement} => {
+  const { pointPositions, pointColors, pointSizes, links, pointIndexToLabel, pointLabelToIndex } = processPerformances(performances)
+  const div = document.createElement('div')
+  div.className = 'app'
+
+  const labelsDiv = document.createElement('div')
+  div.appendChild(labelsDiv)
+
+  const graphDiv = document.createElement('div')
+  graphDiv.className = 'graph'
+  div.appendChild(graphDiv)
+
+  const cosmosLabels = new CosmosLabels(labelsDiv, pointIndexToLabel)
+
+  const graph = new Graph(graphDiv, {
+    spaceSize: 4096,
+    backgroundColor: '#151515',
+    linkWidth: 0.1,
+    linkColor: '#5F74C2',
+    linkArrows: false,
+    fitViewOnInit: false,
+    enableDrag: true,
+    simulationGravity: 0.1,
+    simulationLinkDistance: 1,
+    simulationLinkSpring: 0.3,
+    simulationRepulsion: 0.4,
+    onSimulationTick: () => graph && cosmosLabels.update(graph),
+    onZoom: () => graph && cosmosLabels.update(graph),
+  })
+
+  graph.setPointPositions(new Float32Array(pointPositions))
+  graph.setPointColors(new Float32Array(pointColors))
+  graph.setPointSizes(new Float32Array(pointSizes))
+  graph.setLinks(new Float32Array(links))
+  graph.render()
+  graph.setZoomLevel(0.6)
+
+  // _Track the points_ for which you wish to display labels.
+  // Their coordinates in the simulation space will be accessible
+  // via the `getTrackedPointPositionsMap` method. You can then convert
+  // them to the screen space with the `spaceToScreenPosition`
+  // method.
+  graph.trackPointPositionsByIndices(
+    pointsToShowLabelsFor.map((l) => pointLabelToIndex.get(l) as number)
+  )
+
+  return { div, graph }
+}

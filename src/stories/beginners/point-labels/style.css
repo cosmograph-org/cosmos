@@ -1,0 +1,16 @@
+body {
+  font-family: sans-serif;
+  margin: 0px;
+}
+
+.app {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  color: white;
+}
+
+.graph {
+  width: 100%;
+  height: 100vh;
+}
