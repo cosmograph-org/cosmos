@@ -3,14 +3,10 @@ import { CosmosLabels } from './labels'
 import { processPerformances, pointsToShowLabelsFor } from './data'
 import './style.css'
 
-/**
- * Point Labels Story
- *
- * @param performances - Performances data fetched from Github Gist:
- * https://gist.githubusercontent.com/Stukova/e6c4c7777e0166431a983999213f10c8/raw/performances.json
- *
- * @returns { graph: Graph; div: HTMLDivElement}
- */
+// Load data from Github Gist and use it as `performances` argument for `PointLabelsStory`:
+// const data = await fetch('https://gist.githubusercontent.com/Stukova/e6c4c7777e0166431a983999213f10c8/raw/performances.json')
+// const performances = await data.json()
+
 export const PointLabelsStory = (
   performances: {
     theaterCode: string;

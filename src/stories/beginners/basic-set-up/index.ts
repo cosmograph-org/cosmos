@@ -59,7 +59,6 @@ export const BasicSetUpStory = (): { graph: Graph; div: HTMLDivElement} => {
   /* ~ Demo Actions ~ */
   // Start / Pause
   let isPaused = false
-  // const pauseButton = document.getElementById('pause') as HTMLDivElement
   const pauseButton = document.createElement('div')
   pauseButton.className = 'action'
   pauseButton.textContent = 'Pause'
