@@ -6,11 +6,13 @@ export const QuickStartStory = (): { graph: Graph; div: HTMLDivElement} => {
   div.style.width = '100%'
 
   const config: GraphConfigInterface = {
+    spaceSize: 4096,
     simulationFriction: 0.1, // keeps the graph inert
     simulationGravity: 0, // disables gravity
     simulationRepulsion: 0.5, // increases repulsion between points
     curvedLinks: true, // curved links
     fitViewDelay: 1000, // wait 1 second before fitting the view
+    fitViewPadding: 0.3, // centers the graph width padding of ~30% of screen
     disableRescalePositions: false, // rescale positions
     enableDrag: true, // enable dragging points
     onClick: pointIndex => { console.log('Clicked point index: ', pointIndex) },
