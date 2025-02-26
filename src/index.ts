@@ -879,7 +879,10 @@ export class Graph {
       depth: 1,
       stencil: 0,
     })
-    select(this.canvas).style('cursor', null)
+    // Remove canvas from DOM
+    this.canvas.remove()
+    // Remove attribution element if exists
+    this.attributionDivElement?.remove()
     this.fpsMonitor?.destroy()
     document.getElementById('gl-bench-style')?.remove()
     this._isDestroyed = true
