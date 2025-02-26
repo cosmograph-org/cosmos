@@ -572,7 +572,7 @@ export class Points extends CoreModule {
 
   public getTrackedPositionsMap (): Map<number, [number, number]> {
     const tracked = new Map<number, [number, number]>()
-    if (!this.trackedIndices) return tracked
+    if (!this.trackedIndices || this.trackedIndices.length === 0) return tracked
     const pixels = readPixels(this.reglInstance, this.trackedPositionsFbo as regl.Framebuffer2D)
     for (let i = 0; i < pixels.length / 4; i += 1) {
       const x = pixels[i * 4]
