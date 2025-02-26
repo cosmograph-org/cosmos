@@ -7,7 +7,8 @@ import { RadialStory } from './clusters/radial'
 
 import createCosmosRaw from './create-cosmos?raw'
 import generateMeshDataRaw from './generate-mesh-data?raw'
-import withLabelsStory from './clusters/with-labels?raw'
+import withLabelsStoryRaw from './clusters/with-labels?raw'
+import createClusterLabelsRaw from './create-cluster-labels?raw'
 import wormStory from './clusters/worm?raw'
 import radialStory from './clusters/radial?raw'
 
@@ -49,7 +50,8 @@ export const WithLabels: Story = {
   ...createStory(WithLabelsStory),
   parameters: {
     sourceCode: [
-      { name: 'Story', code: withLabelsStory },
+      { name: 'Story', code: withLabelsStoryRaw },
+      { name: 'create-cluster-labels', code: createClusterLabelsRaw },
       ...sourceCodeAddonParams,
     ],
   },
