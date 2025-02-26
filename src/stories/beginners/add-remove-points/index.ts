@@ -24,8 +24,9 @@ export const AddRemovePoints = (): { graph: Graph; div: HTMLDivElement} => {
     ...config,
     onClick: (i): void => {
       if (i !== undefined) {
-        const newPointPositions = graph
-          .getPointPositions()
+        // Filter out the clicked point from positions array
+        const currentPositions = graph.getPointPositions()
+        const newPointPositions = currentPositions
           .filter((pos, posIndex) => {
             return (
               (posIndex % 2 === 0 && posIndex !== i * 2) ||
@@ -33,11 +34,14 @@ export const AddRemovePoints = (): { graph: Graph; div: HTMLDivElement} => {
             )
           })
 
+        // Convert links array to source-target pairs for easier filtering
         const pairedNumbers = []
         for (let i = 0; i < graphLinks.length; i += 2) {
           const pair = [graphLinks[i], graphLinks[i + 1]]
           pairedNumbers.push(pair)
         }
+
+        // Remove links connected to deleted point and adjust indices of remaining links
         graphLinks = (pairedNumbers
           .filter(
             ([sourceIndex, targetIndex]) => sourceIndex !== i && targetIndex !== i

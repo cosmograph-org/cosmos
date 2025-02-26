@@ -52,11 +52,15 @@ export const processPerformances = (performances: {
   })
 
   const links = performances
-    .map((p) => [
-      pointLabelToIndex.get(p.theaterName),
-      pointLabelToIndex.get(`P:${p.performanceTitle}`),
-    ])
-    .flat() as number[]
+    .map((p) => {
+      const theaterIndex = pointLabelToIndex.get(p.theaterName)
+      const performanceIndex = pointLabelToIndex.get(`P:${p.performanceTitle}`)
+      if (theaterIndex === undefined || performanceIndex === undefined) {
+        return []
+      }
+      return [theaterIndex, performanceIndex]
+    })
+    .flat()
 
   return {
     pointPositions: new Float32Array(pointPositions),

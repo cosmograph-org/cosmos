@@ -23,7 +23,7 @@ body {
 }
 
 .action {
-  margin-left: 2p0;
+  margin-left: 2px;
   font-size: 10pt;
   text-decoration: underline;
   cursor: pointer;
