@@ -25,7 +25,7 @@ Install the package:
 npm install @cosmograph/cosmos
 ```
 
-Configure the graph, set data, and run the simulation:
+Get the data, [configure](../?path=/docs/configuration--docs) the graph and run the simulation:
 
 ```javascript
 import { Graph } from '@cosmograph/cosmos'
@@ -36,7 +36,9 @@ const config = {
   simulationGravity: 0, // disables gravity
   simulationRepulsion: 0.5, // increases repulsion between points
   curvedLinks: true, // curved links
-  fitViewPadding: 0.3, // centers the graph width padding of ~30% of screen
+  fitViewDelay: 1000, // wait 1 second before fitting the view
+  disableRescalePositions: false, // rescale positions
+  enableDrag: true, // enable dragging points
   onClick: pointIndex => { console.log('Clicked point index: ', pointIndex) },
   /* ... */
 }
@@ -64,10 +66,6 @@ graph.setLinks(links)
 graph.render()
 ```
 
-- **`pointPositions`**: A Float32Array of `[x1, y1, x2, y2, ..., xN, yN]`.
-- **`links`**: A Float32Array of `[sourceIndex1, targetIndex1, ..., sourceIndexN, targetIndexN]`.
-
-
 ---
 
 ### What's New in v2.0?
@@ -87,7 +85,7 @@ Check the [Migration Guide](./cosmos-2-0-migration-notes.md) for details.
 
 ### Examples
 
-- [Basic Set-Up](https://stackblitz.com/edit/how-to-use-cosmos?file=src%2Fmain.ts)
+- [Basic Set-Up](https://cosmograph-org.github.io/cosmos/?path=/story/examples-beginners--basic-set-up)
 
 ---
 
