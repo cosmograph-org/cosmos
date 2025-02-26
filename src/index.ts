@@ -862,7 +862,9 @@ export class Graph {
     if (this._isDestroyed) return
     this.store.isSimulationRunning = false
     this.stopFrames()
+    this.store.isSimulationRunning = true
     this.frame()
+    this.store.isSimulationRunning = false
   }
 
   /**
