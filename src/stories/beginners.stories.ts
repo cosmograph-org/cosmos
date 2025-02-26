@@ -49,10 +49,20 @@ export const BasicSetUp: Story = {
 export const PointLabels: Story = {
   name: 'Point Labels',
   loaders: [
-    async (): Promise<{ data: Response }> => {
-      const data = await fetch('https://gist.githubusercontent.com/Stukova/e6c4c7777e0166431a983999213f10c8/raw/performances.json')
-      return {
-        data: await data.json(),
+    async (): Promise<{ data: Response | { performances: [] } }> => {
+      try {
+        const response = await fetch('https://gist.githubusercontent.com/Stukova/e6c4c7777e0166431a983999213f10c8/raw/performances.json')
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`)
+        }
+        return {
+          data: await response.json(),
+        }
+      } catch (error) {
+        console.error('Failed to fetch data:', error)
+        return {
+          data: { performances: [] },
+        }
       }
     },
   ],
