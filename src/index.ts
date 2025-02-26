@@ -807,9 +807,10 @@ export class Graph {
    * Render only one frame of the simulation (stops the simulation if it was running).
    */
   public step (): void {
-    this.store.isSimulationRunning = false
     this.stopFrames()
+    this.store.isSimulationRunning = true
     this.frame()
+    this.store.isSimulationRunning = false
   }
 
   /**
