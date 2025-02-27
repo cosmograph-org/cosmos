@@ -3,7 +3,7 @@ import { generateData } from './data-gen'
 import { config } from './config'
 import './style.css'
 
-export const RemovePoints = (): { graph: Graph; div: HTMLDivElement} => {
+export const removePoints = (): { graph: Graph; div: HTMLDivElement} => {
   const { pointPositions, links } = generateData()
   const div = document.createElement('div')
   div.className = 'app'

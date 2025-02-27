@@ -7,7 +7,7 @@ import './style.css'
 // const data = await fetch('https://gist.githubusercontent.com/Stukova/e6c4c7777e0166431a983999213f10c8/raw/performances.json')
 // const performances = await data.json()
 
-export const PointLabelsStory = (
+export const pointLabels = (
   performances: {
     theaterCode: string;
     performanceTitle: string;
@@ -29,7 +29,7 @@ export const PointLabelsStory = (
 
   const graph = new Graph(graphDiv, {
     spaceSize: 4096,
-    backgroundColor: '#151515',
+    backgroundColor: '#2d313a',
     linkWidth: 0.1,
     linkColor: '#5F74C2',
     linkArrows: false,

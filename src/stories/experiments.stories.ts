@@ -2,8 +2,8 @@ import type { Meta } from '@storybook/html'
 
 import { createStory, Story } from '@/graph/stories/create-story'
 import { CosmosStoryProps } from './create-cosmos'
-import { MeshWithHolesStory } from './experiments/mesh-with-holes'
-import { FullMeshStory } from './experiments/full-mesh'
+import { meshWithHoles } from './experiments/mesh-with-holes'
+import { fullMesh } from './experiments/full-mesh'
 
 import createCosmosRaw from './create-cosmos?raw'
 import generateMeshDataRaw from './generate-mesh-data?raw'
@@ -21,7 +21,7 @@ const sourceCodeAddonParams = [
 ]
 
 export const FullMesh: Story = {
-  ...createStory(FullMeshStory),
+  ...createStory(fullMesh),
   parameters: {
     sourceCode: [
       { name: 'Story', code: fullMeshRaw },
@@ -30,7 +30,7 @@ export const FullMesh: Story = {
   },
 }
 export const MeshWithHoles: Story = {
-  ...createStory(MeshWithHolesStory),
+  ...createStory(meshWithHoles),
   parameters: {
     sourceCode: [
       { name: 'Story', code: meshWithHolesRaw },

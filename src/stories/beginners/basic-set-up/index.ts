@@ -2,7 +2,7 @@ import { Graph } from '@cosmograph/cosmos'
 import { generateData } from './data-gen'
 import './style.css'
 
-export const BasicSetUpStory = (): { graph: Graph; div: HTMLDivElement} => {
+export const basicSetUp = (): { graph: Graph; div: HTMLDivElement} => {
   const div = document.createElement('div')
   div.className = 'app'
 
@@ -21,7 +21,7 @@ export const BasicSetUpStory = (): { graph: Graph; div: HTMLDivElement} => {
 
   const graph = new Graph(graphDiv, {
     spaceSize: 4096,
-    backgroundColor: '#151515',
+    backgroundColor: '#2d313a',
     pointSize: 4,
     pointColor: '#4B5BBF',
     pointGreyoutOpacity: 0.1,

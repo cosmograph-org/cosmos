@@ -7,10 +7,24 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
-  color: white;
 }
 
 .graph {
   width: 100%;
   height: 100vh;
+}
+
+.actions {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: #ccc;
+}
+
+.action {
+  margin-left: 2px;
+  font-size: 10pt;
+  text-decoration: underline;
+  cursor: pointer;
+  user-select: none;
 }

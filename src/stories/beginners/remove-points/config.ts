@@ -2,7 +2,7 @@ import { GraphConfigInterface } from '@cosmograph/cosmos'
 
 export const config: GraphConfigInterface = {
   spaceSize: 4096,
-  backgroundColor: '#151515',
+  backgroundColor: '#2d313a',
   pointSize: 4,
   pointColor: '#4B5BBF',
   pointGreyoutOpacity: 0.1,

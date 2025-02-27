@@ -21,7 +21,7 @@ export const createCosmos = (props: CosmosStoryProps): { div: HTMLDivElement; gr
   div.style.width = '100%'
 
   const config: GraphConfigInterface = {
-    backgroundColor: '#212C42',
+    backgroundColor: '#2d313a',
     pointSize: 3,
     pointColor: '#4B5BBF',
     pointGreyoutOpacity: 0.1,
