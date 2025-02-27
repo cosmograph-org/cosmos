@@ -4,7 +4,7 @@ import { createClusterLabels } from '../create-cluster-labels'
 import { createCosmos } from '../create-cosmos'
 import { generateMeshData } from '../generate-mesh-data'
 
-export const WithLabelsStory = (): {div: HTMLDivElement; graph: Graph } => {
+export const withLabels = (): {div: HTMLDivElement; graph: Graph } => {
   const { pointPositions, pointColors, pointClusters } = generateMeshData(100, 100, 15, 1.0)
   const { div, graph } = createCosmos({
     pointPositions,

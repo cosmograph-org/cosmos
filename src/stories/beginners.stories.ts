@@ -2,10 +2,10 @@ import type { Meta } from '@storybook/html'
 
 import { createStory, Story } from '@/graph/stories/create-story'
 import { CosmosStoryProps } from './create-cosmos'
-import { QuickStartStory } from './beginners/quick-start'
-import { BasicSetUpStory } from './beginners/basic-set-up'
-import { PointLabelsStory } from './beginners/point-labels'
-import { RemovePoints } from './beginners/remove-points'
+import { quickStart } from './beginners/quick-start'
+import { basicSetUp } from './beginners/basic-set-up'
+import { pointLabels } from './beginners/point-labels'
+import { removePoints } from './beginners/remove-points'
 
 import quickStartStoryRaw from './beginners/quick-start?raw'
 import basicSetUpStoryRaw from './beginners/basic-set-up/index?raw'
@@ -26,7 +26,7 @@ const meta: Meta<CosmosStoryProps> = {
 }
 
 export const QuickStart: Story = {
-  ...createStory(QuickStartStory),
+  ...createStory(quickStart),
   parameters: {
     sourceCode: [
       { name: 'Story', code: quickStartStoryRaw },
@@ -35,7 +35,7 @@ export const QuickStart: Story = {
 }
 
 export const BasicSetUp: Story = {
-  ...createStory(BasicSetUpStory),
+  ...createStory(basicSetUp),
   name: '100x100 grid',
   parameters: {
     sourceCode: [
@@ -47,7 +47,6 @@ export const BasicSetUp: Story = {
 }
 
 export const PointLabels: Story = {
-  name: 'Point Labels',
   loaders: [
     async (): Promise<{ data: Response | { performances: [] } }> => {
       try {
@@ -72,7 +71,7 @@ export const PointLabels: Story = {
     }
   },
   render: (args, { loaded: { data } }) => {
-    const story = PointLabelsStory(data.performances)
+    const story = pointLabels(data.performances)
     args.graph = story.graph
     return story.div
   },
@@ -86,9 +85,8 @@ export const PointLabels: Story = {
   },
 }
 
-export const RemovePointsStory: Story = {
-  ...createStory(RemovePoints),
-  name: 'Remove Points',
+export const RemovePoints: Story = {
+  ...createStory(removePoints),
   parameters: {
     sourceCode: [
       { name: 'Story', code: removePointsStoryRaw },
