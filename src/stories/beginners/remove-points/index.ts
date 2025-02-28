@@ -36,8 +36,8 @@ export const removePoints = (): { graph: Graph; div: HTMLDivElement} => {
 
         // Convert links array to source-target pairs for easier filtering
         const pairedNumbers = []
-        for (let i = 0; i < graphLinks.length; i += 2) {
-          const pair = [graphLinks[i], graphLinks[i + 1]]
+        for (let j = 0; j < graphLinks.length; j += 2) {
+          const pair = [graphLinks[j], graphLinks[j + 1]]
           pairedNumbers.push(pair)
         }
 

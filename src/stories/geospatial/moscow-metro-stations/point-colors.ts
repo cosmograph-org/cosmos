@@ -4,42 +4,42 @@ import { getRgbaColor } from '@cosmograph/cosmos'
 
 export const getPointColors = (pointPositions: number[]): Float32Array => {
   const pointColorScale = scaleSequential(interpolateWarm)
+  const numPoints = pointPositions.length / 2
 
   // Calculate center coordinates
-  let sumX = 0
-  let sumY = 0
-  const numPoints = pointPositions.length / 2
-  for (let i = 0; i < numPoints; i++) {
-    sumX += pointPositions[i * 2] as number
-    sumY += pointPositions[i * 2 + 1] as number
+  let centerX = 0
+  let centerY = 0
+  for (let i = 0, idx = 0; i < numPoints; i++, idx += 2) {
+    centerX += pointPositions[idx] as number
+    centerY += pointPositions[idx + 1] as number
   }
-  const centerX = sumX / numPoints
-  const centerY = sumY / numPoints
+  centerX /= numPoints
+  centerY /= numPoints
 
-  // Find maximum distance from center
-  let maxDistance = 0
-  for (let i = 0; i < numPoints; i++) {
-    const dx = (pointPositions[i * 2] as number) - centerX
-    const dy = (pointPositions[i * 2 + 1] as number) - centerY
-    const distance = Math.sqrt(dx * dx + dy * dy)
-    if (distance > maxDistance) maxDistance = distance
+  // Find maximum distance from center (using squared distance for optimization)
+  let maxDistanceSquared = 0
+  for (let i = 0, idx = 0; i < numPoints; i++, idx += 2) {
+    const dx = (pointPositions[idx] as number) - centerX
+    const dy = (pointPositions[idx + 1] as number) - centerY
+    const distanceSquared = dx * dx + dy * dy
+    if (distanceSquared > maxDistanceSquared) maxDistanceSquared = distanceSquared
   }
 
-  pointColorScale.domain([0, maxDistance])
+  pointColorScale.domain([0, Math.sqrt(maxDistanceSquared)])
 
+  // Calculate colors
   const pointColors = new Float32Array(numPoints * 4)
-  for (let i = 0; i < numPoints; i += 1) {
-    const x = pointPositions[i * 2] as number
-    const y = pointPositions[i * 2 + 1] as number
-    const dx = x - centerX
-    const dy = y - centerY
+  for (let i = 0, posIdx = 0, colorIdx = 0; i < numPoints; i++, posIdx += 2, colorIdx += 4) {
+    const dx = (pointPositions[posIdx] as number) - centerX
+    const dy = (pointPositions[posIdx + 1] as number) - centerY
     const distance = Math.sqrt(dx * dx + dy * dy)
     const pointColor = pointColorScale(distance)
     const rgba = getRgbaColor(pointColor)
-    pointColors[i * 4] = rgba[0]
-    pointColors[i * 4 + 1] = rgba[1]
-    pointColors[i * 4 + 2] = rgba[2]
-    pointColors[i * 4 + 3] = rgba[3]
+
+    pointColors[colorIdx] = rgba[0]
+    pointColors[colorIdx + 1] = rgba[1]
+    pointColors[colorIdx + 2] = rgba[2]
+    pointColors[colorIdx + 3] = rgba[3]
   }
 
   return pointColors
