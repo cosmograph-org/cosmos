@@ -31,6 +31,7 @@
   "homepage": "https://cosmograph.app",
   "author": "cosmograph-org",
   "devDependencies": {
+    "@interacta/css-labels": "^0.1.2",
     "@jls-digital/storybook-addon-code": "^1.0.4",
     "@rollup/plugin-alias": "^3.1.9",
     "@rollup/plugin-commonjs": "^22.0.1",

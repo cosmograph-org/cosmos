@@ -84,7 +84,7 @@ The resulting graph will have a total of 3 links: one between points 0 and 1, an
 
 This method sets the colors for the graph links.
 
-* **`linkColors`** (Float32Array): A Float32Array representing the colors of links in the format `[r1, g1, b1, a1, r2, g2, b2, a2, ..., rN, gN, bN, aN]`, where each color is in RGBA format. Each set of four values (`r`, `g`, `b`, `a`) represents the color of a single link. Here’s a breakdown:
+* **`linkColors`** (Float32Array): A Float32Array representing the colors of links in the format `[r1, g1, b1, a1, r2, g2, b2, a2, ..., rN, gN, bN, aN]`, where each color is in RGBA format. Each set of four values (`r`, `g`, `b`, `a`) represents the color of a single link. Here's a breakdown:
 
     * **`r`**: Red value (0.0-1.0)
     * **`g`**: Green value (0.0-1.0)
@@ -207,11 +207,9 @@ This method sets the zoom level of the graph view.
 * **`value`** (Number): The desired zoom level. Higher values result in a closer zoom, while lower values zoom out.
 * **`duration`** (Number, optional): The duration of the zoom animation in milliseconds. If not provided, the default value is `0`, meaning the zoom level will change instantly without any animation.
 
-
 ### <a name="get_zoom_level" href="#get_zoom_level">#</a> graph.<b>getZoomLevel</b>()
 
 This method retrieves the current zoom level of the graph view.
-
 
 ### <a name="fit_view" href="#fit_view">#</a> graph.<b>fitView</b>([<i>duration</i>], [<i>padding</i>])
 
@@ -411,3 +409,24 @@ A boolean property of the graph object that indicates whether the graph simulati
 ### <a name="max_point_size" href="#max_point_size">#</a> graph.<b>maxPointSize</b>
 
 A number property of the graph object that represents the maximum point size the user's hardware can render using the `gl.POINTS` primitive in WebGL. This value varies between different GPUs and is a limitation of the WebGL rendering context.
+
+### <a name="zoom" href="#zoom">#</a> graph.<b>zoom</b>(<i>value</i>, [<i>duration</i>])
+
+This method sets the zoom level of the graph view (alias for setZoomLevel).
+
+* **`value`** (Number): The desired zoom level. Higher values result in a closer zoom, while lower values zoom out.
+* **`duration`** (Number, optional): The duration of the zoom animation in milliseconds. If not provided, the default value is `0`, meaning the zoom level will change instantly without any animation.
+
+### <a name="get_scale_x" href="#get_scale_x">#</a> graph.<b>getScaleX</b>()
+
+Retrieves the X-axis rescaling function used for position transformations when rescaling is enabled.
+
+**Returns:** 
+- A function mapping data values to X-coordinates, or `undefined` if rescaling is disabled.
+
+### <a name="get_scale_y" href="#get_scale_y">#</a> graph.<b>getScaleY</b>()
+
+Retrieves the Y-axis rescaling function used for position transformations when rescaling is enabled.
+
+**Returns:** 
+- A function mapping data values to Y-coordinates, or `undefined` if rescaling is disabled.

@@ -17,7 +17,7 @@ export interface GraphConfigInterface {
   /**
    * TODO: rethink the logic of `disableSimulation` param 👇.
    * Do not run the simulation, just render the graph.
-   * Cosmos uses the x and y values of the points’ data to determine their position in the graph.
+   * Cosmos uses the x and y values of the points' data to determine their position in the graph.
    * If x and y values are not specified, the position of the points will be assigned randomly.
    * This property will be applied only on component initialization and it
    * can't be changed using the `setConfig` method.
@@ -458,6 +458,7 @@ export interface GraphConfigInterface {
   pointSamplingDistance?: number;
   /**
    * Whether to render the attribution or not.
+   * The watermark color can be customized using the CSS variable `--cosmos-attribution-color`.
    * Default value: `false`
   */
   disableAttribution?: boolean;

@@ -3,7 +3,7 @@ import { Graph } from '@cosmograph/cosmos'
 import { createCosmos } from '../create-cosmos'
 import { generateMeshData } from '../generate-mesh-data'
 
-export const RadialStory = (): { graph: Graph; div: HTMLDivElement} => {
+export const radial = (): { graph: Graph; div: HTMLDivElement} => {
   const {
     pointPositions, pointColors, pointSizes,
     links, linkColors, linkWidths,

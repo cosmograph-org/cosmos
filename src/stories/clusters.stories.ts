@@ -1,13 +1,14 @@
 import type { Meta } from '@storybook/html'
 import { CosmosStoryProps } from '@/graph/stories/create-cosmos'
 import { createStory, Story } from '@/graph/stories/create-story'
-import { WithLabelsStory } from './clusters/with-labels'
-import { WormStory } from './clusters/worm'
-import { RadialStory } from './clusters/radial'
+import { withLabels } from './clusters/with-labels'
+import { worm } from './clusters/worm'
+import { radial } from './clusters/radial'
 
 import createCosmosRaw from './create-cosmos?raw'
 import generateMeshDataRaw from './generate-mesh-data?raw'
-import withLabelsStory from './clusters/with-labels?raw'
+import withLabelsStoryRaw from './clusters/with-labels?raw'
+import createClusterLabelsRaw from './create-cluster-labels?raw'
 import wormStory from './clusters/worm?raw'
 import radialStory from './clusters/radial?raw'
 
@@ -26,7 +27,7 @@ const sourceCodeAddonParams = [
 ]
 
 export const Worm: Story = {
-  ...createStory(WormStory),
+  ...createStory(worm),
   parameters: {
     sourceCode: [
       { name: 'Story', code: wormStory },
@@ -36,7 +37,7 @@ export const Worm: Story = {
 }
 
 export const Radial: Story = {
-  ...createStory(RadialStory),
+  ...createStory(radial),
   parameters: {
     sourceCode: [
       { name: 'Story', code: radialStory },
@@ -46,10 +47,11 @@ export const Radial: Story = {
 }
 
 export const WithLabels: Story = {
-  ...createStory(WithLabelsStory),
+  ...createStory(withLabels),
   parameters: {
     sourceCode: [
-      { name: 'Story', code: withLabelsStory },
+      { name: 'Story', code: withLabelsStoryRaw },
+      { name: 'create-cluster-labels', code: createClusterLabelsRaw },
       ...sourceCodeAddonParams,
     ],
   },
