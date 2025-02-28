@@ -27,8 +27,8 @@ export const getPointColors = (pointPositions: number[]): Float32Array => {
 
   pointColorScale.domain([0, maxDistance])
 
-  const pointColors = new Float32Array(pointPositions.length * 2)
-  for (let i = 0; i < pointPositions.length / 2; i += 1) {
+  const pointColors = new Float32Array(numPoints * 4)
+  for (let i = 0; i < numPoints; i += 1) {
     const x = pointPositions[i * 2] as number
     const y = pointPositions[i * 2 + 1] as number
     const dx = x - centerX

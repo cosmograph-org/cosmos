@@ -5,7 +5,7 @@ import './style.css'
 
 /**
  * This example demonstrates the importance of rescaling positions by Cosmos.
- * The Moscow metro coordinates are are normalized (0-1 range in both dimensions).
+ * The Moscow Metro station coordinates are are normalized (0-1 range in both dimensions).
  * By default, Cosmos rescales these positions to fit the canvas.
  * When disabling rescaling (`disableRescalePositions: true`):
  * - Points render using raw coordinates
@@ -13,7 +13,7 @@ import './style.css'
  * - This causes visual artifacts due to WebGL's floating-point precision limitations
  * - Points cluster in the center and may exhibit rendering glitches
  */
-export const moscowMetro = (): {graph: Graph; div: HTMLDivElement} => {
+export const moscowMetroStations = (): {graph: Graph; div: HTMLDivElement} => {
   const div = document.createElement('div')
   div.className = 'app'
 
