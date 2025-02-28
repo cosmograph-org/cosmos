@@ -48,7 +48,7 @@ export const BasicSetUp: Story = {
 
 export const PointLabels: Story = {
   loaders: [
-    async (): Promise<{ data: Response | { performances: [] } }> => {
+    async (): Promise<{ data: { performances: [] } }> => {
       try {
         const response = await fetch('https://gist.githubusercontent.com/Stukova/e6c4c7777e0166431a983999213f10c8/raw/performances.json')
         if (!response.ok) {

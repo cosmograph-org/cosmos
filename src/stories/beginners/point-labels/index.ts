@@ -39,8 +39,8 @@ export const pointLabels = (
     simulationLinkDistance: 1,
     simulationLinkSpring: 0.3,
     simulationRepulsion: 0.4,
-    onSimulationTick: () => graph && cosmosLabels.update(graph),
-    onZoom: () => graph && cosmosLabels.update(graph),
+    onSimulationTick: () => cosmosLabels.update(graph),
+    onZoom: () => cosmosLabels.update(graph),
   })
 
   graph.setPointPositions(new Float32Array(pointPositions))

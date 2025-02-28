@@ -40,12 +40,12 @@ import { Meta } from "@storybook/blocks";
 | enableSimulationDuringZoom | Keep simulation running during zoom operations | `false` |
 | enableDrag | Enable/disable point dragging | `false` |
 | fitViewOnInit | Auto-zoom to fit all points on initialization | `true` |
-| fitViewDelay | Delay before fitting view when enabled | `250` ms |
+| fitViewDelay | Delay before fitting view when enabled in milliseconds | `250` |
 | fitViewPadding | Extra space around points when fitting view | `0.1` |
-| fitViewDuration | Animation duration for fit view operation | `250` ms |
+| fitViewDuration | Animation duration for fit view operation in milliseconds | `250` |
 | fitViewByPointsInRect | When `fitViewOnInit` is set to `true`, fits the view to show the points within a rectangle defined by its two corner coordinates `[[left, bottom], [right, top]]` in the scene space | `undefined` |
 | randomSeed | Providing a value allows control over layout randomness for consistency across simulations. Applied only on initialization | `undefined` |
-| pointSamplingDistance | Sampling density for point position methods (used in `getSampledPointPositionsMap`) | `150` px |
+| pointSamplingDistance | Sampling density for point position methods (used in `getSampledPointPositionsMap`) in pixels | `150` |
 | disableAttribution | Hide Cosmos attribution watermark | `false` |
 | disableRescalePositions | Control automatic point position adjustment. When undefined: auto-rescale if simulation disabled | `undefined` |
 
@@ -75,7 +75,7 @@ Cosmos layout algorithm was inspired by the [d3-force](https://github.com/d3/d3-
 | Callback | Description | 
 |---|---|
 | onSimulationStart | Called when simulation starts |
-| onSimulationTick | Called on every simulation tick with alpha value and hover info |
+| onSimulationTick | Called on every simulation tick, with the current alpha value and hover information |
 | onSimulationEnd | Called when simulation stops |
 | onSimulationPause | Called when simulation pauses |
 | onSimulationRestart | Called when simulation restarts |
