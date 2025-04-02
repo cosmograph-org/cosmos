@@ -75,6 +75,8 @@ export class Graph {
   private _hasClusterPositionsChanged = false
   private _hasPointClusterForceChanged = false
 
+  private _isDestroyed = false
+
   public constructor (div: HTMLDivElement, config?: GraphConfigInterface) {
     if (config) this.config.init(config)
 
@@ -179,6 +181,7 @@ export class Graph {
    * Returns the current simulation progress
    */
   public get progress (): number {
+    if (this._isDestroyed) return 0
     return this.store.simulationProgress
   }
 
@@ -186,6 +189,7 @@ export class Graph {
    * A value that gives information about the running simulation status.
    */
   public get isSimulationRunning (): boolean {
+    if (this._isDestroyed) return false
     return this.store.isSimulationRunning
   }
 
@@ -194,6 +198,7 @@ export class Graph {
    * This value is the maximum size of the `gl.POINTS` primitive that WebGL can render on the user's hardware.
    */
   public get maxPointSize (): number {
+    if (this._isDestroyed) return 0
     return this.store.maxPointSize
   }
 
@@ -202,6 +207,7 @@ export class Graph {
    * @param config Cosmos configuration object.
    */
   public setConfig (config: Partial<GraphConfigInterface>): void {
+    if (this._isDestroyed) return
     const prevConfig = { ...this.config }
     this.config.init(config)
     if (prevConfig.pointColor !== this.config.pointColor) {
@@ -269,6 +275,7 @@ export class Graph {
    * Example: `new Float32Array([1, 2, 3, 4, 5, 6])` sets the first point to (1, 2), the second point to (3, 4), and so on.
    */
   public setPointPositions (pointPositions: Float32Array): void {
+    if (this._isDestroyed) return
     this.graph.inputPointPositions = pointPositions
     this._hasPointPositionsChanged = true
   }
@@ -281,6 +288,7 @@ export class Graph {
    * Example: `new Float32Array([255, 0, 0, 1, 0, 255, 0, 1])` sets the first point to red and the second point to green.
   */
   public setPointColors (pointColors: Float32Array): void {
+    if (this._isDestroyed) return
     this.graph.inputPointColors = pointColors
     this._hasPointColorsChanged = true
   }
@@ -293,6 +301,7 @@ export class Graph {
    * Example: `new Float32Array([10, 20, 30])` sets the first point to size 10, the second point to size 20, and the third point to size 30.
    */
   public setPointSizes (pointSizes: Float32Array): void {
+    if (this._isDestroyed) return
     this.graph.inputPointSizes = pointSizes
     this._hasPointSizesChanged = true
   }
@@ -306,6 +315,7 @@ export class Graph {
    * Example: `new Float32Array([0, 1, 1, 2])` creates a link from point 0 to point 1 and another link from point 1 to point 2.
    */
   public setLinks (links: Float32Array): void {
+    if (this._isDestroyed) return
     this.graph.inputLinks = links
     this._hasLinksChanged = true
   }
@@ -318,6 +328,7 @@ export class Graph {
    * Example: `new Float32Array([255, 0, 0, 1, 0, 255, 0, 1])` sets the first link to red and the second link to green.
    */
   public setLinkColors (linkColors: Float32Array): void {
+    if (this._isDestroyed) return
     this.graph.inputLinkColors = linkColors
     this._hasLinkColorsChanged = true
   }
@@ -330,6 +341,7 @@ export class Graph {
    * Example: `new Float32Array([1, 2, 3])` sets the first link to width 1, the second link to width 2, and the third link to width 3.
    */
   public setLinkWidths (linkWidths: Float32Array): void {
+    if (this._isDestroyed) return
     this.graph.inputLinkWidths = linkWidths
     this._hasLinkWidthsChanged = true
   }
@@ -342,6 +354,7 @@ export class Graph {
    * Example: `[true, false, true]` sets arrows on the first and third links, but not on the second link.
    */
   public setLinkArrows (linkArrows: boolean[]): void {
+    if (this._isDestroyed) return
     this.graph.linkArrowsBoolean = linkArrows
     this._hasLinkArrowsChanged = true
   }
@@ -354,6 +367,7 @@ export class Graph {
    * Example: `new Float32Array([1, 2, 3])` sets the first link to strength 1, the second link to strength 2, and the third link to strength 3.
    */
   public setLinkStrength (linkStrength: Float32Array): void {
+    if (this._isDestroyed) return
     this.graph.inputLinkStrength = linkStrength
   }
 
@@ -369,6 +383,7 @@ export class Graph {
    * @note Clusters without specified positions via `setClusterPositions` will be positioned at their centermass by default.
    */
   public setPointClusters (pointClusters: (number | undefined)[]): void {
+    if (this._isDestroyed) return
     this.graph.inputPointClusters = pointClusters
     this._hasPointClustersChanged = true
   }
@@ -384,6 +399,7 @@ export class Graph {
    * the third cluster will be positioned at its centermass automatically.
    */
   public setClusterPositions (clusterPositions: (number | undefined)[]): void {
+    if (this._isDestroyed) return
     this.graph.inputClusterPositions = clusterPositions
     this._hasClusterPositionsChanged = true
   }
@@ -399,6 +415,7 @@ export class Graph {
    * Example: `new Float32Array([1, 0.4, 0.3])` sets the force coefficient for point 0 to 1, point 1 to 0.4, and point 2 to 0.3.
    */
   public setPointClusterStrength (clusterStrength: Float32Array): void {
+    if (this._isDestroyed) return
     this.graph.inputClusterStrength = clusterStrength
     this._hasPointClusterForceChanged = true
   }
@@ -411,7 +428,12 @@ export class Graph {
    * the more initial energy the simulation will get. Zero value stops the simulation.
    */
   public render (simulationAlpha?: number): void {
+    if (this._isDestroyed) return
     this.graph.update()
+    this._hasPointColorsChanged = true
+    this._hasPointSizesChanged = true
+    this._hasLinkColorsChanged = true
+    this._hasLinkWidthsChanged = true
     const { fitViewOnInit, fitViewDelay, fitViewPadding, fitViewDuration, fitViewByPointsInRect, initialZoomLevel } = this.config
     if (!this.graph.pointsNumber && !this.graph.linksNumber) {
       this.stopFrames()
@@ -444,6 +466,7 @@ export class Graph {
    * @param canZoomOut Set to `false` to prevent zooming out from the point (`true` by default).
    */
   public zoomToPointByIndex (index: number, duration = 700, scale = defaultScaleToZoom, canZoomOut = true): void {
+    if (this._isDestroyed) return
     const { store: { screenSize } } = this
     const positionPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
     if (index === undefined) return
@@ -476,6 +499,7 @@ export class Graph {
    */
 
   public zoom (value: number, duration = 0): void {
+    if (this._isDestroyed) return
     this.setZoomLevel(value, duration)
   }
 
@@ -485,6 +509,7 @@ export class Graph {
    * @param duration Duration of the zoom in/out transition.
    */
   public setZoomLevel (value: number, duration = 0): void {
+    if (this._isDestroyed) return
     if (duration === 0) {
       this.canvasD3Selection
         .call(this.zoomInstance.behavior.scaleTo, value)
@@ -501,6 +526,7 @@ export class Graph {
    * @returns Zoom level value of the view.
    */
   public getZoomLevel (): number {
+    if (this._isDestroyed) return 0
     return this.zoomInstance.eventTransform.k
   }
 
@@ -509,6 +535,7 @@ export class Graph {
    * @returns Array of point positions.
    */
   public getPointPositions (): number[] {
+    if (this._isDestroyed) return []
     if (this.graph.pointsNumber === undefined) return []
     const positions: number[] = []
     const pointPositionsPixels = readPixels(this.reglInstance, this.points.currentPositionFbo as regl.Framebuffer2D)
@@ -529,6 +556,7 @@ export class Graph {
    * @returns Array of point cluster.
    */
   public getClusterPositions (): number[] {
+    if (this._isDestroyed) return []
     if (this.graph.pointClusters === undefined || this.clusters === undefined) return []
     const positions: number[] = []
     const clusterPositionsPixels = readPixels(this.reglInstance, this.clusters.centermassFbo as regl.Framebuffer2D)
@@ -551,6 +579,7 @@ export class Graph {
    * @param padding Padding around the viewport in percentage (`0.1` by default).
    */
   public fitView (duration = 250, padding = 0.1): void {
+    if (this._isDestroyed) return
     this.setZoomTransformByPointPositions(this.getPointPositions(), duration, undefined, padding)
   }
 
@@ -560,6 +589,7 @@ export class Graph {
    * @param padding Padding around the viewport in percentage
    */
   public fitViewByPointIndices (indices: number[], duration = 250, padding = 0.1): void {
+    if (this._isDestroyed) return
     const positionsArray = this.getPointPositions()
     const positions = new Array(indices.length * 2)
     for (const [i, index] of indices.entries()) {
@@ -575,6 +605,7 @@ export class Graph {
    * @param padding Padding around the viewport in percentage
    */
   public fitViewByPointPositions (positions: number[], duration = 250, padding = 0.1): void {
+    if (this._isDestroyed) return
     this.setZoomTransformByPointPositions(positions, duration, undefined, padding)
   }
 
@@ -586,6 +617,7 @@ export class Graph {
    * @returns A Float32Array containing the indices of points inside a rectangular area.
    */
   public getPointsInRange (selection: [[number, number], [number, number]]): Float32Array {
+    if (this._isDestroyed) return new Float32Array()
     const h = this.store.screenSize[1]
     this.store.selectedArea = [[selection[0][0], (h - selection[1][1])], [selection[1][0], (h - selection[0][1])]]
     this.points.findPointsOnAreaSelection()
@@ -604,6 +636,7 @@ export class Graph {
    * The `left` and `right` coordinates should be from 0 to the width of the canvas.
    * The `top` and `bottom` coordinates should be from 0 to the height of the canvas. */
   public selectPointsInRange (selection: [[number, number], [number, number]] | null): void {
+    if (this._isDestroyed) return
     if (selection) {
       const h = this.store.screenSize[1]
       this.store.selectedArea = [[selection[0][0], (h - selection[1][1])], [selection[1][0], (h - selection[0][1])]]
@@ -627,6 +660,7 @@ export class Graph {
    * @param selectAdjacentPoints When set to `true`, selects adjacent points (`false` by default).
    */
   public selectPointByIndex (index: number, selectAdjacentPoints = false): void {
+    if (this._isDestroyed) return
     if (selectAdjacentPoints) {
       const adjacentIndices = this.graph.getAdjacentIndices(index) ?? []
       this.selectPointsByIndices([index, ...adjacentIndices])
@@ -638,6 +672,7 @@ export class Graph {
    * @param indices Array of points indices.
    */
   public selectPointsByIndices (indices?: (number | undefined)[] | null): void {
+    if (this._isDestroyed) return
     if (!indices) {
       this.store.selectedIndices = null
     } else if (indices.length === 0) {
@@ -653,6 +688,7 @@ export class Graph {
    * Unselect all points.
    */
   public unselectPoints (): void {
+    if (this._isDestroyed) return
     this.store.selectedIndices = null
     this.points.updateGreyoutStatus()
   }
@@ -662,6 +698,7 @@ export class Graph {
    * @returns Array of selected indices of points.
    */
   public getSelectedIndices (): number[] | null {
+    if (this._isDestroyed) return null
     const { selectedIndices } = this.store
     if (!selectedIndices) return null
     return Array.from(selectedIndices)
@@ -674,6 +711,7 @@ export class Graph {
    */
 
   public getAdjacentIndices (index: number): number[] | undefined {
+    if (this._isDestroyed) return undefined
     return this.graph.getAdjacentIndices(index)
   }
 
@@ -684,6 +722,7 @@ export class Graph {
    * @param index The index of the point in the array of points.
    */
   public setFocusedPointByIndex (index?: number): void {
+    if (this._isDestroyed) return
     // Config `focusedPointIndex` parameter has higher priority than this method.
     if (this.config.focusedPointIndex !== undefined) return
     if (index === undefined) {
@@ -699,6 +738,7 @@ export class Graph {
    * @returns Array of x and y coordinates in the screen coordinate system.
    */
   public spaceToScreenPosition (spacePosition: [number, number]): [number, number] {
+    if (this._isDestroyed) return [0, 0]
     return this.zoomInstance.convertSpaceToScreenPosition(spacePosition)
   }
 
@@ -708,6 +748,7 @@ export class Graph {
    * @returns Array of x and y coordinates in the space coordinate system.
    */
   public screenToSpacePosition (screenPosition: [number, number]): [number, number] {
+    if (this._isDestroyed) return [0, 0]
     return this.zoomInstance.convertScreenToSpacePosition(screenPosition)
   }
 
@@ -717,6 +758,7 @@ export class Graph {
    * @returns Radius of point in the screen coordinate system.
    */
   public spaceToScreenRadius (spaceRadius: number): number {
+    if (this._isDestroyed) return 0
     return this.zoomInstance.convertSpaceToScreenRadius(spaceRadius)
   }
 
@@ -726,6 +768,7 @@ export class Graph {
    * @returns Radius of the point.
    */
   public getPointRadiusByIndex (index: number): number | undefined {
+    if (this._isDestroyed) return undefined
     return this.graph.pointSizes?.[index]
   }
 
@@ -734,6 +777,7 @@ export class Graph {
    * @param indices Array of points indices.
    */
   public trackPointPositionsByIndices (indices: number[]): void {
+    if (this._isDestroyed) return
     this.points.trackPointsByIndices(indices)
   }
 
@@ -742,6 +786,7 @@ export class Graph {
    * @returns A Map object where keys are the indices of the points and values are their corresponding X and Y coordinates in the [number, number] format.
    */
   public getTrackedPointPositionsMap (): Map<number, [number, number]> {
+    if (this._isDestroyed) return new Map()
     return this.points.getTrackedPositionsMap()
   }
 
@@ -752,6 +797,7 @@ export class Graph {
    * @returns A Map object where keys are the index of the points and values are their corresponding X and Y coordinates in the [number, number] format.
    */
   public getSampledPointPositionsMap (): Map<number, [number, number]> {
+    if (this._isDestroyed) return new Map()
     return this.points.getSampledPointPositionsMap()
   }
 
@@ -761,6 +807,7 @@ export class Graph {
    * This scale is automatically created when position rescaling is enabled.
    */
   public getScaleX (): ((x: number) => number) | undefined {
+    if (this._isDestroyed) return undefined
     return this.points.scaleX
   }
 
@@ -770,6 +817,7 @@ export class Graph {
    * This scale is automatically created when position rescaling is enabled.
    */
   public getScaleY (): ((y: number) => number) | undefined {
+    if (this._isDestroyed) return undefined
     return this.points.scaleY
   }
 
@@ -778,6 +826,7 @@ export class Graph {
    * @param alpha Value from 0 to 1. The higher the value, the more initial energy the simulation will get.
    */
   public start (alpha = 1): void {
+    if (this._isDestroyed) return
     if (!this.graph.pointsNumber) return
     this.store.isSimulationRunning = true
     this.store.alpha = alpha
@@ -791,6 +840,7 @@ export class Graph {
    * Pause the simulation.
    */
   public pause (): void {
+    if (this._isDestroyed) return
     this.store.isSimulationRunning = false
     this.config.onSimulationPause?.()
   }
@@ -799,6 +849,7 @@ export class Graph {
    * Restart the simulation.
    */
   public restart (): void {
+    if (this._isDestroyed) return
     this.store.isSimulationRunning = true
     this.config.onSimulationRestart?.()
   }
@@ -807,6 +858,7 @@ export class Graph {
    * Render only one frame of the simulation (stops the simulation if it was running).
    */
   public step (): void {
+    if (this._isDestroyed) return
     this.store.isSimulationRunning = false
     this.stopFrames()
     this.frame()
@@ -816,6 +868,7 @@ export class Graph {
    * Destroy this Cosmos instance.
    */
   public destroy (): void {
+    if (this._isDestroyed) return
     window.clearTimeout(this._fitViewOnInitTimeoutID)
     this.stopFrames()
     this.reglInstance.destroy()
@@ -828,12 +881,14 @@ export class Graph {
     select(this.canvas).style('cursor', null)
     this.fpsMonitor?.destroy()
     document.getElementById('gl-bench-style')?.remove()
+    this._isDestroyed = true
   }
 
   /**
    * Create new Cosmos instance.
    */
   public create (): void {
+    if (this._isDestroyed) return
     if (this._hasPointPositionsChanged) this.points.updatePositions()
     if (this._hasPointColorsChanged) this.points.updateColor()
     if (this._hasPointSizesChanged) this.points.updateSize()
