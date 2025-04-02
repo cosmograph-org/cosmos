@@ -52,13 +52,12 @@ export class ForceManyBody extends CoreModule {
       shape: [store.pointsTextureSize, store.pointsTextureSize, 4],
       type: 'float',
     })
-    if (!this.randomValuesFbo) {
-      this.randomValuesFbo = reglInstance.framebuffer({
-        color: this.randomValuesTexture,
-        depth: false,
-        stencil: false,
-      })
-    }
+    if (!this.randomValuesFbo) this.randomValuesFbo = reglInstance.framebuffer()
+    this.randomValuesFbo({
+      color: this.randomValuesTexture,
+      depth: false,
+      stencil: false,
+    })
 
     if (!this.pointIndices) this.pointIndices = reglInstance.buffer(0)
     this.pointIndices(createIndexesForBuffer(store.pointsTextureSize))
