@@ -1,10 +1,9 @@
-
 import { Graph } from '@cosmograph/cosmos'
 import { createClusterLabels } from '../create-cluster-labels'
 import { createCosmos } from '../create-cosmos'
 import { generateMeshData } from '../generate-mesh-data'
 
-export const withLabels = (): {div: HTMLDivElement; graph: Graph } => {
+export const withLabels = (): {div: HTMLDivElement; graph: Graph; destroy: () => void } => {
   let nClusters = 2
   const { pointPositions, pointColors, pointClusters } = generateMeshData(100, 100, nClusters, 1.0)
 
@@ -26,16 +25,29 @@ export const withLabels = (): {div: HTMLDivElement; graph: Graph } => {
     onSimulationTick: updateClusterLabels.bind(this, graph),
   })
 
+  let increasing = true
   const interval = setInterval(() => {
-    nClusters += 5
-    if (nClusters > 15) {
-      clearInterval(interval)
+    if (increasing) {
+      nClusters += 5
+      if (nClusters >= 15) {
+        increasing = false
+      }
+    } else {
+      nClusters -= 5
+      if (nClusters <= 2) {
+        increasing = true
+      }
     }
+
     const nextData = generateMeshData(100, 100, nClusters, 1.0)
     graph.setPointClusters(nextData.pointClusters)
     graph.setPointColors(nextData.pointColors)
     graph.render(1)
   }, 1500)
 
-  return { div, graph }
+  const destroy = (): void => {
+    clearInterval(interval)
+  }
+
+  return { div, graph, destroy }
 }

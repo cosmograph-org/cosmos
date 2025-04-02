@@ -186,10 +186,14 @@ export class Clusters extends CoreModule {
     }
   }
 
-  public run (): void {
-    if (!this.data.pointClusters && !this.data.clusterPositions) return
+  public calculateCentermass (): void {
     this.clearCentermassCommand?.()
     this.calculateCentermassCommand?.()
+  }
+
+  public run (): void {
+    if (!this.data.pointClusters && !this.data.clusterPositions) return
+    this.calculateCentermass()
     this.applyForcesCommand?.()
   }
 }
