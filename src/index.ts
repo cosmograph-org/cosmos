@@ -42,7 +42,7 @@ export class Graph {
   private forceLinkIncoming: ForceLink | undefined
   private forceLinkOutgoing: ForceLink | undefined
   private forceMouse: ForceMouse | undefined
-  private clusters: Clusters | undefined
+  private clusters: Clusters
   private zoomInstance = new Zoom(this.store, this.config)
   private dragInstance = new Drag(this.store, this.config)
 
@@ -158,8 +158,8 @@ export class Graph {
       this.forceLinkIncoming = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
       this.forceLinkOutgoing = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
       this.forceMouse = new ForceMouse(this.reglInstance, this.config, this.store, this.graph, this.points)
-      this.clusters = new Clusters(this.reglInstance, this.config, this.store, this.graph, this.points)
     }
+    this.clusters = new Clusters(this.reglInstance, this.config, this.store, this.graph, this.points)
 
     this.store.backgroundColor = getRgbaColor(this.config.backgroundColor)
     if (this.config.hoveredPointRingColor) {
@@ -557,7 +557,8 @@ export class Graph {
    */
   public getClusterPositions (): number[] {
     if (this._isDestroyed) return []
-    if (this.graph.pointClusters === undefined || this.clusters === undefined) return []
+    if (this.graph.pointClusters === undefined) return []
+    this.clusters.calculateCentermass()
     const positions: number[] = []
     const clusterPositionsPixels = readPixels(this.reglInstance, this.clusters.centermassFbo as regl.Framebuffer2D)
     positions.length = clusterPositionsPixels.length / 2
@@ -960,7 +961,7 @@ export class Graph {
     this.forceMouse?.initPrograms()
     this.forceManyBody?.initPrograms()
     this.forceCenter?.initPrograms()
-    this.clusters?.initPrograms()
+    this.clusters.initPrograms()
   }
 
   private frame (): void {
@@ -1001,7 +1002,7 @@ export class Graph {
           }
 
           if (this.graph.pointClusters || this.graph.clusterPositions) {
-            this.clusters?.run()
+            this.clusters.run()
             this.points.updatePosition()
           }
 
