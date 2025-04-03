@@ -15,15 +15,12 @@ import { type Hovered } from '@/graph/modules/Store'
 
 export interface GraphConfigInterface {
   /**
-   * TODO: rethink the logic of `disableSimulation` param 👇.
-   * Do not run the simulation, just render the graph.
-   * Cosmos uses the x and y values of the points' data to determine their position in the graph.
-   * If x and y values are not specified, the position of the points will be assigned randomly.
+   * If set to `false`, the simulation will not run.
    * This property will be applied only on component initialization and it
    * can't be changed using the `setConfig` method.
-   * Default value: `false`
+   * Default value: `true`
    */
-  disableSimulation?: boolean;
+  enableSimulation?: boolean;
   /**
    * Canvas background color.
    * Can be either a hex color string (e.g., '#b3b3b3') or an array of RGBA values.
@@ -180,7 +177,7 @@ export interface GraphConfigInterface {
    * can't be changed using the `setConfig` method.
    * Default value: `false`
    */
-  useQuadtree?: boolean;
+  useClassicQuadtree?: boolean;
 
   /**
    * Decay coefficient. Use smaller values if you want the simulation to "cool down" slower.
@@ -204,13 +201,13 @@ export interface GraphConfigInterface {
   simulationRepulsion?: number;
   /**
    * Decreases / increases the detalization of the Many-Body force calculations.
-   * When `useQuadtree` is set to `true`, this property corresponds to the Barnes–Hut approximation criterion.
+   * When `useClassicQuadtree` is set to `true`, this property corresponds to the Barnes–Hut approximation criterion.
    * Default value: `1.15`
    */
   simulationRepulsionTheta?: number;
   /**
    * Barnes–Hut approximation depth.
-   * Can only be used when `useQuadtree` is set `true`.
+   * Can only be used when `useClassicQuadtree` is set `true`.
    * Default value: `12`
    */
   simulationRepulsionQuadtreeLevels?: number;
@@ -237,6 +234,7 @@ export interface GraphConfigInterface {
   simulationRepulsionFromMouse?: number;
   /**
    * Friction coefficient.
+   * Values range from 0 (high friction, stops quickly) to 1 (no friction, keeps moving).
    * Default value: `0.85`
    */
   simulationFriction?: number;
@@ -396,10 +394,10 @@ export interface GraphConfigInterface {
    */
   initialZoomLevel?: number;
   /**
-   * Disables zooming in and out.
-   * Default: `false`
+   * Enables or disables zooming in and out.
+   * Default: `true`
    */
-  disableZoom?: boolean;
+  enableZoom?: boolean;
   /**
    * Controls whether the simulation remains active during zoom operations.
    * When set to `true`, the simulation continues running while zooming.
@@ -457,16 +455,16 @@ export interface GraphConfigInterface {
   */
   pointSamplingDistance?: number;
   /**
-   * Whether to render the attribution or not.
+   * Whether to show the attribution or not.
    * The watermark color can be customized using the CSS variable `--cosmos-attribution-color`.
-   * Default value: `false`
+   * Default value: `true`
   */
-  disableAttribution?: boolean;
+  showAttribution?: boolean;
   /**
    * Controls automatic position adjustment of points in the visible space.
    *
    * When `undefined` (default):
-   * - If simulation is disabled (`disableSimulation: true`), points will be automatically
+   * - If simulation is disabled (`enableSimulation: false`), points will be automatically
    *   repositioned to fit within the visible space
    * - If simulation is enabled, points will not be rescaled
    *
@@ -474,11 +472,11 @@ export interface GraphConfigInterface {
    * - `true`: Forces points positions to be rescaled
    * - `false`: Forces points positions to not be rescaled
    */
-  disableRescalePositions?: boolean | undefined;
+  rescalePositions?: boolean | undefined;
 }
 
 export class GraphConfig implements GraphConfigInterface {
-  public disableSimulation = defaultConfigValues.disableSimulation
+  public enableSimulation = defaultConfigValues.enableSimulation
   public backgroundColor = defaultBackgroundColor
   public spaceSize = defaultConfigValues.spaceSize
   public pointColor = defaultPointColor
@@ -503,7 +501,7 @@ export class GraphConfig implements GraphConfigInterface {
   public linkArrowsSizeScale = defaultConfigValues.arrowSizeScale
   public linkVisibilityDistanceRange = defaultConfigValues.linkVisibilityDistanceRange
   public linkVisibilityMinTransparency = defaultConfigValues.linkVisibilityMinTransparency
-  public useQuadtree = defaultConfigValues.useQuadtree
+  public useClassicQuadtree = defaultConfigValues.useClassicQuadtree
 
   public simulationDecay = defaultConfigValues.simulation.decay
   public simulationGravity = defaultConfigValues.simulation.gravity
@@ -541,7 +539,7 @@ export class GraphConfig implements GraphConfigInterface {
 
   public scalePointsOnZoom = defaultConfigValues.scalePointsOnZoom
   public initialZoomLevel = undefined
-  public disableZoom = defaultConfigValues.disableZoom
+  public enableZoom = defaultConfigValues.enableZoom
   public enableSimulationDuringZoom = defaultConfigValues.enableSimulationDuringZoom
   public enableDrag = defaultConfigValues.enableDrag
   public fitViewOnInit = defaultConfigValues.fitViewOnInit
@@ -552,8 +550,8 @@ export class GraphConfig implements GraphConfigInterface {
 
   public randomSeed = undefined
   public pointSamplingDistance = defaultConfigValues.pointSamplingDistance
-  public disableAttribution = defaultConfigValues.disableAttribution
-  public disableRescalePositions = defaultConfigValues.disableRescalePositions
+  public showAttribution = defaultConfigValues.showAttribution
+  public rescalePositions = defaultConfigValues.rescalePositions
 
   public init (config: GraphConfigInterface): void {
     (Object.keys(config) as (keyof GraphConfigInterface)[])

@@ -142,17 +142,17 @@ export class Graph {
       .on('click', this.onClick.bind(this))
       .on('mousemove', this.onMouseMove.bind(this))
       .on('contextmenu', this.onRightClickMouse.bind(this))
-    if (this.config.disableZoom || !this.config.enableDrag) this.updateZoomDragBehaviors()
+    if (!this.config.enableZoom || !this.config.enableDrag) this.updateZoomDragBehaviors()
     this.setZoomLevel(this.config.initialZoomLevel ?? 1)
 
     this.store.maxPointSize = (this.reglInstance.limits.pointSizeDims[1] ?? MAX_POINT_SIZE) / this.config.pixelRatio
 
     this.points = new Points(this.reglInstance, this.config, this.store, this.graph)
     this.lines = new Lines(this.reglInstance, this.config, this.store, this.graph, this.points)
-    if (!this.config.disableSimulation) {
+    if (this.config.enableSimulation) {
       this.forceGravity = new ForceGravity(this.reglInstance, this.config, this.store, this.graph, this.points)
       this.forceCenter = new ForceCenter(this.reglInstance, this.config, this.store, this.graph, this.points)
-      this.forceManyBody = this.config.useQuadtree
+      this.forceManyBody = this.config.useClassicQuadtree
         ? new ForceManyBodyQuadtree(this.reglInstance, this.config, this.store, this.graph, this.points)
         : new ForceManyBody(this.reglInstance, this.config, this.store, this.graph, this.points)
       this.forceLinkIncoming = new ForceLink(this.reglInstance, this.config, this.store, this.graph, this.points)
@@ -262,7 +262,7 @@ export class Graph {
       this.store.maxPointSize = (this.reglInstance.limits.pointSizeDims[1] ?? MAX_POINT_SIZE) / this.config.pixelRatio
     }
 
-    if (prevConfig.disableZoom !== this.config.disableZoom || prevConfig.enableDrag !== this.config.enableDrag) {
+    if (prevConfig.enableZoom !== this.config.enableZoom || prevConfig.enableDrag !== this.config.enableDrag) {
       this.updateZoomDragBehaviors()
     }
   }
@@ -965,7 +965,7 @@ export class Graph {
   }
 
   private frame (): void {
-    const { config: { simulationGravity, simulationCenter, renderLinks, disableSimulation }, store: { alpha, isSimulationRunning } } = this
+    const { config: { simulationGravity, simulationCenter, renderLinks, enableSimulation }, store: { alpha, isSimulationRunning } } = this
     if (alpha < ALPHA_MIN && isSimulationRunning) this.end()
     if (!this.store.pointsTextureSize) return
 
@@ -974,7 +974,7 @@ export class Graph {
       this.resizeCanvas()
       if (!this.dragInstance.isActive) this.findHoveredPoint()
 
-      if (!disableSimulation) {
+      if (enableSimulation) {
         if (this.isRightClickMouse) {
           if (!isSimulationRunning) this.start(0.1)
           this.forceMouse?.run()
@@ -1125,11 +1125,13 @@ export class Graph {
         .on('.drag', null)
     }
 
-    if (this.config.disableZoom) {
+    if (this.config.enableZoom) {
+      this.canvasD3Selection.call(this.zoomInstance.behavior)
+    } else {
       this.canvasD3Selection
         .call(this.zoomInstance.behavior)
         .on('wheel.zoom', null)
-    } else this.canvasD3Selection.call(this.zoomInstance.behavior)
+    }
   }
 
   private findHoveredPoint (): void {
@@ -1179,7 +1181,7 @@ export class Graph {
   }
 
   private addAttribution (): void {
-    if (this.config.disableAttribution) return
+    if (!this.config.showAttribution) return
     this.attributionDivElement = document.createElement('div')
     this.attributionDivElement.style.cssText = `
       cursor: pointer;

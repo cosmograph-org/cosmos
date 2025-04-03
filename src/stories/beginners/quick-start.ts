@@ -15,7 +15,7 @@ export const quickStart = (): { graph: Graph; div: HTMLDivElement} => {
     curvedLinks: true, // curved links
     fitViewDelay: 1000, // wait 1 second before fitting the view
     fitViewPadding: 0.3, // centers the graph width padding of ~30% of screen
-    disableRescalePositions: false, // rescale positions
+    rescalePositions: true, // rescale positions
     enableDrag: true, // enable dragging points
     onClick: pointIndex => { console.log('Clicked point index: ', pointIndex) },
   /* ... */
