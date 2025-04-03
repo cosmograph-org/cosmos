@@ -557,11 +557,11 @@ export class Graph {
    */
   public getClusterPositions (): number[] {
     if (this._isDestroyed) return []
-    if (this.graph.pointClusters === undefined) return []
+    if (this.graph.pointClusters === undefined || this.clusters.clusterCount === undefined) return []
     this.clusters.calculateCentermass()
     const positions: number[] = []
     const clusterPositionsPixels = readPixels(this.reglInstance, this.clusters.centermassFbo as regl.Framebuffer2D)
-    positions.length = clusterPositionsPixels.length / 2
+    positions.length = this.clusters.clusterCount * 2
     for (let i = 0; i < positions.length / 2; i += 1) {
       const sumX = clusterPositionsPixels[i * 4 + 0]
       const sumY = clusterPositionsPixels[i * 4 + 1]

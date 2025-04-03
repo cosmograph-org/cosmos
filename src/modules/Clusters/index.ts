@@ -9,6 +9,7 @@ import updateVert from '@/graph/modules/Shared/quad.vert'
 
 export class Clusters extends CoreModule {
   public centermassFbo: regl.Framebuffer2D | undefined
+  public clusterCount: number | undefined
 
   private clusterFbo: regl.Framebuffer2D | undefined
   private clusterPositionsFbo: regl.Framebuffer2D | undefined
@@ -29,18 +30,18 @@ export class Clusters extends CoreModule {
     if (data.pointsNumber === undefined || (!data.pointClusters && !data.clusterPositions)) return
 
     // Find the highest cluster index in the array and add 1 (since cluster indices start at 0).
-    const clusterNumber = (data.pointClusters ?? []).reduce<number>((max, clusterIndex) => {
+    this.clusterCount = (data.pointClusters ?? []).reduce<number>((max, clusterIndex) => {
       if (clusterIndex === undefined || clusterIndex < 0) return max
       return Math.max(max, clusterIndex)
     }, 0) + 1
 
-    this.clustersTextureSize = Math.ceil(Math.sqrt(clusterNumber))
+    this.clustersTextureSize = Math.ceil(Math.sqrt(this.clusterCount))
 
     const clusterState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
     const clusterPositions = new Float32Array(this.clustersTextureSize * this.clustersTextureSize * 4).fill(-1)
     const clusterForceCoefficient = new Float32Array(pointsTextureSize * pointsTextureSize * 4).fill(1)
     if (data.clusterPositions) {
-      for (let cluster = 0; cluster < clusterNumber; ++cluster) {
+      for (let cluster = 0; cluster < this.clusterCount; ++cluster) {
         clusterPositions[cluster * 4 + 0] = data.clusterPositions[cluster * 2 + 0] ?? -1
         clusterPositions[cluster * 4 + 1] = data.clusterPositions[cluster * 2 + 1] ?? -1
       }
