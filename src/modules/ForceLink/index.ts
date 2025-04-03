@@ -69,13 +69,12 @@ export class ForceLink extends CoreModule {
       shape: [pointsTextureSize, pointsTextureSize, 4],
       type: 'float',
     })
-    if (!this.linkFirstIndicesAndAmountFbo) {
-      this.linkFirstIndicesAndAmountFbo = reglInstance.framebuffer({
-        color: this.linkFirstIndicesAndAmountTexture,
-        depth: false,
-        stencil: false,
-      })
-    }
+    if (!this.linkFirstIndicesAndAmountFbo) this.linkFirstIndicesAndAmountFbo = reglInstance.framebuffer()
+    this.linkFirstIndicesAndAmountFbo({
+      color: this.linkFirstIndicesAndAmountTexture,
+      depth: false,
+      stencil: false,
+    })
 
     if (!this.indicesTexture) this.indicesTexture = reglInstance.texture()
     this.indicesTexture({
@@ -83,13 +82,12 @@ export class ForceLink extends CoreModule {
       shape: [linksTextureSize, linksTextureSize, 4],
       type: 'float',
     })
-    if (!this.indicesFbo) {
-      this.indicesFbo = reglInstance.framebuffer({
-        color: this.indicesTexture,
-        depth: false,
-        stencil: false,
-      })
-    }
+    if (!this.indicesFbo) this.indicesFbo = reglInstance.framebuffer()
+    this.indicesFbo({
+      color: this.indicesTexture,
+      depth: false,
+      stencil: false,
+    })
 
     if (!this.biasAndStrengthTexture) this.biasAndStrengthTexture = reglInstance.texture()
     this.biasAndStrengthTexture({
@@ -97,13 +95,12 @@ export class ForceLink extends CoreModule {
       shape: [linksTextureSize, linksTextureSize, 4],
       type: 'float',
     })
-    if (!this.biasAndStrengthFbo) {
-      this.biasAndStrengthFbo = reglInstance.framebuffer({
-        color: this.biasAndStrengthTexture,
-        depth: false,
-        stencil: false,
-      })
-    }
+    if (!this.biasAndStrengthFbo) this.biasAndStrengthFbo = reglInstance.framebuffer()
+    this.biasAndStrengthFbo({
+      color: this.biasAndStrengthTexture,
+      depth: false,
+      stencil: false,
+    })
 
     if (!this.randomDistanceTexture) this.randomDistanceTexture = reglInstance.texture()
     this.randomDistanceTexture({
@@ -111,13 +108,12 @@ export class ForceLink extends CoreModule {
       shape: [linksTextureSize, linksTextureSize, 4],
       type: 'float',
     })
-    if (!this.randomDistanceFbo) {
-      this.randomDistanceFbo = reglInstance.framebuffer({
-        color: this.randomDistanceTexture,
-        depth: false,
-        stencil: false,
-      })
-    }
+    if (!this.randomDistanceFbo) this.randomDistanceFbo = reglInstance.framebuffer()
+    this.randomDistanceFbo({
+      color: this.randomDistanceTexture,
+      depth: false,
+      stencil: false,
+    })
   }
 
   public initPrograms (): void {

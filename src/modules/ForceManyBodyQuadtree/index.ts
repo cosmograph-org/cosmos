@@ -36,13 +36,16 @@ export class ForceManyBodyQuadtree extends CoreModule {
           type: 'float',
         })
       }
-
       if (!this.levelsFbos.has(levelKey)) {
-        this.levelsFbos.set(levelKey, reglInstance.framebuffer({
+        this.levelsFbos.set(levelKey, reglInstance.framebuffer())
+      }
+      const fbo = this.levelsFbos.get(levelKey)
+      if (fbo) {
+        fbo({
           color: this.levelsTextures.get(levelKey),
           depth: false,
           stencil: false,
-        }))
+        })
       }
     }
 
@@ -59,13 +62,12 @@ export class ForceManyBodyQuadtree extends CoreModule {
       shape: [store.pointsTextureSize, store.pointsTextureSize, 4],
       type: 'float',
     })
-    if (!this.randomValuesFbo) {
-      this.randomValuesFbo = reglInstance.framebuffer({
-        color: this.randomValuesTexture,
-        depth: false,
-        stencil: false,
-      })
-    }
+    if (!this.randomValuesFbo) this.randomValuesFbo = reglInstance.framebuffer()
+    this.randomValuesFbo({
+      color: this.randomValuesTexture,
+      depth: false,
+      stencil: false,
+    })
 
     if (!this.pointIndices) this.pointIndices = reglInstance.buffer(0)
     this.pointIndices(createIndexesForBuffer(store.pointsTextureSize))

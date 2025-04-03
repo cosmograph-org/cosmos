@@ -6,7 +6,8 @@ export const createClusterLabels = (props: { div: HTMLDivElement }): (graph: Gra
     const clusterPositions = graph.getClusterPositions()
     const nClusters = clusterPositions.length / 2
     if (nClusters === 0) return
-    if (clusterLabelDivs.length === 0) {
+    if (clusterLabelDivs.length !== nClusters) {
+      clusterLabelDivs.forEach((div) => div.remove())
       for (let i = 0; i < nClusters; i++) {
         const clusterLabelDiv = document.createElement('div')
         const contentLabel = document.createElement('p')

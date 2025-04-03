@@ -9,6 +9,7 @@ import updateVert from '@/graph/modules/Shared/quad.vert'
 
 export class Clusters extends CoreModule {
   public centermassFbo: regl.Framebuffer2D | undefined
+  public clusterCount: number | undefined
 
   private clusterFbo: regl.Framebuffer2D | undefined
   private clusterPositionsFbo: regl.Framebuffer2D | undefined
@@ -29,22 +30,18 @@ export class Clusters extends CoreModule {
     if (data.pointsNumber === undefined || (!data.pointClusters && !data.clusterPositions)) return
 
     // Find the highest cluster index in the array and add 1 (since cluster indices start at 0).
-    const clusterNumber = (data.pointClusters ?? []).reduce<number>((max, clusterIndex) => {
+    this.clusterCount = (data.pointClusters ?? []).reduce<number>((max, clusterIndex) => {
       if (clusterIndex === undefined || clusterIndex < 0) return max
       return Math.max(max, clusterIndex)
     }, 0) + 1
 
-    this.clustersTextureSize = Math.ceil(Math.sqrt(clusterNumber))
+    this.clustersTextureSize = Math.ceil(Math.sqrt(this.clusterCount))
 
-    if (!this.clusterTexture) this.clusterTexture = reglInstance.texture()
-
-    if (!this.clusterPositionsTexture) this.clusterPositionsTexture = reglInstance.texture()
-    if (!this.clusterForceCoefficientTexture) this.clusterForceCoefficientTexture = reglInstance.texture()
     const clusterState = new Float32Array(pointsTextureSize * pointsTextureSize * 4)
     const clusterPositions = new Float32Array(this.clustersTextureSize * this.clustersTextureSize * 4).fill(-1)
     const clusterForceCoefficient = new Float32Array(pointsTextureSize * pointsTextureSize * 4).fill(1)
     if (data.clusterPositions) {
-      for (let cluster = 0; cluster < clusterNumber; ++cluster) {
+      for (let cluster = 0; cluster < this.clusterCount; ++cluster) {
         clusterPositions[cluster * 4 + 0] = data.clusterPositions[cluster * 2 + 0] ?? -1
         clusterPositions[cluster * 4 + 1] = data.clusterPositions[cluster * 2 + 1] ?? -1
       }
@@ -63,59 +60,58 @@ export class Clusters extends CoreModule {
 
       if (data.clusterStrength) clusterForceCoefficient[i * 4 + 0] = data.clusterStrength[i] ?? 1
     }
+
+    if (!this.clusterTexture) this.clusterTexture = reglInstance.texture()
     this.clusterTexture({
       data: clusterState,
       shape: [pointsTextureSize, pointsTextureSize, 4],
       type: 'float',
     })
-    if (!this.clusterFbo) {
-      this.clusterFbo = reglInstance.framebuffer({
-        color: this.clusterTexture,
-        depth: false,
-        stencil: false,
-      })
-    }
+    if (!this.clusterFbo) this.clusterFbo = reglInstance.framebuffer()
+    this.clusterFbo({
+      color: this.clusterTexture,
+      depth: false,
+      stencil: false,
+    })
 
+    if (!this.clusterPositionsTexture) this.clusterPositionsTexture = reglInstance.texture()
     this.clusterPositionsTexture({
       data: clusterPositions,
       shape: [this.clustersTextureSize, this.clustersTextureSize, 4],
       type: 'float',
     })
-    if (!this.clusterPositionsFbo) {
-      this.clusterPositionsFbo = reglInstance.framebuffer({
-        color: this.clusterPositionsTexture,
-        depth: false,
-        stencil: false,
-      })
-    }
+    if (!this.clusterPositionsFbo) this.clusterPositionsFbo = reglInstance.framebuffer()
+    this.clusterPositionsFbo({
+      color: this.clusterPositionsTexture,
+      depth: false,
+      stencil: false,
+    })
 
+    if (!this.clusterForceCoefficientTexture) this.clusterForceCoefficientTexture = reglInstance.texture()
     this.clusterForceCoefficientTexture({
       data: clusterForceCoefficient,
       shape: [pointsTextureSize, pointsTextureSize, 4],
       type: 'float',
     })
-    if (!this.clusterForceCoefficientFbo) {
-      this.clusterForceCoefficientFbo = reglInstance.framebuffer({
-        color: this.clusterForceCoefficientTexture,
-        depth: false,
-        stencil: false,
-      })
-    }
+    if (!this.clusterForceCoefficientFbo) this.clusterForceCoefficientFbo = reglInstance.framebuffer()
+    this.clusterForceCoefficientFbo({
+      color: this.clusterForceCoefficientTexture,
+      depth: false,
+      stencil: false,
+    })
 
     if (!this.centermassTexture) this.centermassTexture = reglInstance.texture()
-
     this.centermassTexture({
       data: new Float32Array(this.clustersTextureSize * this.clustersTextureSize * 4).fill(0),
       shape: [this.clustersTextureSize, this.clustersTextureSize, 4],
       type: 'float',
     })
-    if (!this.centermassFbo) {
-      this.centermassFbo = reglInstance.framebuffer({
-        color: this.centermassTexture,
-        depth: false,
-        stencil: false,
-      })
-    }
+    if (!this.centermassFbo) this.centermassFbo = reglInstance.framebuffer()
+    this.centermassFbo({
+      color: this.centermassTexture,
+      depth: false,
+      stencil: false,
+    })
 
     if (!this.pointIndices) this.pointIndices = reglInstance.buffer(0)
     this.pointIndices(createIndexesForBuffer(store.pointsTextureSize))
@@ -191,10 +187,14 @@ export class Clusters extends CoreModule {
     }
   }
 
-  public run (): void {
-    if (!this.data.pointClusters && !this.data.clusterPositions) return
+  public calculateCentermass (): void {
     this.clearCentermassCommand?.()
     this.calculateCentermassCommand?.()
+  }
+
+  public run (): void {
+    if (!this.data.pointClusters && !this.data.clusterPositions) return
+    this.calculateCentermass()
     this.applyForcesCommand?.()
   }
 }

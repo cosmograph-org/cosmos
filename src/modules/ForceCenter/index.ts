@@ -23,13 +23,12 @@ export class ForceCenter extends CoreModule {
       shape: [1, 1, 4],
       type: 'float',
     })
-    if (!this.centermassFbo) {
-      this.centermassFbo = reglInstance.framebuffer({
-        color: this.centermassTexture,
-        depth: false,
-        stencil: false,
-      })
-    }
+    if (!this.centermassFbo) this.centermassFbo = reglInstance.framebuffer()
+    this.centermassFbo({
+      color: this.centermassTexture,
+      depth: false,
+      stencil: false,
+    })
 
     if (!this.pointIndices) this.pointIndices = reglInstance.buffer(0)
     this.pointIndices(createIndexesForBuffer(store.pointsTextureSize))

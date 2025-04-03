@@ -13,7 +13,7 @@ import findHoveredPointVert from '@/graph/modules/Points/find-hovered-point.vert
 import fillGridWithSampledPointsFrag from '@/graph/modules/Points/fill-sampled-points.frag'
 import fillGridWithSampledPointsVert from '@/graph/modules/Points/fill-sampled-points.vert'
 import updatePositionFrag from '@/graph/modules/Points/update-position.frag'
-import { createIndexesForBuffer, createQuadBuffer, destroyFramebuffer } from '@/graph/modules/Shared/buffer'
+import { createIndexesForBuffer, createQuadBuffer } from '@/graph/modules/Shared/buffer'
 import trackPositionsFrag from '@/graph/modules/Points/track-positions.frag'
 import dragPointFrag from '@/graph/modules/Points/drag-point.frag'
 import updateVert from '@/graph/modules/Shared/quad.vert'
@@ -73,8 +73,8 @@ export class Points extends CoreModule {
     }
 
     // Create position buffer
-    destroyFramebuffer(this.currentPositionFbo)
-    this.currentPositionFbo = reglInstance.framebuffer({
+    if (!this.currentPositionFbo) this.currentPositionFbo = reglInstance.framebuffer()
+    this.currentPositionFbo({
       color: reglInstance.texture({
         data: initialState,
         shape: [pointsTextureSize, pointsTextureSize, 4],
@@ -84,8 +84,8 @@ export class Points extends CoreModule {
       stencil: false,
     })
 
-    destroyFramebuffer(this.previousPositionFbo)
-    this.previousPositionFbo = reglInstance.framebuffer({
+    if (!this.previousPositionFbo) this.previousPositionFbo = reglInstance.framebuffer()
+    this.previousPositionFbo({
       color: reglInstance.texture({
         data: initialState,
         shape: [pointsTextureSize, pointsTextureSize, 4],
@@ -97,8 +97,8 @@ export class Points extends CoreModule {
 
     if (!this.config.disableSimulation) {
       // Create velocity buffer
-      destroyFramebuffer(this.velocityFbo)
-      this.velocityFbo = reglInstance.framebuffer({
+      if (!this.velocityFbo) this.velocityFbo = reglInstance.framebuffer()
+      this.velocityFbo({
         color: reglInstance.texture({
           data: new Float32Array(pointsTextureSize * pointsTextureSize * 4).fill(0),
           shape: [pointsTextureSize, pointsTextureSize, 4],
@@ -116,22 +116,20 @@ export class Points extends CoreModule {
       shape: [pointsTextureSize, pointsTextureSize, 4],
       type: 'float',
     })
-    if (!this.selectedFbo) {
-      this.selectedFbo = reglInstance.framebuffer({
-        color: this.selectedTexture,
-        depth: false,
-        stencil: false,
-      })
-    }
+    if (!this.selectedFbo) this.selectedFbo = reglInstance.framebuffer()
+    this.selectedFbo({
+      color: this.selectedTexture,
+      depth: false,
+      stencil: false,
+    })
 
-    if (!this.hoveredFbo) {
-      this.hoveredFbo = reglInstance.framebuffer({
-        shape: [2, 2],
-        colorType: 'float',
-        depth: false,
-        stencil: false,
-      })
-    }
+    if (!this.hoveredFbo) this.hoveredFbo = reglInstance.framebuffer()
+    this.hoveredFbo({
+      shape: [2, 2],
+      colorType: 'float',
+      depth: false,
+      stencil: false,
+    })
 
     if (!this.drawPointIndices) this.drawPointIndices = reglInstance.buffer(0)
     this.drawPointIndices(createIndexesForBuffer(store.pointsTextureSize))
@@ -435,13 +433,12 @@ export class Points extends CoreModule {
       height: pointsTextureSize,
       type: 'float',
     })
-    if (!this.greyoutStatusFbo) {
-      this.greyoutStatusFbo = reglInstance.framebuffer({
-        color: this.greyoutStatusTexture,
-        depth: false,
-        stencil: false,
-      })
-    }
+    if (!this.greyoutStatusFbo) this.greyoutStatusFbo = reglInstance.framebuffer()
+    this.greyoutStatusFbo({
+      color: this.greyoutStatusTexture,
+      depth: false,
+      stencil: false,
+    })
   }
 
   public updateSize (): void {
@@ -463,13 +460,12 @@ export class Points extends CoreModule {
       type: 'float',
     })
 
-    if (!this.sizeFbo) {
-      this.sizeFbo = reglInstance.framebuffer({
-        color: this.sizeTexture,
-        depth: false,
-        stencil: false,
-      })
-    }
+    if (!this.sizeFbo) this.sizeFbo = reglInstance.framebuffer()
+    this.sizeFbo({
+      color: this.sizeTexture,
+      depth: false,
+      stencil: false,
+    })
   }
 
   public updateSampledPointsGrid (): void {
@@ -478,8 +474,8 @@ export class Points extends CoreModule {
     if (dist === 0) dist = defaultConfigValues.pointSamplingDistance
     const w = Math.ceil(screenSize[0] / dist)
     const h = Math.ceil(screenSize[1] / dist)
-    destroyFramebuffer(this.sampledPointsFbo)
-    this.sampledPointsFbo = reglInstance.framebuffer({
+    if (!this.sampledPointsFbo) this.sampledPointsFbo = reglInstance.framebuffer()
+    this.sampledPointsFbo({
       shape: [w, h],
       depth: false,
       stencil: false,
@@ -556,13 +552,12 @@ export class Points extends CoreModule {
       height: textureSize,
       type: 'float',
     })
-    if (!this.trackedIndicesFbo) {
-      this.trackedIndicesFbo = reglInstance.framebuffer({
-        color: this.trackedIndicesTexture,
-        depth: false,
-        stencil: false,
-      })
-    }
+    if (!this.trackedIndicesFbo) this.trackedIndicesFbo = reglInstance.framebuffer()
+    this.trackedIndicesFbo({
+      color: this.trackedIndicesTexture,
+      depth: false,
+      stencil: false,
+    })
 
     if (!this.trackedPositionsFbo) this.trackedPositionsFbo = reglInstance.framebuffer()
     this.trackedPositionsFbo({
