@@ -6,7 +6,7 @@ import { Meta } from "@storybook/blocks";
 
 | Property | Description | Default |
 |---|---|---|
-| disableSimulation | Do not run the simulation, just render the graph. Cosmos uses the `x` and `y` values of the points' data to determine their position in the graph. If `x` and `y` values are not specified, the position of the points will be assigned randomly. This property will be applied only on component initialization and it can't be changed using the `setConfig` method | `false` |
+| enableSimulation | If set to `false`, the simulation will not run. This property will be applied only on component initialization and it can't be changed using the `setConfig` method | `true` |
 | backgroundColor | Canvas background color | `#222222` |
 | spaceSize | Simulation space size (max 8192) | `8192` |
 | pointColor | The default color to use for points when no point colors are provided, or if the color value in the array is `undefined` or `null`. This can be either a hex color string (e.g., '#b3b3b3') or an array of RGBA values in the format `[red, green, blue, alpha]` where each value is a number between 0 and 255 | `#b3b3b3` |
@@ -31,12 +31,12 @@ import { Meta } from "@storybook/blocks";
 | linkArrowsSizeScale | Scale factor for the link arrows size | `1` |
 | linkVisibilityDistanceRange | The range defines the minimum and maximum link visibility distance in pixels.<br /><br />The link will be fully opaque when its length is less than the first number in the array, and will have `linkVisibilityMinTransparency` transparency when its length is greater than the second number in the array.<br /><br />This distance is defined in screen space coordinates and will change as you zoom in and out (e.g. links become longer when you zoom in, and shorter when you zoom out). | `[50, 150]` |
 | linkVisibilityMinTransparency | The transparency value that the link will have when its length reaches the maximum link distance value from `linkVisibilityDistanceRange`. | `0.25` |
-| useQuadtree | Use the classic [quadtree algorithm](https://en.wikipedia.org/wiki/Barnes%E2%80%93Hut_simulation) for the Many-Body force. This property will be applied only on component initialization and it can't be changed using the `setConfig` method.<br /><br /> ⚠ The algorithm might not work on some GPUs (e.g. Nvidia) and on Windows (unless you disable ANGLE in the browser settings). | `false` |
+| useClassicQuadtree | Use the classic [quadtree algorithm](https://en.wikipedia.org/wiki/Barnes%E2%80%93Hut_simulation) for the Many-Body force. This property will be applied only on component initialization and it can't be changed using the `setConfig` method.<br /><br /> ⚠ The algorithm might not work on some GPUs (e.g. Nvidia) and on Windows (unless you disable ANGLE in the browser settings). | `false` |
 | showFPSMonitor | Show WebGL performance monitor | `false` |
 | pixelRatio | Canvas pixel ratio | `2` |
 | scalePointsOnZoom | Increase/decrease point size when zooming | `true` |
 | initialZoomLevel | Initial zoom level (set once during initialization) | `undefined` |
-| disableZoom | Disables zooming interactions | `false` |
+| enableZoom | Enables zooming interactions | `true` |
 | enableSimulationDuringZoom | Keep simulation running during zoom operations | `false` |
 | enableDrag | Enable/disable point dragging | `false` |
 | fitViewOnInit | Auto-zoom to fit all points on initialization | `true` |
@@ -46,8 +46,8 @@ import { Meta } from "@storybook/blocks";
 | fitViewByPointsInRect | When `fitViewOnInit` is set to `true`, fits the view to show the points within a rectangle defined by its two corner coordinates `[[left, bottom], [right, top]]` in the scene space | `undefined` |
 | randomSeed | Providing a value allows control over layout randomness for consistency across simulations. Applied only on initialization | `undefined` |
 | pointSamplingDistance | Sampling density for point position methods (used in `getSampledPointPositionsMap`) in pixels | `150` |
-| disableAttribution | Hide Cosmos attribution watermark | `false` |
-| disableRescalePositions | Control automatic point position adjustment. When undefined: auto-rescale if simulation disabled | `undefined` |
+| showAttribution | Show Cosmos attribution watermark | `true` |
+| rescalePositions | Control automatic point position adjustment. When undefined: auto-rescale if simulation disabled | `undefined` |
 
 **Note:** The attribution watermark color can be customized using CSS variable `--cosmos-attribution-color`.
 
@@ -61,13 +61,13 @@ Cosmos layout algorithm was inspired by the [d3-force](https://github.com/d3/d3-
 | simulationGravity | Gravity force coefficient | 0.0 – 1.0 | `0.25` |
 | simulationCenter | Centering force coefficient | 0.0 – 1.0 | `0.0` |
 | simulationRepulsion | Repulsion force coefficient | 0.0 – 2.0 | `1.0` |
-| simulationRepulsionTheta | Decreases / increases the detalization of the Many-Body force calculations. <br /><br /> When `useQuadtree` is set to `true`, this property corresponds to the Barnes–Hut approximation criterion. | 0.3 – 2.0 | `1.15` |
-| simulationRepulsionQuadtreeLevels | Barnes–Hut approximation depth. <br /><br />Can only be used when `useQuadtree` is set `true`.  | 5 – 12 | `12` | 
+| simulationRepulsionTheta | Decreases / increases the detalization of the Many-Body force calculations. <br /><br /> When `useClassicQuadtree` is set to `true`, this property corresponds to the Barnes–Hut approximation criterion. | 0.3 – 2.0 | `1.15` |
+| simulationRepulsionQuadtreeLevels | Barnes–Hut approximation depth. <br /><br />Can only be used when `useClassicQuadtree` is set `true`.  | 5 – 12 | `12` | 
 | simulationLinkSpring | Link spring force coefficient | 0.0 – 2.0 | `1.0` |
 | simulationLinkDistance | Minimum link distance | 1 – 20 | `10` |
 | simulationLinkDistRandomVariationRange | Link distance randomness multiplier range | [0.8 – 1.2,<br/> 1.2 – 2.0] | `[1.0, 1.2]` |
 | simulationRepulsionFromMouse | Repulsion from the mouse pointer force coefficient. The repulsion force is activated by pressing the right mouse button. | 0.0 – 5.0 | `2.0`
-| simulationFriction | Friction coefficient| 0.8 – 1.0 | `0.85` |
+| simulationFriction | Friction coefficient. Values range from `0` (high friction, stops quickly) to `1` (no friction, keeps moving). | 0.0 – 1.0 | `0.85` |
 | simulationCluster | Cluster coefficient | 0.0 – 1.0 | `0.1` |
 
 ## Event Callbacks

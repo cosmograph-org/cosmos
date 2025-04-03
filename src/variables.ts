@@ -7,7 +7,7 @@ export const defaultLinkWidth = 1
 export const defaultBackgroundColor = '#222222'
 
 export const defaultConfigValues = {
-  disableSimulation: false,
+  enableSimulation: true,
   spaceSize: 8192,
   pointSizeScale: 1,
   linkWidthScale: 1,
@@ -25,7 +25,7 @@ export const defaultConfigValues = {
   hoveredPointRingColor: 'white',
   focusedPointRingColor: 'white',
   focusedPointIndex: undefined,
-  useQuadtree: false,
+  useClassicQuadtree: false,
   simulation: {
     decay: 5000,
     gravity: 0.25,
@@ -43,7 +43,7 @@ export const defaultConfigValues = {
   showFPSMonitor: false,
   pixelRatio: 2,
   scalePointsOnZoom: true,
-  disableZoom: false,
+  enableZoom: true,
   enableSimulationDuringZoom: false,
   enableDrag: false,
   fitViewOnInit: true,
@@ -51,8 +51,8 @@ export const defaultConfigValues = {
   fitViewPadding: 0.1,
   fitViewDuration: 250,
   pointSamplingDistance: 150,
-  disableAttribution: false,
-  disableRescalePositions: undefined,
+  showAttribution: true,
+  rescalePositions: undefined,
 }
 
 export const hoveredPointRingOpacity = 0.7
