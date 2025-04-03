@@ -55,7 +55,7 @@ export class Points extends CoreModule {
   private sampledPointIndices: regl.Buffer | undefined
 
   public updatePositions (): void {
-    const { reglInstance, store, data, config: { disableRescalePositions, disableSimulation } } = this
+    const { reglInstance, store, data, config: { rescalePositions, enableSimulation } } = this
     const { pointsTextureSize } = store
     if (!pointsTextureSize || !data.pointPositions || data.pointsNumber === undefined) return
 
@@ -63,7 +63,7 @@ export class Points extends CoreModule {
     // Rescale positions only when rescaling is enabled OR rescaling is not set and simulation is disabled
     this.scaleX = undefined
     this.scaleY = undefined
-    if (disableRescalePositions === false || (disableRescalePositions === undefined && disableSimulation)) {
+    if (rescalePositions === true || (rescalePositions === undefined && !enableSimulation)) {
       this.rescaleInitialNodePositions()
     }
     for (let i = 0; i < data.pointsNumber; ++i) {
@@ -95,7 +95,7 @@ export class Points extends CoreModule {
       stencil: false,
     })
 
-    if (!this.config.disableSimulation) {
+    if (this.config.enableSimulation) {
       // Create velocity buffer
       if (!this.velocityFbo) this.velocityFbo = reglInstance.framebuffer()
       this.velocityFbo({
@@ -148,7 +148,7 @@ export class Points extends CoreModule {
 
   public initPrograms (): void {
     const { reglInstance, config, store, data } = this
-    if (!config.disableSimulation) {
+    if (config.enableSimulation) {
       if (!this.updatePositionCommand) {
         this.updatePositionCommand = reglInstance({
           frag: updatePositionFrag,

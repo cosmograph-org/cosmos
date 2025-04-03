@@ -7,7 +7,7 @@ import './style.css'
  * This example demonstrates the importance of rescaling positions by Cosmos.
  * The Moscow Metro station coordinates are are normalized (0-1 range in both dimensions).
  * By default, Cosmos rescales these positions to fit the canvas.
- * When disabling rescaling (`disableRescalePositions: true`):
+ * When disabling rescaling (`rescalePositions: false`):
  * - Points render using raw coordinates
  * - The entire graph occupies a tiny 1x1 area in WebGL's clip space (-1 to 1)
  * - This causes visual artifacts due to WebGL's floating-point precision limitations
@@ -25,14 +25,14 @@ export const moscowMetroStations = (): {graph: Graph; div: HTMLDivElement} => {
   actionsDiv.className = 'actions'
   div.appendChild(actionsDiv)
 
-  let disableRescalePositions = false
+  let rescalePositions = true
 
   const graph = new Graph(graphDiv, {
     backgroundColor: '#2d313a',
     scalePointsOnZoom: false,
-    disableRescalePositions,
+    rescalePositions,
     pointColor: '#FEE08B',
-    disableSimulation: true,
+    enableSimulation: false,
     enableDrag: false,
     fitViewOnInit: true,
   })
@@ -49,9 +49,9 @@ export const moscowMetroStations = (): {graph: Graph; div: HTMLDivElement} => {
   actionsDiv.appendChild(disableEnableRescaleButton)
 
   disableEnableRescaleButton.addEventListener('click', () => {
-    disableRescalePositions = !disableRescalePositions
-    disableEnableRescaleButton.textContent = disableRescalePositions ? 'Enable Rescale' : 'Disable Rescale'
-    graph.setConfig({ disableRescalePositions })
+    rescalePositions = !rescalePositions
+    disableEnableRescaleButton.textContent = rescalePositions ? 'Disable Rescale' : 'Enable Rescale'
+    graph.setConfig({ rescalePositions })
     graph.setPointPositions(new Float32Array(moscowMetroCoords))
     graph.render()
     graph.fitView()
