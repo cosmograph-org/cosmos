@@ -47,6 +47,7 @@ export const basicSetUp = (): { graph: Graph; div: HTMLDivElement} => {
       }
       console.log('Clicked point index: ', index)
     },
+    attribution: 'visualized with <a href="https://cosmograph.app/" style="color: var(--cosmos-attribution-color);" target="_blank">Cosmograph</a>',
   })
 
   const { pointPositions, links } = generateData()

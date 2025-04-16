@@ -21,7 +21,6 @@ import { Store, ALPHA_MIN, MAX_POINT_SIZE, type Hovered } from '@/graph/modules/
 import { Zoom } from '@/graph/modules/Zoom'
 import { Drag } from '@/graph/modules/Drag'
 import { defaultConfigValues, defaultScaleToZoom } from '@/graph/variables'
-import { attributionSvg } from '@/graph/attribution'
 
 export class Graph {
   public config = new GraphConfig()
@@ -1181,22 +1180,19 @@ export class Graph {
   }
 
   private addAttribution (): void {
-    if (!this.config.showAttribution) return
+    if (!this.config.attribution) return
     this.attributionDivElement = document.createElement('div')
     this.attributionDivElement.style.cssText = `
-      cursor: pointer;
       user-select: none;
       position: absolute;
-      margin: 0 0.6rem 0.6rem 0;
-      line-height: 0;
       bottom: 0;
       right: 0;
       color: var(--cosmos-attribution-color);
+      margin: 0 0.6rem 0.6rem 0;
+      font-size: 0.7rem;
+      font-family: inherit;
     `
-    this.attributionDivElement.onclick = (): void => window.open('https://cosmograph.app/', '_blank')?.focus()
-    const svgParser = new DOMParser()
-    const svgElement = svgParser.parseFromString(attributionSvg, 'image/svg+xml').firstChild as SVGElement
-    this.attributionDivElement.appendChild(svgElement)
+    this.attributionDivElement.innerHTML = this.config.attribution
     this.store.div?.appendChild(this.attributionDivElement)
   }
 }

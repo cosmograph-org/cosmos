@@ -41,6 +41,7 @@ export const createCosmos = (props: CosmosStoryProps): { div: HTMLDivElement; gr
     simulationGravity: 0.02,
     simulationFriction: 0.7,
     simulationDecay: 10000000,
+    attribution: 'visualized with <a href="https://cosmograph.app/" style="color: var(--cosmos-attribution-color);" target="_blank">Cosmograph</a>',
     ...props,
   }
 

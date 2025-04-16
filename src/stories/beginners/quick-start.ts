@@ -18,6 +18,7 @@ export const quickStart = (): { graph: Graph; div: HTMLDivElement} => {
     rescalePositions: true, // rescale positions
     enableDrag: true, // enable dragging points
     onClick: pointIndex => { console.log('Clicked point index: ', pointIndex) },
+    attribution: 'visualized with <a href="https://cosmograph.app/" style="color: var(--cosmos-attribution-color);" target="_blank">Cosmograph</a>',
   /* ... */
   }
 

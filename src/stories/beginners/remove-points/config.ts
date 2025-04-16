@@ -20,4 +20,5 @@ export const config: GraphConfigInterface = {
   simulationRepulsion: 0.2,
   simulationGravity: 0.1,
   simulationDecay: 100000,
+  attribution: 'visualized with <a href="https://cosmograph.app/" style="color: var(--cosmos-attribution-color);" target="_blank">Cosmograph</a>',
 }
