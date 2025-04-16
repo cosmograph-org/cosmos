@@ -455,12 +455,6 @@ export interface GraphConfigInterface {
   */
   pointSamplingDistance?: number;
   /**
-   * Whether to show the attribution or not.
-   * The watermark color can be customized using the CSS variable `--cosmos-attribution-color`.
-   * Default value: `true`
-  */
-  showAttribution?: boolean;
-  /**
    * Controls automatic position adjustment of points in the visible space.
    *
    * When `undefined` (default):
@@ -473,6 +467,12 @@ export interface GraphConfigInterface {
    * - `false`: Forces points positions to not be rescaled
    */
   rescalePositions?: boolean | undefined;
+  /**
+   * Controls the text shown in the bottom right corner.
+   * - When a non-empty string is provided: Displays the string as HTML
+   * - When empty string or not provided: No text is displayed
+   */
+  attribution?: string;
 }
 
 export class GraphConfig implements GraphConfigInterface {
@@ -550,7 +550,7 @@ export class GraphConfig implements GraphConfigInterface {
 
   public randomSeed = undefined
   public pointSamplingDistance = defaultConfigValues.pointSamplingDistance
-  public showAttribution = defaultConfigValues.showAttribution
+  public attribution = defaultConfigValues.attribution
   public rescalePositions = defaultConfigValues.rescalePositions
 
   public init (config: GraphConfigInterface): void {

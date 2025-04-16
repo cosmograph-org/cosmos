@@ -51,7 +51,7 @@ export const defaultConfigValues = {
   fitViewPadding: 0.1,
   fitViewDuration: 250,
   pointSamplingDistance: 150,
-  showAttribution: true,
+  attribution: '',
   rescalePositions: undefined,
 }
 

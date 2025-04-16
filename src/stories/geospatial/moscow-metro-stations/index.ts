@@ -35,6 +35,7 @@ export const moscowMetroStations = (): {graph: Graph; div: HTMLDivElement} => {
     enableSimulation: false,
     enableDrag: false,
     fitViewOnInit: true,
+    attribution: 'visualized with <a href="https://cosmograph.app/" style="color: var(--cosmos-attribution-color);" target="_blank">Cosmograph</a>',
   })
 
   const pointColors = getPointColors(moscowMetroCoords)

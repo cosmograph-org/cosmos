@@ -41,6 +41,7 @@ export const pointLabels = (
     simulationRepulsion: 0.4,
     onSimulationTick: () => cosmosLabels.update(graph),
     onZoom: () => cosmosLabels.update(graph),
+    attribution: 'visualized with <a href="https://cosmograph.app/" style="color: var(--cosmos-attribution-color);" target="_blank">Cosmograph</a>',
   })
 
   graph.setPointPositions(new Float32Array(pointPositions))

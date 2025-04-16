@@ -46,10 +46,10 @@ import { Meta } from "@storybook/blocks";
 | fitViewByPointsInRect | When `fitViewOnInit` is set to `true`, fits the view to show the points within a rectangle defined by its two corner coordinates `[[left, bottom], [right, top]]` in the scene space | `undefined` |
 | randomSeed | Providing a value allows control over layout randomness for consistency across simulations. Applied only on initialization | `undefined` |
 | pointSamplingDistance | Sampling density for point position methods (used in `getSampledPointPositionsMap`) in pixels | `150` |
-| showAttribution | Show Cosmos attribution watermark | `true` |
+| attribution | Controls the text shown in the bottom right corner. Provide HTML content as a string for custom attribution. Empty string hides attribution | `''` |
 | rescalePositions | Control automatic point position adjustment. When undefined: auto-rescale if simulation disabled | `undefined` |
 
-**Note:** The attribution watermark color can be customized using CSS variable `--cosmos-attribution-color`.
+**Note:** The attribution text color can be customized using CSS variable `--cosmos-attribution-color`.
 
 ## Simulation configuration
 
