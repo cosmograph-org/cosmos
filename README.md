@@ -1,19 +1,19 @@
 
 <p align="center" style="color: #444">
-  <h1 align="center">🌌 Cosmos</h1>
+  <h1 align="center">🌌 cosmos.gl</h1>
 </p>
 <p align="center" style="font-size: 1.2rem;">GPU-accelerated Force Graph</p>
 
-**Cosmos** is a WebGL Force Graph layout algorithm and rendering engine. All the computations and drawing are happening on the GPU in fragment and vertex shaders, avoiding expensive memory operations.
+**Cosmos.gl** is a WebGL Force Graph layout algorithm and rendering engine. All the computations and drawing are happening on the GPU in fragment and vertex shaders, avoiding expensive memory operations. It enables real-time simulation of network graphs consisting of hundreds of thousands of points and links on modern hardware.
 
-It enables real-time simulation of network graphs consisting of hundreds of thousands of points and links on modern hardware.
+This engine powers 🪐 [Cosmograph](http://cosmograph.app) — a toolset for exploring complex networks and AI embeddings.
 
-<video src="https://user-images.githubusercontent.com/755708/173392407-9b05cbb6-d39e-4c2c-ab41-50900cfda823.mp4" autoplay controls alt="Demo of Cosmos GPU-accelerated Force Graph">
+<video src="https://user-images.githubusercontent.com/755708/173392407-9b05cbb6-d39e-4c2c-ab41-50900cfda823.mp4" autoplay controls alt="Demo of cosmos.gl GPU-accelerated Force Graph">
 </video>
 
 [📺 Comparison with other libraries](https://www.youtube.com/watch?v=HWk78hP8aEE)
 
-[🎮 Try Cosmos on StackBlitz](https://stackblitz.com/edit/how-to-use-cosmos?file=src%2Fmain.ts)
+[🎮 Check out our storybook for examples](https://cosmosgl.github.io/cosmos/)
 
 ---
 
@@ -72,7 +72,7 @@ graph.render()
 
 ### What's New in v2.0?
 
-Cosmos v2.0 introduces significant improvements in performance and data handling:
+Cosmos.gl v2.0 introduces significant improvements in performance and data handling:
 
 - Enhanced data structures with WebGL-compatible formats.
 - Methods like `setPointPositions` and `setLinks` replace `setData` for improved efficiency.
@@ -87,7 +87,7 @@ Check the [Migration Guide](./cosmos-2-0-migration-notes.md) for details.
 
 ### Examples
 
-- [Basic Set-Up](https://cosmograph-org.github.io/cosmos/?path=/story/examples-beginners--basic-set-up)
+- [Basic Set-Up](https://cosmosgl.github.io/cosmos/?path=/story/examples-beginners--basic-set-up)
 
 ---
 
@@ -106,9 +106,9 @@ Check the [Migration Guide](./cosmos-2-0-migration-notes.md) for details.
 ---
 
 ### Documentation
-- 🧑‍💻 [Quick Start](https://cosmograph-org.github.io/cosmos/?path=/docs/welcome-to-cosmos--docs)
-- 🛠 [Configuration](https://cosmograph-org.github.io/cosmos/?path=/docs/configuration--docs)
-- ⚙️ [API Reference](https://cosmograph-org.github.io/cosmos/?path=/docs/api-reference--docs)
+- 🧑‍💻 [Quick Start](https://cosmosgl.github.io/cosmos/?path=/docs/welcome-to-cosmos--docs)
+- 🛠 [Configuration](https://cosmosgl.github.io/cosmos/?path=/docs/configuration--docs)
+- ⚙️ [API Reference](https://cosmosgl.github.io/cosmos/?path=/docs/api-reference--docs)
 - 🚀 [Migration Guide](./cosmos-2-0-migration-notes.md)
 
 ---
@@ -121,4 +121,4 @@ Check the [Migration Guide](./cosmos-2-0-migration-notes.md) for details.
 
 ### Contact
 
-[📩 hi@cosmograph.app](mailto:hi@cosmograph.app)
+[GitHub Discussions](https://github.com/orgs/cosmosgl/discussions)
